@@ -4,6 +4,7 @@ import httpStatus from 'http-status';
 import { prisma } from '../libs/prismaHelper';
 import { createToken } from '../libs/authHelper';
 import sendVeficationEmail from '../helper/email/emailSend';
+import { isJSDocPrivateTag } from 'typescript';
 // import sendEmail from '../libs/hepler/Email/emaliSend';
 // import bcrypt from "bcrypt"
 // import { createToken } from '../libs/hepler/auth/jwtHelper';
@@ -11,7 +12,7 @@ import sendVeficationEmail from '../helper/email/emailSend';
 interface SignupRequestBody {
     country?: string;
     fullName?: string;
-    userName?: string;
+    userName: string;
     email: string;
     password: string;
 }
@@ -52,7 +53,7 @@ const SingUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
                 fullName,
                 userName,
                 email,
-                password
+                password,
             }
         });
         console.log(createUser, "User created");
@@ -75,8 +76,6 @@ const SingUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
         });
     }
 };
-
-
 const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
     try {
         const { password, email } = req.body;
@@ -115,43 +114,6 @@ const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
         });
     }
 }
-
-
-
-// const verifiyUser = async (req: Request, res: Response) => {
-//     const reqPerams = req.params.otp;
-//     const findByOTP = await Users.findOne({
-//         'verfiyCode': reqPerams
-//     })
-//     if (!findByOTP) {
-//         return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, data: findByOTP, message: 'OTP are not matched', })
-//     } else {
-//         const { verfiyCodeExpier, createdAt } = findByOTP;
-//         const created_date = relativeDate(createdAt)
-//         const Expier_date = relativeDate(verfiyCodeExpier)
-
-//         if (created_date >= Expier_date) {
-//             return sendResponse<any>(res, { statusCode: httpStatus.EXPECTATION_FAILED, success: false, message: 'OTP are unvalid, time over', })
-//         } else {
-//             const verified = await Users.updateOne({
-//                 'verfiyCode': reqPerams,
-//             }, { isVerfiyed: true })
-
-//             console.log(verified, 'true');
-
-//             if (verified.modifiedCount === 1) {
-//                 const verifiedData = await Users.updateOne({ 'verfiyCode': reqPerams }, { verfiyCode: null, verfiyCodeExpier: null })
-//                 console.log(verifiedData, 'clear');
-//                 return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, message: 'User Verifiyed Successfully', })
-//             } else {
-//                 return sendResponse<any>(res, { statusCode: httpStatus.NOT_ACCEPTABLE, success: false, message: 'Forbidden' })
-//             }
-//         }
-
-//     }
-// }
-
-// // recover pass
 const forgotPass = async (req: Request, res: Response) => {
     const { email } = req.params;
 
@@ -162,6 +124,10 @@ const forgotPass = async (req: Request, res: Response) => {
     } else {
         const verfiyCode = Math.floor(1000000 + Math.random() * 9000000)
         const { fullName } = findByEmail
+        console.log(fullName, 'check full');
+        if (!fullName) {
+            return console.log('full name need');
+        }
         const updateUserOtp = await prisma.user.update({
             where: { email }, // Specify the user to update
             data: { otp: verfiyCode }, // Update the OTP field
@@ -173,61 +139,65 @@ const forgotPass = async (req: Request, res: Response) => {
         })
     }
 }
+const verifyOtp = async (req: Request, res: Response) => {
+    const { email } = req.params;
+
+    const { code } = req.query
+
+    const findByEmail = await prisma.user.findUnique({ where: { email } });
+
+    if (!findByEmail) {
+        return sendResponse(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            success: false,
+            message: 'User not found', data: null
+        });
+    }
+
+    const { otp } = findByEmail
+
+    try {
+        if (code === otp?.toString()) {
+            await prisma.user.update({
+                where: { email },
+                data: { otp: 0 },
+            });
+            return sendResponse(res, {
+                statusCode: httpStatus.OK,
+                success: true,
+                message: 'OTP matched successfully'
+            });
+        }
+    } catch (error) {
+        return sendResponse(res, {
+            statusCode: httpStatus.NOT_ACCEPTABLE,
+            success: false,
+            message: 'Something want wrong', data: null
+        });
+    }
+
+};
 
 
-// const verifyPass = async (req: Request, res: Response) => {
-//     const reqParams: number = parseInt(req.params.otp, 10);
-
-//     const findByOTP = await prisma.user.findUnique({
-//         where: {
-//             otp: reqParams,
-//         },
-//     });
-
-//     if (!findByOTP) {
-//         return sendResponse<any>(res, {
-//             statusCode: httpStatus.NOT_FOUND,
-//             success: false,
-//             data: null,
-//             message: 'OTP does not match',
-//         });
-//     } else {
-//         // Optionally, clear the OTP after successful verification
-//         await prisma.user.update({
-//             where: { otp: reqParams },
-//             data: { otp: null },
-//         });
-
-//         return sendResponse<any>(res, {
-//             statusCode: httpStatus.OK,
-//             success: true,
-//             message: 'OTP matched successfully',
-//         });
-//     }
-// };
-// const setNewPass = async (req: Request, res: Response) => {
-//     const { email, password } = req.params;
-//     const findByEmail = await Users.findOne({
-//         $or: [{
-//             email: email,
-//             password: password
-//         }]
-//     });
-//     console.log(findByEmail, 'email');
-
-//     if (!findByEmail) {
-//         return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Your email are not matched', })
-//     } else {
-//         const hashPassword: String = await bcrypt.hash(password, 10)
-
-//         const updateNewPass = await Users.updateOne({ email: email }, { password: hashPassword });
-//         if (updateNewPass.matchedCount === 1) {
-//             return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, message: 'Your new password set successfully', })
-//         } else {
-//             return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Something want wrong, your password not update', })
-//         }
-//     }
-// }
+const setNewPass = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
 
 
-export default { SingUp, SignIn, forgotPass }
+    try {
+        const findByEmail = await prisma.user.findUnique({ where: { email } })
+        console.log(findByEmail, 'find by email');
+        if (!findByEmail) {
+            return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Your email are not matched', })
+        } else {
+            const updateNewPass = await prisma.user.update({ where: { email }, data: { password } })
+            console.log(updateNewPass, "update new password");
+            return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, message: 'Your new password set successfully', })
+        }
+    } catch (error) {
+        console.log(error);
+        return sendResponse<any>(res, { data: error, statusCode: httpStatus.OK, success: false, message: 'Some thing want wrong!', })
+    }
+}
+
+
+export default { SingUp, SignIn, forgotPass, verifyOtp, setNewPass }
