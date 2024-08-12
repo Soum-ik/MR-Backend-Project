@@ -14,18 +14,44 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  country   String?
-  fullName  String?
-  userName  String   @unique
-  email     String   @unique
-  password  String?
-  role      Role     @default(USER) // Set a default role, if needed
-  otp       Int?      @default(0)
-  createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  fullName         String?
+  userName         String            @unique
+  email            String            @unique
+  password         String?
+  country          String?
+  city             String?
+  industryName     String?
+  address          String?
+  number           String?
+  image            String?
+  language         String[]          @default([])
+  role             Role              @default(USER) // Set a default role, if needed
+  otp              Int?              @default(0)
+  createdAt        DateTime          @default(now())
+  updateAt         DateTime          @updatedAt
+  SocialMediaLinks SocialMediaLinks?
 
   @@map("Users")
+}
+
+model SocialMediaLinks {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  facebook  String?
+  instagram String?
+  linkedin  String?
+  twitter   String?
+  pinterest String?
+  google    String?
+  tumblr    String?
+  youtube   String?
+  yelp      String?
+  tiktok    String?
+  nextdoor  String?
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@map("SocialMediaLinks")
 }
 
 enum Role {

@@ -4,11 +4,8 @@ import httpStatus from 'http-status';
 import { prisma } from '../libs/prismaHelper';
 import { createToken } from '../libs/authHelper';
 import sendVeficationEmail from '../helper/email/emailSend';
-import { isJSDocPrivateTag } from 'typescript';
-// import sendEmail from '../libs/hepler/Email/emaliSend';
-// import bcrypt from "bcrypt"
-// import { createToken } from '../libs/hepler/auth/jwtHelper';
 
+// types
 interface SignupRequestBody {
     country?: string;
     fullName?: string;
@@ -196,15 +193,56 @@ const setNewPass = async (req: Request, res: Response) => {
         return sendResponse<any>(res, { data: error, statusCode: httpStatus.OK, success: false, message: 'Some thing want wrong!', })
     }
 }
-const updateUser = async (req: Request, res: Response) => {
-    const reqBody = req.body;
-
-}
-
 const getAllUser = async (req: Request, res: Response) => {
     const allUser = await prisma.user.findMany()
     return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, data: allUser, message: 'all user successfully get', })
 
 }
+const updateUser = async (req: Request, res: Response) => {
+    const { email } = req.body;
 
-export default { SingUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser }
+    if (!email) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Email is required',
+        });
+    }
+
+    try {
+        const { country, city, industryName, address, number, language, image } = req.body;
+
+        const updatedUser = await prisma.user.update({
+            where: { email },
+            data: {
+                country,
+                city,
+                industryName,
+                address,
+                number,
+                language,
+                image
+            },
+        });
+
+        console.log('User updated:', updatedUser);
+
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            data: updatedUser,
+            message: 'User updated successfully',
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: 'An error occurred while updating the user',
+        });
+    }
+};
+
+
+export default { SingUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser, updateUser }
