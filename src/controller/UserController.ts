@@ -177,8 +177,6 @@ const verifyOtp = async (req: Request, res: Response) => {
     }
 
 };
-
-
 const setNewPass = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
@@ -198,6 +196,15 @@ const setNewPass = async (req: Request, res: Response) => {
         return sendResponse<any>(res, { data: error, statusCode: httpStatus.OK, success: false, message: 'Some thing want wrong!', })
     }
 }
+const updateUser = async (req: Request, res: Response) => {
+    const reqBody = req.body;
 
+}
 
-export default { SingUp, SignIn, forgotPass, verifyOtp, setNewPass }
+const getAllUser = async (req: Request, res: Response) => {
+    const allUser = await prisma.user.findMany()
+    return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, data: allUser, message: 'all user successfully get', })
+
+}
+
+export default { SingUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser }
