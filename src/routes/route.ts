@@ -5,7 +5,7 @@ const router = express.Router()
 
 
 // get users api route -done
-router.post('/sign-up', UserController.SingUp);
+router.post('/sign-up', UserController.SignUp);
 router.post('/sign-in', UserController.SignIn);
 router.get('/forgot-pass/:email', UserController.forgotPass);
 router.get('/verify-otp/:email', UserController.verifyOtp);

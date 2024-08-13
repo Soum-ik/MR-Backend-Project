@@ -14,35 +14,43 @@ interface SignupRequestBody {
     password: string;
 }
 
-const SingUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
+const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
     try {
-        const {
-            country,
-            fullName,
-            userName,
-            email,
-            password,
-        } = req.body;
+        const { country, fullName, userName, email, password } = req.body;
 
-        const existingEmail = await prisma.user.findUnique({ where: { email } })
+        // Validate request body
+        if (!email || !password) {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.BAD_REQUEST,
+                success: false,
+                data: null,
+                message: "Email and password are required"
+            });
+        }
+
+        // Check if the email is already used
+        const existingEmail = await prisma.user.findUnique({ where: { email } });
         if (existingEmail) {
             return sendResponse<any>(res, {
-                statusCode: httpStatus.NOT_ACCEPTABLE,
-                success: true,
+                statusCode: httpStatus.CONFLICT,
+                success: false,
                 data: null,
-                message: "Email are already used"
-            });
-        }
-        const existingUserName = await prisma.user.findUnique({ where: { userName } })
-        if (existingUserName) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.NOT_ACCEPTABLE,
-                success: true,
-                data: null,
-                message: "User name are already used"
+                message: "Email is already in use"
             });
         }
 
+        // Check if the username is already used
+        const existingUserName = await prisma.user.findUnique({ where: { userName } });
+        if (existingUserName) {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.CONFLICT,
+                success: false,
+                data: null,
+                message: "Username is already in use"
+            });
+        }
+
+       
         // Create the new user
         const createUser = await prisma.user.create({
             data: {
@@ -50,29 +58,36 @@ const SingUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
                 fullName,
                 userName,
                 email,
-                password,
+                password
             }
         });
+
+        const { role, id } = createUser;
+
+        // Create the token
+        const token = createToken({ role, user_id: id });
+
         console.log(createUser, "User created");
 
         return sendResponse<any>(res, {
-            statusCode: httpStatus.OK,
+            statusCode: httpStatus.CREATED,
             success: true,
-            data: createUser,
+            data: { ...createUser, token },
             message: "User created successfully"
         });
 
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
+        console.error("Error creating user:", error.message);
+
 
         return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            statusCode: httpStatus.NOT_ACCEPTABLE,
             success: false,
-            data: error,
-            message: "User not created"
+            data: null,
         });
     }
 };
+
 const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
     try {
         const { password, email } = req.body;
@@ -83,9 +98,7 @@ const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
                 statusCode: httpStatus.NOT_FOUND, success: false, data: null, message: "User are not found"
             });
         }
-
         const { role, id } = findUserByEmail
-
 
         // // Create the token
         const token = createToken({ role, user_id: id });
@@ -103,7 +116,7 @@ const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
         // res.locals.loggedInUser = { username, semester, isVerfiyed, role, suspend, user_id: id };
 
         return sendResponse<any>(res, {
-            statusCode: httpStatus.OK, success: true, data: { token }, message: "User authenticated successfully"
+            statusCode: httpStatus.OK, success: true, data: { token, findUserByEmail }, message: "User authenticated successfully"
         });
     } catch (error) {
         return sendResponse<any>(res, {
@@ -245,4 +258,4 @@ const updateUser = async (req: Request, res: Response) => {
 };
 
 
-export default { SingUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser, updateUser }
+export default { SignUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser, updateUser }

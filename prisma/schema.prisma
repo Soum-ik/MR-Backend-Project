@@ -25,7 +25,7 @@ model User {
   address          String?
   number           String?
   image            String?
-  language         String[]          @default([])
+  language         String?          
   role             Role              @default(USER) // Set a default role, if needed
   otp              Int?              @default(0)
   createdAt        DateTime          @default(now())
