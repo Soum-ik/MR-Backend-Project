@@ -14,6 +14,21 @@ interface SignupRequestBody {
     password: string;
 }
 
+// Define the User interface
+interface User {
+    user_id?: string;
+    role?: string;
+    email?: string;
+    iat?: number;
+    exp?: number;
+}
+
+// Extend the Request interface to include the user property
+interface AuthenticatedRequest extends Request {
+    user?: User;
+}
+
+
 const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
     try {
         const { country, fullName, userName, email, password } = req.body;
@@ -50,7 +65,7 @@ const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
             });
         }
 
-       
+
         // Create the new user
         const createUser = await prisma.user.create({
             data: {
@@ -62,17 +77,17 @@ const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
             }
         });
 
-        const { role, id } = createUser;
+        const { role, id, email: Useremail } = createUser;
 
         // Create the token
-        const token = createToken({ role, user_id: id });
+        const token = createToken({ role, user_id: id, email: Useremail });
 
         console.log(createUser, "User created");
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.CREATED,
             success: true,
-            data: { ...createUser, token },
+            data: token,
             message: "User created successfully"
         });
 
@@ -88,42 +103,54 @@ const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
     }
 };
 
+
 const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
     try {
         const { password, email } = req.body;
 
-        const findUserByEmail = await prisma.user.findUnique({ where: { email, password } });
-        if (!findUserByEmail) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.NOT_FOUND, success: false, data: null, message: "User are not found"
+        // Find user by email and password
+        const user = await prisma.user.findUnique({ where: { email, password } });
+
+        if (!user) {
+            return sendResponse(res, {
+                statusCode: httpStatus.NOT_FOUND,
+                success: false,
+                data: null,
+                message: "User not found",
             });
         }
-        const { role, id } = findUserByEmail
 
-        // // Create the token
-        const token = createToken({ role, user_id: id });
+        const { role, id, email: Useremail } = user;
 
+        // Create the token
+        const token = createToken({ role, user_id: id, email: Useremail });
 
-        // // Set the cookie with the token
+        // Set cookie with the token
         res.cookie('authToken', token, {
-            httpOnly: true, // Cookie cannot be accessed via JavaScript
-            // secure: process.env.NODE_ENV === 'production', // Cookie only sent over HTTPS in production
-            maxAge: 3600000, // 1 hour (cookie expiration)
-            sameSite: 'strict', // Protect against CSRF attacks
+            httpOnly: true,
+            maxAge: 3600000, // 1 hour
+            sameSite: 'strict', // CSRF protection
         });
 
-        // // set logged in user local identifier
-        // res.locals.loggedInUser = { username, semester, isVerfiyed, role, suspend, user_id: id };
-
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.OK, success: true, data: { token, findUserByEmail }, message: "User authenticated successfully"
+        // Return successful response with token and user data
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            data: { token, user },
+            message: "User authenticated successfully",
         });
+
     } catch (error) {
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR, success: false, data: error, message: "An error occurred"
+        // Handle error
+        return sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            data: error,
+            message: "An error occurred",
         });
     }
-}
+};
+
 const forgotPass = async (req: Request, res: Response) => {
     const { email } = req.params;
 
@@ -223,7 +250,7 @@ const updateUser = async (req: Request, res: Response) => {
     }
 
     try {
-        const { country, city, industryName, address, number, language, image } = req.body;
+        const { country, city, industryName, address, number, language, image, description } = req.body;
 
         const updatedUser = await prisma.user.update({
             where: { email },
@@ -234,7 +261,7 @@ const updateUser = async (req: Request, res: Response) => {
                 address,
                 number,
                 language,
-                image
+                image, description
             },
         });
 
@@ -257,5 +284,51 @@ const updateUser = async (req: Request, res: Response) => {
     }
 };
 
+const getSingelUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    if (!req.user || !req.user.email) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'User information is missing or email is required',
+        });
+    }
+    const user = req.user
+    const { email } = user
 
-export default { SignUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser, updateUser }
+    if (!email) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Email is required',
+        });
+    }
+
+    try {
+        const findByEmail = await prisma.user.findUnique({ where: { email } })
+        if (findByEmail) {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.OK,
+                success: true,
+                data: findByEmail,
+                message: 'User found',
+            });
+        } else {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.NOT_FOUND,
+                success: false,
+                data: null,
+                message: 'User not found',
+            });
+        }
+    } catch (error) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.NOT_ACCEPTABLE,
+            success: false,
+            data: null,
+            message: 'Some want wrong',
+        });
+    }
+
+}
+
+export default { SignUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser, updateUser, getSingelUser }
