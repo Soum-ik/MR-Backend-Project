@@ -250,11 +250,12 @@ const updateUser = async (req: Request, res: Response) => {
     }
 
     try {
-        const { country, city, industryName, address, number, language, image, description } = req.body;
+        const { fullName,country, city, industryName, address, number, language, image, description } = req.body;
 
         const updatedUser = await prisma.user.update({
             where: { email },
             data: {
+                fullName,
                 country,
                 city,
                 industryName,
