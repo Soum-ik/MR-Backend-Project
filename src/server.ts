@@ -11,7 +11,8 @@ const app: Application = express()
 const corsOptions = {
     origin: [
         'http://localhost:3000',
-        'http://localhost:5173'
+        'http://localhost:5173',
+        'https://mr-project-fiverr-system.vercel.app'
     ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
