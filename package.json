@@ -1,10 +1,11 @@
 {
   "name": "mr-project--fiverr-system-backend",
-  "module": "index.ts",
+  "module": "server.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch run ./src/server.js",
-    "build" : "tsc"
+    "start": "bun --watch run ./src/server.js",
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --rs --transpile-only src/server.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -27,6 +28,8 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.14",
     "prisma": "^5.18.0",
-    "tsc": "^2.0.4"
+    "ts-node-dev": "^2.0.0",
+    "tsc": "^2.0.4",
+    "zod": "^3.23.8"
   }
 }

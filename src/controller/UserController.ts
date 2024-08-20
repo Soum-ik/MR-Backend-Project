@@ -215,8 +215,11 @@ const verifyOtp = async (req: Request, res: Response) => {
 
 };
 const setNewPass = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-
+    const { email }: any = req.user
+    if (!email) {
+        return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Email are required!', })
+    }
+    const { password } = req.body;
 
     try {
         const findByEmail = await prisma.user.findUnique({ where: { email } })

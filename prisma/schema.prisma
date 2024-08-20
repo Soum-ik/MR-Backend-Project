@@ -57,14 +57,14 @@ model SocialMediaLinks {
 }
 
 model CreateProject {
-  id                     String  @id @default(auto()) @map("_id") @db.ObjectId
-  projectImage           String?
-  originalAmount         Int?
-  offerAmount            Int?
-  extraFastDelivery      Int?
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectImage            String?
+  originalAmount          Int?
+  offerAmount             Int?
+  extraFastDelivery       Int?
   extraFastDeliveryAmount Int?
-  providedSource         String[] @default([])
-  requirement            String[] @default([])
+  providedSource          String[] @default([])
+  requirement             String[] @default([])
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -89,18 +89,35 @@ model Design {
 
 model DesignOption {
   id   String   @id @default(auto()) @map("_id") @db.ObjectId
-  type SideType // Enum for Single Side, Double Side
+  type String[]
 
   designId String
   design   Design @relation(fields: [designId], references: [id], onDelete: Cascade)
 }
 
+model Category {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  categoryName String        @unique
+  image        String
+  bulletPoint  String[]      @default([])
+  requirements String[]      @default([])
+  subCategory  subCategory[]
+
+  @@map("Categorys")
+}
+
+model subCategory {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  subTitle            String
+  subAmount           Int
+  regularDeliveryDays Int
+  fastDeliveryDays    Int
+  fastDeliveryPrice   Int
+  categoryId          String   @db.ObjectId
+  category            Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   ADMIN
   USER
-}
-
-enum SideType {
-  SINGLE_SIDE
-  DOUBLE_SIDE
 }
