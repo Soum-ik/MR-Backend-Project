@@ -108,11 +108,11 @@ model Category {
 
 model subCategory {
   id                  String   @id @default(auto()) @map("_id") @db.ObjectId
-  subTitle            String
-  subAmount           Int
-  regularDeliveryDays Int
-  fastDeliveryDays    Int
-  fastDeliveryPrice   Int
+  subTitle            String?
+  subAmount           String?
+  regularDeliveryDays String?
+  fastDeliveryDays    String?
+  fastDeliveryPrice   String?
   categoryId          String   @db.ObjectId
   category            Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
