@@ -98,7 +98,7 @@ model DesignOption {
 model Category {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
   categoryName String        @unique
-  image        String
+  image        Json?
   bulletPoint  String[]      @default([])
   requirements String[]      @default([])
   subCategory  subCategory[]
