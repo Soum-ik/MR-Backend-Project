@@ -67,10 +67,10 @@ model CreateProject {
   requirement             String[] @default([])
 
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
   designId String? @db.ObjectId
-  Design   Design? @relation(fields: [designId], references: [id], onDelete: Cascade) // Fixed redundant Design relation
+  Design   Design? @relation(fields: [designId], references: [id], onUpdate: Cascade, onDelete: Restrict) // Fixed redundant Design relation
 
   @@map("CreateProjectAdmin")
 }
@@ -92,7 +92,7 @@ model DesignOption {
   type String[]
 
   designId String
-  design   Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+  design   Design @relation(fields: [designId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }
 
 model Category {
@@ -114,7 +114,64 @@ model subCategory {
   fastDeliveryDays    String?
   fastDeliveryPrice   String?
   categoryId          String   @db.ObjectId
-  category            Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category            Category @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model UploadDesign {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+
+  size       String
+  fileFormat String
+  image      Json?
+  tags       String[] @default([])
+
+  folder    String @unique
+  subFolder String @unique
+  industrie String @unique
+  design    String @unique
+
+  folders    folders[]
+  subFolders subFolders[]
+  industries industries[]
+  designs    designs[]
+}
+
+model folders {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name   String? @unique
+
+  UploadDesignId String       @db.ObjectId
+  UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model subFolders {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name   String? @unique
+
+  UploadDesignId String       @db.ObjectId
+  UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model industries {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name   String? @unique
+
+  UploadDesignId String       @db.ObjectId
+  UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model designs {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name   String? @unique
+
+  UploadDesignId String       @db.ObjectId
+  UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
 }
 
 enum Role {

@@ -11,7 +11,7 @@ router.post('/sign-up', UserController.SignUp);
 router.post('/sign-in', UserController.SignIn);
 router.get('/forgot-pass/:email', UserController.forgotPass);
 router.get('/verify-otp/:email', UserController.verifyOtp);
-router.post('/set-new-pass/', authenticateToken, UserController.setNewPass);
+router.put('/set-new-pass/', authenticateToken, UserController.setNewPass);
 router.get('/all-user/', UserController.getAllUser);
 router.post('/update-user/', UserController.updateUser);
 router.post('/social-media-link/', SocialMediaLinkController.upsertSocialMediaLink);
