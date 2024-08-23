@@ -219,13 +219,12 @@ const setNewPass = async (req: Request, res: Response) => {
     if (!email) {
         return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Email are required!', })
     }
-    const { password } = req.body;
+    const { password, currentPassword } = req.body;
 
     try {
-        const findByEmail = await prisma.user.findUnique({ where: { email } })
-        console.log(findByEmail, 'find by email');
+        const findByEmail = await prisma.user.findUnique({ where: { email: email, password: currentPassword } })
         if (!findByEmail) {
-            return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Your email are not matched', })
+            return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Youre password are not matched', })
         } else {
             const updateNewPass = await prisma.user.update({ where: { email }, data: { password } })
             console.log(updateNewPass, "update new password");
@@ -253,7 +252,7 @@ const updateUser = async (req: Request, res: Response) => {
     }
 
     try {
-        const { fullName,country, city, industryName, address, number, language, image, description } = req.body;
+        const { fullName, country, city, industryName, address, number, language, image, description } = req.body;
 
         const updatedUser = await prisma.user.update({
             where: { email },
