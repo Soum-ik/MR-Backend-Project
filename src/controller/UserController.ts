@@ -224,7 +224,7 @@ const setNewPass = async (req: Request, res: Response) => {
     try {
         const findByEmail = await prisma.user.findUnique({ where: { email: email, password: currentPassword } })
         if (!findByEmail) {
-            return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Youre password are not matched', })
+            return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Your current password is wrong!', })
         } else {
             const updateNewPass = await prisma.user.update({ where: { email }, data: { password } })
             console.log(updateNewPass, "update new password");
