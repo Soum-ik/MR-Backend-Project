@@ -29,8 +29,23 @@ const UploadDesign = async (req: Request, res: Response) => {
 
         // Create UploadDesign in the database
         const uploadDesign = await prisma.uploadDesign.create({
-            data: validatedData,
+            data: {
+                title: validatedData.title,
+                description: validatedData.description,
+                category: validatedData.category,
+                subCategory: validatedData.subCategory,
+                size: validatedData.size,
+                fileFormat: validatedData.fileFormat,
+                image: validatedData.image,
+                tags: validatedData.tags,
+                relatedDesign: validatedData.relatedDesign,
+                folder: validatedData.folder,
+                subFolder: validatedData.subFolder,
+                industrie: validatedData.industrie,
+                design: validatedData.design
+            }
         });
+        console.log(uploadDesign);
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
@@ -43,7 +58,7 @@ const UploadDesign = async (req: Request, res: Response) => {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.BAD_REQUEST,
                 success: false,
-                data: null,
+                data: 'null',
                 message: `${error}`,
             });
         }

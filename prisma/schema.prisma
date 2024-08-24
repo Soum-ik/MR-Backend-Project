@@ -122,10 +122,14 @@ model UploadDesign {
   title       String
   description String
 
-  size       String
-  fileFormat String
-  image      Json?
-  tags       String[] @default([])
+  category    String
+  subCategory String
+
+  size          String
+  fileFormat    String
+  image         Json[]
+  tags          String[] @default([])
+  relatedDesign String[] @default([])
 
   folder    String @unique
   subFolder String @unique
@@ -141,7 +145,7 @@ model UploadDesign {
 model folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name   String? @unique
+  name String? @unique
 
   UploadDesignId String       @db.ObjectId
   UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
@@ -150,7 +154,7 @@ model folders {
 model subFolders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name   String? @unique
+  name String? @unique
 
   UploadDesignId String       @db.ObjectId
   UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
@@ -159,7 +163,7 @@ model subFolders {
 model industries {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name   String? @unique
+  name String? @unique
 
   UploadDesignId String       @db.ObjectId
   UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
@@ -168,7 +172,7 @@ model industries {
 model designs {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name   String? @unique
+  name String? @unique
 
   UploadDesignId String       @db.ObjectId
   UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)

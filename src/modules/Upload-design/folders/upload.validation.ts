@@ -15,3 +15,4 @@ export const uploadDesignSchema = z.object({
     industrie: z.string().min(1, "Industry is required"),
     design: z.string().min(1, "Design is required"),
 });
+
