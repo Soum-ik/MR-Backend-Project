@@ -17,7 +17,7 @@ export const uploadDesignSchema = z.object({
     tags: z.array(z.string()).nonempty("At least one tag is required"),
     folder: z.string().nonempty("Folder is required"),
     subFolder: z.string().nonempty("SubFolder is required"),
-    industrie: z.string().nonempty("Industry is required"),
-    design: z.string().nonempty("Design is required"),
+    industrie: z.array(z.string()),
+    design: z.array(z.string()),
     relatedDesign: z.array(z.string()).nonempty("At least one related design is required"),
 });

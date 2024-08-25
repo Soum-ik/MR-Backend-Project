@@ -131,10 +131,12 @@ model UploadDesign {
   tags          String[] @default([])
   relatedDesign String[] @default([])
 
-  folder    String @unique
-  subFolder String @unique
-  industrie String @unique
-  design    String @unique
+  folder    String   @unique
+  subFolder String   @unique
+  industrie String[]
+  design    String[]
+
+  designSerialGenerator String?
 
   folders    folders[]
   subFolders subFolders[]
@@ -176,6 +178,16 @@ model designs {
 
   UploadDesignId String       @db.ObjectId
   UploadDesign   UploadDesign @relation(fields: [UploadDesignId], references: [folder], onUpdate: Cascade, onDelete: Restrict)
+}
+
+model desigserialNumberGenerator {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  serialnumber String? @unique
+}
+
+model projectSerialNumberGenerator {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  serialnumber String? @unique
 }
 
 enum Role {

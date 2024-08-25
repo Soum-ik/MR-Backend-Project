@@ -3,6 +3,7 @@ import UserController from '../controller/UserController'
 import SocialMediaLinkController from '../controller/socialMediaLinkController';
 import authenticateToken from '../middleware/auth';
 import { CategoryRoute } from '../modules/ProjectCategory/CategoryRoute';
+import { UploadRoute } from '../modules/Upload-design/upload.route';
 const router = express.Router()
 
 
@@ -20,6 +21,7 @@ router.get('/social-media-link/:email', SocialMediaLinkController.getSocialMedia
 router.get('/get-singel-user/', authenticateToken, UserController.getSingelUser);
 
 router.use('/category', CategoryRoute)
+router.use('/upload', UploadRoute)
 
 
 export default router

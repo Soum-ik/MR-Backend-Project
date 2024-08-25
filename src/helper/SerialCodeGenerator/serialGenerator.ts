@@ -1,4 +1,4 @@
-const statement = (num) => {
+const statement = (num: string): string => {
   switch (num) {
     case "2":
       return "N";
@@ -15,23 +15,20 @@ const statement = (num) => {
   }
 };
 
-export const designSerialGenerator = (serial = 0) => {
+export const designSerialGenerator = (serial: number = 0): string => {
   const modifiedSerial = serial
     .toString()
     .split("")
-    .map((num) => {
-      return statement(num);
-    })
+    .map((num) => statement(num))
     .join("");
   return `MR${modifiedSerial}DN`;
 };
-export const projectSerialGenerator = (serial = 0) => {
+
+export const projectSerialGenerator = (serial: number = 0): string => {
   const modifiedSerial = serial
     .toString()
     .split("")
-    .map((num) => {
-      return statement(num);
-    })
+    .map((num) => statement(num))
     .join("");
   return `MR${modifiedSerial}PN`;
 };

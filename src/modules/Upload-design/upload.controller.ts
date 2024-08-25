@@ -1,30 +1,30 @@
 import type { Request, Response } from 'express'
 import { prisma } from '../../libs/prismaHelper';
-import { UploadDesign } from './upload.inteface';
+import { UploadDesignSchemaInterface } from './upload.inteface';
 import { uploadDesignSchema } from './upload.validation';
 import { z } from 'zod';
 import sendResponse from '../../libs/sendResponse';
 import httpStatus from 'http-status';
-import { checkNameExists } from './upload.utlity';
+import { getLastSerialNumber } from '../../libs/utlitys/desginNumber';
+import { designSerialGenerator } from '../../helper/SerialCodeGenerator/serialGenerator';
 
 
-const UploadDesign = async (req: Request, res: Response) => {
+export const UploadDesign = async (req: Request, res: Response) => {
     try {
         // Validate request body using Zod and infer the correct type
-        const validatedData: UploadDesign = uploadDesignSchema.parse(req.body);
+        const validatedData: UploadDesignSchemaInterface = uploadDesignSchema.parse(req.body);
 
-        // Additional server-side logic (e.g., checking if the folder exists)
-        const folderExists = await checkNameExists('folders', validatedData.folder);
-        const subFolderExists = await checkNameExists('subFolders', validatedData.subFolder);
-        const industryExists = await checkNameExists('industries', validatedData.industrie);
-        const designExists = await checkNameExists('designs', validatedData.design);
-        if (folderExists || subFolderExists || industryExists || designExists) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.NOT_ACCEPTABLE,
-                success: false,
-                data: null,
-                message: 'This name already exists',
-            });
+        // Get the last serial number from the server
+        const { serialnumber } = await getLastSerialNumber();
+        const convertStringIntoNumber = serialnumber && parseInt(serialnumber);
+
+        let specialSerialCodeGenarator;
+        let convertedSerialUpdateNumber;
+
+        // Generate special serial number if last serial number exists
+        if (convertStringIntoNumber) {
+            convertedSerialUpdateNumber = convertStringIntoNumber + 1;
+            specialSerialCodeGenarator = designSerialGenerator(convertedSerialUpdateNumber);
         }
 
         // Create UploadDesign in the database
@@ -42,24 +42,27 @@ const UploadDesign = async (req: Request, res: Response) => {
                 folder: validatedData.folder,
                 subFolder: validatedData.subFolder,
                 industrie: validatedData.industrie,
-                design: validatedData.design
+                design: validatedData.design,
+                designSerialGenerator: specialSerialCodeGenarator,
             }
         });
-        console.log(uploadDesign);
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
             success: true,
             data: uploadDesign,
-            message: `Great! You're design are upload successfull`,
+            message: `Great! Your design was uploaded successfully.`,
         });
+
     } catch (error) {
+        console.error(error);
+
         if (error instanceof z.ZodError) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.BAD_REQUEST,
                 success: false,
-                data: 'null',
-                message: `${error}`,
+                data: null,
+                message: `${error.message}`,
             });
         }
 
@@ -70,4 +73,35 @@ const UploadDesign = async (req: Request, res: Response) => {
             message: `Internal server error`,
         });
     }
-} 
+};
+
+const getAllUploadDesign = async (req: Request, res: Response) => {
+    try {
+        const findall = await prisma.uploadDesign.findMany({})
+        if (!findall) {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+                success: false,
+                data: null,
+                message: `Upload design are not found!`,
+            });
+        }
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            data: findall,
+            message: `Internal server error`,
+        });
+    } catch (error) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            data: error,
+            message: `Internal server error`,
+        });
+    }
+}
+
+export const uploaders = {
+    UploadDesign, getAllUploadDesign
+}
