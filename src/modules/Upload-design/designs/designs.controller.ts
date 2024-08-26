@@ -5,16 +5,26 @@ import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
 
 const getByNameSchema = z.object({
-    name: z.string().nonempty({ message: 'Sub Folder name is required' }),
+    name: z.union([z.string(), z.array(z.string())]),
 });
 
 const getByname = async (req: Request, res: Response) => {
     try {
         // Validate the query using Zod
-        const { name } = getByNameSchema.parse(req.query);
+        let { name } = getByNameSchema.parse(req.query);
+
+        // Ensure that name is an array, even if a single string is passed
+        if (typeof name === 'string') {
+            name = [name]; // Convert single string to an array
+        }
+
 
         const findByName = await prisma.uploadDesign.findMany({
-            where: { subFolder: name },
+            where: {
+                designs: {
+                    hasSome: name
+                }
+            },
         });
 
 
