@@ -40,14 +40,14 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 subCategory: validatedData.subCategory,
                 size: validatedData.size,
                 fileFormat: validatedData.fileFormat,
-                image: validatedData.images,
+                images: validatedData.images,
                 tags: validatedData.tags,
-                relatedDesign: validatedData.relatedDesigns,
+                relatedDesigns: validatedData.relatedDesigns,
+                designSerialGenerator: specialSerialCodeGenarator,
                 folder: validatedData.folder,
                 subFolder: validatedData.subFolder,
-                industrie: validatedData.industries,
-                design: validatedData.designs,
-                designSerialGenerator: specialSerialCodeGenarator,
+                industrys: validatedData.industries,
+
             }
         });
 
@@ -115,7 +115,7 @@ const deleteDesign = async (req: Request, res: Response) => {
         // Check if the design exists in the database
         const design = await prisma.uploadDesign.delete({
             where: { id: id },
-            include: { designs: true, folders: true, industries: true, subFolders: true },
+            include: { Designs: true, folders: true, Industrys: true, SubFolders: true },
 
         });
         // console.log(design);
