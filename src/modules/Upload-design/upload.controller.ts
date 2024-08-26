@@ -91,10 +91,10 @@ const getAllUploadDesign = async (req: Request, res: Response) => {
             });
         }
         return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
+            statusCode: httpStatus.OK,
+            success: true,
             data: findall,
-            message: `Internal server error`,
+            message: `Get data successfully`,
         });
     } catch (error) {
         return sendResponse<any>(res, {
