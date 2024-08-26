@@ -142,7 +142,7 @@ model UploadDesign {
   designs String[]
   Designs Designs? @relation(fields: [designs], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
-  designSerialGenerator String?
+  designId String?
 }
 
 model Folders {

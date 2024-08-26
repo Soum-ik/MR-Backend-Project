@@ -4,6 +4,8 @@ import SocialMediaLinkController from '../controller/socialMediaLinkController';
 import authenticateToken from '../middleware/auth';
 import { CategoryRoute } from '../modules/ProjectCategory/CategoryRoute';
 import { UploadRoute } from '../modules/Upload-design/upload.route';
+import { FolderRouter } from '../modules/Upload-design/folders/folders.route';
+import { SubFolderRouter } from '../modules/Upload-design/subFolders/subfolders.route';
 const router = express.Router()
 
 
@@ -22,6 +24,8 @@ router.get('/get-singel-user/', authenticateToken, UserController.getSingelUser)
 
 router.use('/category', CategoryRoute)
 router.use('/upload', UploadRoute)
+router.use('/folder', FolderRouter)
+router.use('/subFolderRouter', SubFolderRouter)
 
 
 export default router

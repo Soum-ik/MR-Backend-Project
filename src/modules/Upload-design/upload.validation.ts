@@ -11,7 +11,7 @@ export const uploadDesignSchema = z.object({
         z.object({
             name: z.string().nonempty("Name is required"),
             url: z.string().url("Invalid URL format"),
-            thumbnail: z.boolean().optional(),
+            thumbnail: z.boolean().default(false),
         })
     ).nonempty("At least one image is required"),
     tags: z.array(z.string()).nonempty("At least one tag is required"),

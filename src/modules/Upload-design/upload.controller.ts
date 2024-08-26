@@ -7,6 +7,7 @@ import sendResponse from '../../libs/sendResponse';
 import httpStatus from 'http-status';
 import { getLastSerialNumber } from '../../libs/utlitys/desginNumber';
 import { designSerialGenerator } from '../../helper/SerialCodeGenerator/serialGenerator';
+import { findOrCreateEntity } from './upload.utlity';
 
 
 export const UploadDesign = async (req: Request, res: Response) => {
@@ -16,6 +17,7 @@ export const UploadDesign = async (req: Request, res: Response) => {
 
         // Get the last serial number from the server
         const { serialnumber } = await getLastSerialNumber();
+
         const convertStringIntoNumber = serialnumber && parseInt(serialnumber);
 
         let specialSerialCodeGenarator;
@@ -26,11 +28,13 @@ export const UploadDesign = async (req: Request, res: Response) => {
             specialSerialCodeGenarator = designSerialGenerator(convertedSerialUpdateNumber);
         }
 
-        await prisma.desigserialNumberGenerator.create({
-            data: {
-                serialnumber: convertedSerialUpdateNumber + ''
-            }
-        })
+        // Check or create entities
+        await findOrCreateEntity(prisma.folders, { name: validatedData.folder }, { name: validatedData.folder });
+        await findOrCreateEntity(prisma.subFolders, { name: validatedData.subFolder }, { name: validatedData.subFolder });
+        await findOrCreateEntity(prisma.industrys, { name: validatedData.industries }, { name: validatedData.industries });
+        await findOrCreateEntity(prisma.designs, { name: validatedData.designs }, { name: validatedData.designs });
+
+
         // Create UploadDesign in the database
         const uploadDesign = await prisma.uploadDesign.create({
             data: {
@@ -43,13 +47,22 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 images: validatedData.images,
                 tags: validatedData.tags,
                 relatedDesigns: validatedData.relatedDesigns,
-                designSerialGenerator: specialSerialCodeGenarator,
+                designId: specialSerialCodeGenarator,
                 folder: validatedData.folder,
                 subFolder: validatedData.subFolder,
                 industrys: validatedData.industries,
-
+                designs: validatedData.designs
             }
         });
+
+
+
+
+        await prisma.desigserialNumberGenerator.create({
+            data: {
+                serialnumber: convertedSerialUpdateNumber + ''
+            }
+        })
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
@@ -118,22 +131,6 @@ const deleteDesign = async (req: Request, res: Response) => {
             include: { Designs: true, folders: true, Industrys: true, SubFolders: true },
 
         });
-        // console.log(design);
-
-        // if (!design) {
-        //     return sendResponse<any>(res, {
-        //         statusCode: httpStatus.NOT_FOUND,
-        //         success: false,
-        //         data: null,
-        //         message: `Design not found.`,
-        //     });
-        // }
-
-        // // Delete the design from the database
-        // await prisma.uploadDesign.delete({
-        //     where: { id: id },
-        // });
-
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
             success: true,

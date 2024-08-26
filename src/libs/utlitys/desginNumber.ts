@@ -4,13 +4,16 @@ export async function getLastSerialNumber() {
     // Check if there is any serial number in the database
     const lastSerialNumberEntry = await prisma.desigserialNumberGenerator.findFirst({
         orderBy: {
-            serialnumber: 'desc'
-        }
+            id: 'desc'
+        },
+        take : 1
     });
+
+    console.log(lastSerialNumberEntry, 'index cheking');
 
     if (lastSerialNumberEntry) {
         // Destructure the last entry object
-        const { id, serialnumber } = lastSerialNumberEntry;
+        const { id, serialnumber } = lastSerialNumberEntry
 
         // Return the destructured object for further manipulation
         return { id, serialnumber };
