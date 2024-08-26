@@ -1,4 +1,5 @@
-import { prisma } from "../../libs/prismaHelper";
+import { prisma } from "../../../libs/prismaHelper";
+
 
 
 export async function checkNameExists(

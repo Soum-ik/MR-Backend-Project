@@ -7,17 +7,17 @@ export const uploadDesignSchema = z.object({
     category: z.string().nonempty("Category is required"),
     subCategory: z.string().nonempty("SubCategory is required"),
     fileFormat: z.string().nonempty("FileFormat is required"),
-    image: z.array(
+    images: z.array(
         z.object({
             name: z.string().nonempty("Name is required"),
             url: z.string().url("Invalid URL format"),
-            thumbline: z.boolean().optional(),
+            thumbnail: z.boolean().optional(),
         })
     ).nonempty("At least one image is required"),
     tags: z.array(z.string()).nonempty("At least one tag is required"),
     folder: z.string().nonempty("Folder is required"),
     subFolder: z.string().nonempty("SubFolder is required"),
-    industrie: z.array(z.string()),
-    design: z.array(z.string()),
-    relatedDesign: z.array(z.string()).nonempty("At least one related design is required"),
+    industries: z.array(z.string()),
+    designs: z.array(z.string()),
+    relatedDesigns: z.array(z.string()).nonempty("At least one related design is required"),
 });

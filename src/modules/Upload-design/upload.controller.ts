@@ -21,12 +21,16 @@ export const UploadDesign = async (req: Request, res: Response) => {
         let specialSerialCodeGenarator;
         let convertedSerialUpdateNumber;
 
-        // Generate special serial number if last serial number exists
         if (convertStringIntoNumber) {
             convertedSerialUpdateNumber = convertStringIntoNumber + 1;
             specialSerialCodeGenarator = designSerialGenerator(convertedSerialUpdateNumber);
         }
 
+        await prisma.desigserialNumberGenerator.create({
+            data: {
+                serialnumber: convertedSerialUpdateNumber + ''
+            }
+        })
         // Create UploadDesign in the database
         const uploadDesign = await prisma.uploadDesign.create({
             data: {
@@ -36,13 +40,13 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 subCategory: validatedData.subCategory,
                 size: validatedData.size,
                 fileFormat: validatedData.fileFormat,
-                image: validatedData.image,
+                image: validatedData.images,
                 tags: validatedData.tags,
-                relatedDesign: validatedData.relatedDesign,
+                relatedDesign: validatedData.relatedDesigns,
                 folder: validatedData.folder,
                 subFolder: validatedData.subFolder,
-                industrie: validatedData.industrie,
-                design: validatedData.design,
+                industrie: validatedData.industries,
+                design: validatedData.designs,
                 designSerialGenerator: specialSerialCodeGenarator,
             }
         });
@@ -102,6 +106,53 @@ const getAllUploadDesign = async (req: Request, res: Response) => {
     }
 }
 
+const deleteDesign = async (req: Request, res: Response) => {
+    try {
+        // Extract the design ID from the request parameters
+        const { id } = req.params;
+        console.log(id);
+
+        // Check if the design exists in the database
+        const design = await prisma.uploadDesign.delete({
+            where: { id: id },
+            include: { designs: true, folders: true, industries: true, subFolders: true },
+
+        });
+        // console.log(design);
+
+        // if (!design) {
+        //     return sendResponse<any>(res, {
+        //         statusCode: httpStatus.NOT_FOUND,
+        //         success: false,
+        //         data: null,
+        //         message: `Design not found.`,
+        //     });
+        // }
+
+        // // Delete the design from the database
+        // await prisma.uploadDesign.delete({
+        //     where: { id: id },
+        // });
+
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            data: design,
+            message: `Design deleted successfully.`,
+        });
+    } catch (error) {
+        console.log(error);
+
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            data: null,
+            message: `Internal server error`,
+        });
+    }
+};
+
+
 export const uploaders = {
-    UploadDesign, getAllUploadDesign
+    UploadDesign, getAllUploadDesign, deleteDesign
 }
