@@ -20,4 +20,5 @@ export const uploadDesignSchema = z.object({
     industries: z.array(z.string()),
     designs: z.array(z.string()),
     relatedDesigns: z.array(z.string()).nonempty("At least one related design is required"),
+   
 });

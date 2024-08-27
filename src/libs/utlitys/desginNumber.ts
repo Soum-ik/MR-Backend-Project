@@ -8,8 +8,7 @@ export async function getLastSerialNumber() {
         },
         take : 1
     });
-
-    console.log(lastSerialNumberEntry, 'index cheking');
+ 
 
     if (lastSerialNumberEntry) {
         // Destructure the last entry object

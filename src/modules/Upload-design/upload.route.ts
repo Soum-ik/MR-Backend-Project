@@ -6,6 +6,6 @@ const router = express.Router();
 router.post('/create', uploaders.UploadDesign)
 router.get('/get', uploaders.getAllUploadDesign)
 router.delete('/delete/:id', uploaders.deleteDesign)
-
+router.put('/udpate/:designId', uploaders.UpdateDesign)
 
 export const UploadRoute = router;

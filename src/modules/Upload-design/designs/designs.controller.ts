@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
+import { DataItem } from '../upload.inteface';
 
 const getByNameSchema = z.object({
     name: z.union([z.string(), z.array(z.string())]),
@@ -71,11 +72,18 @@ const getAll = async (req: Request, res: Response) => {
         // Fetch all folders from the database
         const findAll = await prisma.designs.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
 
+
+        function extractNames(data: DataItem[]): string[] {
+            const names = data.flatMap(item => item.name); // Flatten all 'name' arrays into one array
+            return [...new Set(names)]; // Remove duplicates using a Set and convert it back to an array
+        }
+        const extractDatas = extractNames(findAll)
+
         // Send success response with retrieved data
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
             success: true,
-            data: findAll,
+            data: extractDatas,
             message: `Designs retrieved successfully`,
         });
 

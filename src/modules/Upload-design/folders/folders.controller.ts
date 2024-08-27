@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
+import { DataItem } from '../upload.inteface';
 
 const getByNameSchema = z.object({
     name: z.string().nonempty({ message: 'Folder name is required' }),
@@ -20,6 +21,9 @@ const getByname = async (req: Request, res: Response) => {
             where: { folder: name },
             orderBy: { id: 'desc' }
         });
+
+
+
 
 
 
@@ -64,7 +68,8 @@ const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
         const findAll = await prisma.folders.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
-
+    
+        // const extractDatas = extractNames(findAll)
         // Send success response with retrieved data
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,

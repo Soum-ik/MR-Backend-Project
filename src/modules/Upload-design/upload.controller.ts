@@ -28,55 +28,65 @@ export const UploadDesign = async (req: Request, res: Response) => {
             specialSerialCodeGenarator = designSerialGenerator(convertedSerialUpdateNumber);
         }
 
+        if (specialSerialCodeGenarator) {
+
+            // Create UploadDesign in the database
+            const uploadDesign = await prisma.uploadDesign.create({
+                data: {
+                    title: validatedData.title,
+                    description: validatedData.description,
+                    category: validatedData.category,
+                    subCategory: validatedData.subCategory,
+                    size: validatedData.size,
+                    fileFormat: validatedData.fileFormat,
+                    images: validatedData.images,
+                    tags: validatedData.tags,
+                    relatedDesigns: validatedData.relatedDesigns,
+                    folder: validatedData.folder,
+                    subFolder: validatedData.subFolder,
+                    industrys: validatedData.industries,
+                    designs: validatedData.designs,
+                    designId: specialSerialCodeGenarator
+                }
+            });
+
+            // Check or create entities
+            await findOrCreateEntity(prisma.folders, { name: validatedData.folder }, { name: validatedData.folder });
+            await findOrCreateEntity(prisma.subFolders, { name: validatedData.subFolder }, { name: validatedData.subFolder });
+            await prisma.industrys.create({
+                data: {
+                    name: validatedData.industries
+                }
+            })
+            await prisma.designs.create({
+                data: {
+                    name: validatedData.designs
+                }
+            })
 
 
-        // Create UploadDesign in the database
-        const uploadDesign = await prisma.uploadDesign.create({
-            data: {
-                title: validatedData.title,
-                description: validatedData.description,
-                category: validatedData.category,
-                subCategory: validatedData.subCategory,
-                size: validatedData.size,
-                fileFormat: validatedData.fileFormat,
-                images: validatedData.images,
-                tags: validatedData.tags,
-                relatedDesigns: validatedData.relatedDesigns,
-                designId: specialSerialCodeGenarator,
-                folder: validatedData.folder,
-                subFolder: validatedData.subFolder,
-                industrys: validatedData.industries,
-                designs: validatedData.designs
-            }
-        });
+            await prisma.desigserialNumberGenerator.create({
+                data: {
+                    serialnumber: convertedSerialUpdateNumber + ''
+                }
+            })
 
-        // Check or create entities
-        await findOrCreateEntity(prisma.folders, { name: validatedData.folder }, { name: validatedData.folder });
-        await findOrCreateEntity(prisma.subFolders, { name: validatedData.subFolder }, { name: validatedData.subFolder });
-        await prisma.industrys.create({
-            data: {
-                name: validatedData.industries
-            }
-        })
-        await prisma.designs.create({
-            data: {
-                name: validatedData.designs
-            }
-        })
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.OK,
+                success: true,
+                data: uploadDesign,
+                message: `Great! Your design was uploaded successfully.`,
+            });
+        } else {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.OK,
+                success: true,
+                data: null,
+                message: `Something probelm in serial number`,
+            }); 
+        }
 
 
-        await prisma.desigserialNumberGenerator.create({
-            data: {
-                serialnumber: convertedSerialUpdateNumber + ''
-            }
-        })
-
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            data: uploadDesign,
-            message: `Great! Your design was uploaded successfully.`,
-        });
 
     } catch (error) {
         console.error(error);
@@ -155,6 +165,76 @@ const deleteDesign = async (req: Request, res: Response) => {
 };
 
 
+export const UpdateDesign = async (req: Request, res: Response) => {
+    try {
+        // Validate request body using Zod and infer the correct type
+        const validatedData = uploadDesignSchema.parse(req.body);
+
+        // Find the existing design by designId
+        const { designId } = req.params;
+
+        const existingDesign = await prisma.uploadDesign.findUnique({
+            where: { designId: designId },
+        });
+
+
+        if (!existingDesign) {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.NOT_FOUND,
+                success: false,
+                data: null,
+                message: `Design with ID ${designId} not found`,
+            });
+        }
+
+        // Update the design in the database
+        const updatedDesign = await prisma.uploadDesign.update({
+            where: { designId: designId },
+            data: {
+                title: validatedData.title,
+                description: validatedData.description,
+                category: validatedData.category,
+                subCategory: validatedData.subCategory,
+                size: validatedData.size,
+                fileFormat: validatedData.fileFormat,
+                images: validatedData.images,
+                tags: validatedData.tags,
+                folder: validatedData.folder,
+                subFolder: validatedData.subFolder,
+                industrys: validatedData.industries,
+                designs: validatedData.designs,
+                relatedDesigns: validatedData.relatedDesigns,
+            },
+        });
+
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            data: updatedDesign,
+            message: `Design with ID ${designId} updated successfully.`,
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        if (error instanceof z.ZodError) {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.BAD_REQUEST,
+                success: false,
+                data: null,
+                message: `${error.message}`,
+            });
+        }
+
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            data: null,
+            message: `Internal server error`,
+        });
+    }
+};
+
 export const uploaders = {
-    UploadDesign, getAllUploadDesign, deleteDesign
+    UploadDesign, getAllUploadDesign, deleteDesign, UpdateDesign
 }
