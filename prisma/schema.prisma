@@ -124,23 +124,23 @@ model UploadDesign {
   category    String
   subCategory String
 
-  size          String
-  fileFormat    String
+  size           String
+  fileFormat     String
   images         Json[]
-  tags          String[] @default([])
+  tags           String[] @default([])
   relatedDesigns String[] @default([])
 
-  folder  String?
-  folders Folders? @relation(fields: [folder], references: [name], onUpdate: Cascade, onDelete: Restrict)
+  folder String?
+  // folders Folders? @relation(fields: [folder], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
-  subFolder  String?
-  SubFolders SubFolders? @relation(fields: [subFolder], references: [name], onUpdate: Cascade, onDelete: Restrict)
+  subFolder String?
+  // SubFolders SubFolders? @relation(fields: [subFolder], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
   industrys String[]
-  Industrys Industrys? @relation(fields: [industrys], references: [name], onUpdate: Cascade, onDelete: Restrict)
+  // Industrys Industrys? @relation(fields: [industrys], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
   designs String[]
-  Designs Designs? @relation(fields: [designs], references: [name], onUpdate: Cascade, onDelete: Restrict)
+  // Designs Designs? @relation(fields: [designs], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
   designId String?
 }
@@ -148,29 +148,25 @@ model UploadDesign {
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name          String         @unique
-  uploadDesigns UploadDesign[]
+  name String @unique
 }
 
 model SubFolders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name          String         @unique
-  uploadDesigns UploadDesign[]
+  name String @unique
 }
 
 model Industrys {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name          String[]        @unique
-  uploadDesigns UploadDesign[]
+  name String[] 
 }
 
 model Designs {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name          String[]        @unique
-  uploadDesigns UploadDesign[]
+  name String[]  
 }
 
 model desigserialNumberGenerator {

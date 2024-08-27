@@ -28,11 +28,6 @@ export const UploadDesign = async (req: Request, res: Response) => {
             specialSerialCodeGenarator = designSerialGenerator(convertedSerialUpdateNumber);
         }
 
-        // Check or create entities
-        await findOrCreateEntity(prisma.folders, { name: validatedData.folder }, { name: validatedData.folder });
-        await findOrCreateEntity(prisma.subFolders, { name: validatedData.subFolder }, { name: validatedData.subFolder });
-        await findOrCreateEntity(prisma.industrys, { name: validatedData.industries }, { name: validatedData.industries });
-        await findOrCreateEntity(prisma.designs, { name: validatedData.designs }, { name: validatedData.designs });
 
 
         // Create UploadDesign in the database
@@ -55,7 +50,19 @@ export const UploadDesign = async (req: Request, res: Response) => {
             }
         });
 
-
+        // Check or create entities
+        await findOrCreateEntity(prisma.folders, { name: validatedData.folder }, { name: validatedData.folder });
+        await findOrCreateEntity(prisma.subFolders, { name: validatedData.subFolder }, { name: validatedData.subFolder });
+        await prisma.industrys.create({
+            data: {
+                name: validatedData.industries
+            }
+        })
+        await prisma.designs.create({
+            data: {
+                name: validatedData.designs
+            }
+        })
 
 
         await prisma.desigserialNumberGenerator.create({
@@ -128,8 +135,6 @@ const deleteDesign = async (req: Request, res: Response) => {
         // Check if the design exists in the database
         const design = await prisma.uploadDesign.delete({
             where: { id: id },
-            include: { Designs: true, folders: true, Industrys: true, SubFolders: true },
-
         });
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,

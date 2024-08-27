@@ -26,6 +26,7 @@ const getByname = async (req: Request, res: Response) => {
                     hasSome: name, // This filters for records where industrys contains any of the values in the name array
                 },
             },
+            orderBy: { id: 'desc' }
         });
 
         if (findByName.length === 0) {
@@ -68,7 +69,7 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.industrys.findMany({ select: { name: true } });
+        const findAll = await prisma.industrys.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
 
         // Send success response with retrieved data
         return sendResponse<any>(res, {

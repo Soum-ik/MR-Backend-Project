@@ -18,6 +18,7 @@ const getByname = async (req: Request, res: Response) => {
 
         const findByName = await prisma.uploadDesign.findMany({
             where: { folder: name },
+            orderBy: { id: 'desc' }
         });
 
 
@@ -62,7 +63,7 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.folders.findMany({ select: { name: true } });
+        const findAll = await prisma.folders.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
 
         // Send success response with retrieved data
         return sendResponse<any>(res, {
