@@ -1,36 +1,16 @@
 import { prisma } from "../../libs/prismaHelper";
 
+// Helper function to check if an entity exists, and create it if it doesn't
+export async function findOrCreateEntity<T>(
+    model: any,
+    whereCondition: any,
+    createData: any
+): Promise<T> {
+    let entity = await model.findUnique({ where: whereCondition });
 
-export async function checkNameExists(
-    tableName: 'folders' | 'subFolders' | 'designs' | 'industries',
-    name: string
-): Promise<boolean> {
-    let result;
-
-    switch (tableName) {
-        case 'folders':
-            result = await prisma.folders.findUnique({
-                where: { name: name },
-            });
-            break;
-        case 'subFolders':
-            result = await prisma.subFolders.findUnique({
-                where: { name: name },
-            });
-            break;
-        case 'designs':
-            result = await prisma.designs.findUnique({
-                where: { name: name },
-            });
-            break;
-        case 'industries':
-            result = await prisma.industries.findUnique({
-                where: { name: name },
-            });
-            break;
-        default:
-            throw new Error(`Unknown table: ${tableName}`);
+    if (!entity) {
+        entity = await model.create({ data: createData });
     }
 
-    return result !== null;
+    return entity;
 }

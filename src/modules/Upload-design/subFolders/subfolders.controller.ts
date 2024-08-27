@@ -5,7 +5,7 @@ import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
 
 const getByNameSchema = z.object({
-    name: z.string().nonempty({ message: 'Folder name is required' }),
+    name: z.string().nonempty({ message: 'Sub Folder name is required' }),
 });
 
 const getByname = async (req: Request, res: Response) => {
@@ -13,11 +13,8 @@ const getByname = async (req: Request, res: Response) => {
         // Validate the query using Zod
         const { name } = getByNameSchema.parse(req.query);
 
-        console.log(name, 'chekcing the name');
-
-
         const findByName = await prisma.uploadDesign.findMany({
-            where: { folder: name },
+            where: { subFolder: name },
         });
 
 
@@ -62,7 +59,7 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.folders.findMany({ select: { name: true } });
+        const findAll = await prisma.subFolders.findMany({ select: { name: true } });
 
         // Send success response with retrieved data
         return sendResponse<any>(res, {
@@ -95,6 +92,6 @@ const getAll = async (req: Request, res: Response) => {
     }
 }
 
-export const folder = {
+export const Subfolder = {
     getByname, getAll
 };

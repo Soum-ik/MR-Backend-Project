@@ -4,30 +4,36 @@ import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
 
+
 const getByNameSchema = z.object({
-    name: z.string().nonempty({ message: 'Folder name is required' }),
+    name: z.union([z.string(), z.array(z.string())]),
 });
 
 const getByname = async (req: Request, res: Response) => {
     try {
         // Validate the query using Zod
-        const { name } = getByNameSchema.parse(req.query);
+        let { name } = getByNameSchema.parse(req.query);
 
-        console.log(name, 'chekcing the name');
+        // Ensure that name is an array, even if a single string is passed
+        if (typeof name === 'string') {
+            name = [name]; // Convert single string to an array
+        }
 
-
+        // Use Prisma to find records where the industrys array contains any of the values in the name array
         const findByName = await prisma.uploadDesign.findMany({
-            where: { folder: name },
+            where: {
+                industrys: {
+                    hasSome: name, // This filters for records where industrys contains any of the values in the name array
+                },
+            },
         });
-
-
 
         if (findByName.length === 0) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.NOT_FOUND,
                 success: false,
                 data: null,
-                message: `Folders are not found`,
+                message: `Industry not found`,
             });
         }
 
@@ -35,7 +41,7 @@ const getByname = async (req: Request, res: Response) => {
             statusCode: httpStatus.OK,
             success: true,
             data: findByName,
-            message: `Folders retrieved successfully`,
+            message: `Industry retrieved successfully`,
         });
 
     } catch (error) {
@@ -62,7 +68,7 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.folders.findMany({ select: { name: true } });
+        const findAll = await prisma.industrys.findMany({ select: { name: true } });
 
         // Send success response with retrieved data
         return sendResponse<any>(res, {
@@ -95,6 +101,6 @@ const getAll = async (req: Request, res: Response) => {
     }
 }
 
-export const folder = {
+export const Industrys = {
     getByname, getAll
 };
