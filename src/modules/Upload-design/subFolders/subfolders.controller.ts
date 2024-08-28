@@ -3,10 +3,9 @@ import httpStatus from 'http-status';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
-import { DataItem } from '../upload.inteface';
 
 const getByNameSchema = z.object({
-    name: z.string().nonempty({ message: 'Folder name is required' }),
+    name: z.string().nonempty({ message: 'Sub Folder name is required' }),
 });
 
 const getByname = async (req: Request, res: Response) => {
@@ -14,16 +13,9 @@ const getByname = async (req: Request, res: Response) => {
         // Validate the query using Zod
         const { name } = getByNameSchema.parse(req.query);
 
-        console.log(name, 'chekcing the name');
-
-
         const findByName = await prisma.uploadDesign.findMany({
-            where: { folder: name },
-            orderBy: { id: 'desc' }
+            where: { subFolder: name },  orderBy: { id: 'desc' } 
         });
-
-
-
 
 
 
@@ -67,9 +59,8 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.folders.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
-    
-        // const extractDatas = extractNames(findAll)
+        const findAll = await prisma.subFolders.findMany({ select: { name: true },  orderBy: { id: 'desc' }  });
+
         // Send success response with retrieved data
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
@@ -101,6 +92,6 @@ const getAll = async (req: Request, res: Response) => {
     }
 }
 
-export const folder = {
+export const Subfolder = {
     getByname, getAll
 };

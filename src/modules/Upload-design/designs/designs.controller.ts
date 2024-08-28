@@ -6,24 +6,27 @@ import { z } from 'zod';
 import { DataItem } from '../upload.inteface';
 
 const getByNameSchema = z.object({
-    name: z.string().nonempty({ message: 'Folder name is required' }),
+    name: z.union([z.string(), z.array(z.string())]),
 });
 
 const getByname = async (req: Request, res: Response) => {
     try {
         // Validate the query using Zod
-        const { name } = getByNameSchema.parse(req.query);
+        let { name } = getByNameSchema.parse(req.query);
 
-        console.log(name, 'chekcing the name');
+        // Ensure that name is an array, even if a single string is passed
+        if (typeof name === 'string') {
+            name = [name]; // Convert single string to an array
+        }
 
 
         const findByName = await prisma.uploadDesign.findMany({
-            where: { folder: name },
-            orderBy: { id: 'desc' }
+            where: {
+                designs: {
+                    hasSome: name
+                }
+            }, orderBy: { id: 'desc' }
         });
-
-
-
 
 
 
@@ -67,15 +70,21 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.folders.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
-    
-        // const extractDatas = extractNames(findAll)
+        const findAll = await prisma.designs.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
+
+
+        function extractNames(data: DataItem[]): string[] {
+            const names = data.flatMap(item => item.name); // Flatten all 'name' arrays into one array
+            return [...new Set(names)]; // Remove duplicates using a Set and convert it back to an array
+        }
+        const extractDatas = extractNames(findAll)
+
         // Send success response with retrieved data
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
             success: true,
-            data: findAll,
-            message: `Folders retrieved successfully`,
+            data: extractDatas,
+            message: `Designs retrieved successfully`,
         });
 
     } catch (error) {
@@ -101,6 +110,6 @@ const getAll = async (req: Request, res: Response) => {
     }
 }
 
-export const folder = {
+export const Designs = {
     getByname, getAll
 };
