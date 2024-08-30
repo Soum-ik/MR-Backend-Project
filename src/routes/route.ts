@@ -8,6 +8,7 @@ import { FolderRouter } from '../modules/Upload-design/folders/folders.route';
 import { SubFolderRouter } from '../modules/Upload-design/subFolders/subfolders.route';
 import { IndustrysRoute } from '../modules/Upload-design/industries/industries.route';
 import { DesignsRoute } from '../modules/Upload-design/designs/designs.route';
+import { createProjectRoute } from '../modules/create-project-admin/createProject.route';
 const router = express.Router()
 
 
@@ -30,7 +31,7 @@ router.use('/folder', FolderRouter)
 router.use('/subFolderRouter', SubFolderRouter)
 router.use('/industrys', IndustrysRoute)
 router.use('/designs', DesignsRoute)
-
+router.use('/create-project', createProjectRoute)
 
 export default router
 

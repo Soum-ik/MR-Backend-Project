@@ -52,47 +52,45 @@ model SocialMediaLinks {
   userId    String  @unique
   user      User    @relation(fields: [userId], references: [id])
 
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
   @@map("SocialMediaLinks")
 }
 
-// model CreateProject {
-//   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
-//   projectImage            String?
-//   originalAmount          Int?
-//   offerAmount             Int?
-//   extraFastDelivery       Int?
-//   extraFastDeliveryAmount Int?
-//   providedSource          String[] @default([])
-//   requirement             String[] @default([])
+model CreateProject {
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectImage            String?
+  originalAmount          String?
+  offerAmount             String?
+  delivery                String?
+  extraFastDelivery       String?
+  extraFastDeliveryAmount String?
+  bullPoints              String[] @default([])
+  requirements            String[] @default([])
 
-//   userId String
-//   user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  freeDesignName        String
+  freeDesignTypographys String[] @default([])
 
-//   designId String? @db.ObjectId
-//   // Design   Design? @relation(fields: [designId], references: [id], onUpdate: Cascade, onDelete: Restrict) // Fixed redundant Design relation
+  createdAt            DateTime               @default(now())
+  updateAt             DateTime               @updatedAt
+  CreateProjectDesigns CreateProjectDesigns[]
 
-//   @@map("CreateProjectAdmin")
-// }
+  @@map("CreateProjectAdmin")
+}
 
-// model Design {
-//   id   String @id @default(auto()) @map("_id") @db.ObjectId
-//   name String // e.g., "Door Hanger", "Poster", etc.
+model CreateProjectDesigns {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-//   CreateProjects CreateProject[] // Fixed the relation to be plural for multiple projects
+  designName       String?
+  designTypogrphys String[] @default([])
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
+  createProjectId String        @db.ObjectId
+  createProject   CreateProject @relation(fields: [createProjectId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
-//   DesignOptions DesignOption[] // Pluralized for clarity
-// }
-
-// model DesignOption {
-//   id   String   @id @default(auto()) @map("_id") @db.ObjectId
-//   type String[]
-
-//   designId String
-//   design   Design @relation(fields: [designId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-// }
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+}
 
 model Category {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
@@ -101,19 +99,24 @@ model Category {
   bulletPoint  String[]      @default([])
   requirements String[]      @default([])
   subCategory  subCategory[]
+  createdAt    DateTime      @default(now())
+  updateAt     DateTime      @updatedAt
 
   @@map("Categorys")
 }
 
 model subCategory {
-  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                  String  @id @default(auto()) @map("_id") @db.ObjectId
   subTitle            String?
   subAmount           String?
   regularDeliveryDays String?
   fastDeliveryDays    String?
   fastDeliveryPrice   String?
-  categoryId          String   @db.ObjectId
-  category            Category @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  categoryId          String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  category  Category @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 }
 
 model UploadDesign {
@@ -129,6 +132,8 @@ model UploadDesign {
   images         Json[]
   tags           String[] @default([])
   relatedDesigns String[] @default([])
+  createdAt      DateTime @default(now())
+  updateAt       DateTime @updatedAt
 
   folder String?
   // folders Folders? @relation(fields: [folder], references: [name], onUpdate: Cascade, onDelete: Restrict)
@@ -148,35 +153,47 @@ model UploadDesign {
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name String @unique
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
 }
 
 model SubFolders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name String @unique
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
 }
 
 model Industrys {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name String[] 
+  name      String[]
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
 }
 
 model Designs {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name String[]  
+  name      String[]
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
 }
 
 model desigserialNumberGenerator {
-  id           String  @id @default(auto()) @map("_id") @db.ObjectId
-  serialnumber String? @unique
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  serialnumber String?  @unique
+  createdAt    DateTime @default(now())
+  updateAt     DateTime @updatedAt
 }
 
 model projectSerialNumberGenerator {
-  id           String  @id @default(auto()) @map("_id") @db.ObjectId
-  serialnumber String? @unique
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  serialnumber String?  @unique
+  createdAt    DateTime @default(now())
+  updateAt     DateTime @updatedAt
 }
 
 enum Role {

@@ -197,7 +197,7 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
                 bulletPoint: validatedData.bulletPoint,
                 requirements: validatedData.requirements,
             },
-            include: { subCategory: true }, // Include subCategory in the response
+            
         });
 
         // Send success response
