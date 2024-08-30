@@ -25,7 +25,7 @@ export const createProjectSchema = z.object({
 });
 
 export const designs = z.object({
-  id: z.string(), // id is required during updates
+  id: z.string().optional(), // id is required during updates
   designName: z.string(),
   designTypogrphys: z.array(z.string()).default([]),
 })
