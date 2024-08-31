@@ -72,24 +72,12 @@ model CreateProject {
   freeDesignName        String
   freeDesignTypographys String[] @default([])
 
-  createdAt            DateTime               @default(now())
-  updateAt             DateTime               @updatedAt
-  CreateProjectDesigns CreateProjectDesigns[]
-
-  @@map("CreateProjectAdmin")
-}
-
-model CreateProjectDesigns {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  designName       String?
-  designTypogrphys String[] @default([])
-
-  createProjectId String        @db.ObjectId
-  createProject   CreateProject @relation(fields: [createProjectId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
+
+  designs Json[] @default([])
+
+  @@map("CreateProjectAdmin")
 }
 
 model Category {

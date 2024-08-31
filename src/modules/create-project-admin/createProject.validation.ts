@@ -3,6 +3,7 @@
 import { z } from 'zod';
 
 export const createProjectSchema = z.object({
+  id: z.string().optional(),
   projectImage: z.string().url().optional(),
   originalAmount: z.string().optional(),
   offerAmount: z.string().optional(),
@@ -14,14 +15,10 @@ export const createProjectSchema = z.object({
   freeDesignName: z.string(),
   freeDesignTypographys: z.array(z.string()).default([]),
   // Add optional CreateProjectDesign fields if applicable
-  CreateProjectDesigns: z
-    .array(
-      z.object({
-        designName: z.string().optional(),
-        designTypogrphys: z.array(z.string()).default([]),
-      })
-    )
-    .optional(),
+  designs: z.array(z.object({
+    designName: z.string(),
+    designView: z.array(z.string()).default([]),
+  }))
 });
 
 export const designs = z.object({

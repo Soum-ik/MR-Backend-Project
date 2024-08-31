@@ -1,8 +1,9 @@
+import { verifyToken } from './../../libs/authHelper';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
-import { z } from 'zod';
+import { date, z } from 'zod';
 import { createProjectSchema, updateProjectSchema, designs } from './createProject.validation';
 import { Prisma } from '@prisma/client';
 
@@ -17,28 +18,32 @@ const createProject = async (req: Request, res: Response) => {
         // Validate the request body using Zod
         const validatedBody = createProjectSchema.parse(req.body);
 
-        // Extract CreateProjectDesign from the validatedBody
-        const { CreateProjectDesigns, ...projectData } = validatedBody;
+        // Check if a project already exists (you should add a specific condition in the where clause)
+        const findProject = await prisma.createProject.findFirst();
 
-        // Create the project in the database using Prisma
-        const newProject = await prisma.createProject.create({
-            data: {
-                ...projectData, // Spread the projectData to include all project fields
-                CreateProjectDesigns: {
-                    create: CreateProjectDesigns ?? [], // Handle creation of related designs if provided
+        let project;
+
+        if (findProject?.id) {
+            // Update the existing project
+            project = await prisma.createProject.update({
+                where: {
+                    id: findProject.id
                 },
-            },
-            include: {
-                CreateProjectDesigns: true, // Include related designs in the response
-            },
-        });
+                data: validatedBody,
+            });
+        } else {
+            // Create a new project if it doesn't exist
+            project = await prisma.createProject.create({
+                data: validatedBody,
+            });
+        }
 
-        // Respond with the created project data
+        // Respond with the created or updated project data
         return sendResponse(res, {
             statusCode: httpStatus.CREATED,
             success: true,
-            data: newProject,
-            message: `Project created successfully.`,
+            message: findProject?.id ? 'Project updated successfully.' : 'Project created successfully.',
+            data: project,
         });
     } catch (error) {
         // Handle validation errors
@@ -69,9 +74,6 @@ const deleteProject = async (req: Request, res: Response) => {
         // Check if the project exists
         const existingProject = await prisma.createProject.findUnique({
             where: { id },
-            include: {
-                CreateProjectDesigns: true, // Include related designs
-            },
         });
 
         if (!existingProject) {
@@ -82,10 +84,7 @@ const deleteProject = async (req: Request, res: Response) => {
             });
         }
 
-        // Delete related designs first
-        await prisma.createProjectDesigns.deleteMany({
-            where: { createProjectId: id },
-        });
+
 
         // Delete the project
         await prisma.createProject.delete({
@@ -110,56 +109,10 @@ const deleteProject = async (req: Request, res: Response) => {
 
 
 
-const getProjectById = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
-
-        // Fetch the project by ID
-        const project = await prisma.createProject.findUnique({
-            where: { id },
-            include: {
-                CreateProjectDesigns: true, // Include related designs if any
-            },
-        });
-
-        if (!project) {
-            return sendResponse(res, {
-                statusCode: httpStatus.NOT_FOUND,
-                success: false,
-                message: `Project with ID ${id} not found.`,
-            });
-        }
-
-        // Respond with the project data
-        return sendResponse(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            data: project,
-            message: 'Project fetched successfully.',
-        });
-    } catch (error) {
-        console.error("Error in getProjectById:", error);
-        return sendResponse(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            message: 'Internal server error',
-        });
-    }
-};
-
-
-
 const getAllProjects = async (req: Request, res: Response) => {
     try {
         // Fetch all projects
-        const projects = await prisma.createProject.findMany({
-            include: {
-                CreateProjectDesigns: true, // Include related designs if any
-            },
-            orderBy: {
-                id: 'desc'
-            }
-        });
+        const projects = await prisma.createProject.findMany()
 
         // Respond with the list of projects
         return sendResponse(res, {
@@ -179,120 +132,120 @@ const getAllProjects = async (req: Request, res: Response) => {
 };
 
 
-const updateProject = async (req: Request, res: Response) => {
-    try {
-        // Validate the request body using Zod
-        const validatedBody = createProjectSchemaWithDesigns.parse(req.body);
+// const updateProject = async (req: Request, res: Response) => {
+//     try {
+//         // Validate the request body using Zod
+//         const validatedBody = createProjectSchemaWithDesigns.parse(req.body);
 
-        // Extract project ID from request parameters
-        const projectId = req.params.projectId;
-        if (!projectId) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.BAD_REQUEST,
-                success: false,
-                message: 'Project ID is required.',
-            });
-        }
+//         // Extract project ID from request parameters
+//         const projectId = req.params.projectId;
+//         if (!projectId) {
+//             return sendResponse<any>(res, {
+//                 statusCode: httpStatus.BAD_REQUEST,
+//                 success: false,
+//                 message: 'Project ID is required.',
+//             });
+//         }
 
-        // Fetch the existing project to ensure it exists
-        const existingProject = await prisma.createProject.findUnique({
-            where: { id: projectId },
-            include: { CreateProjectDesigns: true },
-        });
+//         // Fetch the existing project to ensure it exists
+//         const existingProject = await prisma.createProject.findUnique({
+//             where: { id: projectId },
+//             include: { CreateProjectDesigns: true },
+//         });
 
-        if (!existingProject) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.NOT_FOUND,
-                success: false,
-                message: 'Project not found',
-            });
-        }
+//         if (!existingProject) {
+//             return sendResponse<any>(res, {
+//                 statusCode: httpStatus.NOT_FOUND,
+//                 success: false,
+//                 message: 'Project not found',
+//             });
+//         }
 
-        // Prepare operations for CreateProjectDesigns
-        const createProjectDesignsOperations = validatedBody.CreateProjectDesigns?.map(sub => {
-            if (sub.id) {
-                // Update existing design
-                return prisma.createProjectDesigns.update({
-                    where: { id: sub.id },
-                    data: {
-                        designName: sub.designName,
-                        designTypogrphys: sub.designTypogrphys,
-                        createProjectId: projectId, // Assign the parent project ID
-                    },
-                });
-            } else {
-                // Create new design
-                return prisma.createProjectDesigns.create({
-                    data: {
-                        designName: sub.designName,
-                        designTypogrphys: sub.designTypogrphys,
-                        createProjectId: projectId, // Assign the parent project ID
-                    },
-                });
-            }
-        }) || []; // Fallback to empty array if CreateProjectDesigns is undefined
+//         // Prepare operations for CreateProjectDesigns
+//         const createProjectDesignsOperations = validatedBody.CreateProjectDesigns?.map(sub => {
+//             if (sub.id) {
+//                 // Update existing design
+//                 return prisma.createProjectDesigns.update({
+//                     where: { id: sub.id },
+//                     data: {
+//                         designName: sub.designName,
+//                         designTypogrphys: sub.designTypogrphys,
+//                         createProjectId: projectId, // Assign the parent project ID
+//                     },
+//                 });
+//             } else {
+//                 // Create new design
+//                 return prisma.createProjectDesigns.create({
+//                     data: {
+//                         designName: sub.designName,
+//                         designTypogrphys: sub.designTypogrphys,
+//                         createProjectId: projectId, // Assign the parent project ID
+//                     },
+//                 });
+//             }
+//         }) || []; // Fallback to empty array if CreateProjectDesigns is undefined
 
-        // Execute design operations
-        const updatedCreateProjectDesigns = await Promise.all(createProjectDesignsOperations);
+//         // Execute design operations
+//         const updatedCreateProjectDesigns = await Promise.all(createProjectDesignsOperations);
 
-        // Update the main project
-        const updatedProject = await prisma.createProject.update({
-            where: { id: projectId },
-            data: {
-                bullPoints: validatedBody.bullPoints,
-                delivery: validatedBody.delivery,
-                extraFastDelivery: validatedBody.extraFastDelivery,
-                requirements: validatedBody.requirements,
-                offerAmount: validatedBody.offerAmount,
-                projectImage: validatedBody.projectImage,
-                extraFastDeliveryAmount: validatedBody.extraFastDeliveryAmount,
-                originalAmount: validatedBody.originalAmount,
-                freeDesignName: validatedBody.freeDesignName,
-                freeDesignTypographys: validatedBody.freeDesignTypographys,
-            },
-        });
+//         // Update the main project
+//         const updatedProject = await prisma.createProject.update({
+//             where: { id: projectId },
+//             data: {
+//                 bullPoints: validatedBody.bullPoints,
+//                 delivery: validatedBody.delivery,
+//                 extraFastDelivery: validatedBody.extraFastDelivery,
+//                 requirements: validatedBody.requirements,
+//                 offerAmount: validatedBody.offerAmount,
+//                 projectImage: validatedBody.projectImage,
+//                 extraFastDeliveryAmount: validatedBody.extraFastDeliveryAmount,
+//                 originalAmount: validatedBody.originalAmount,
+//                 freeDesignName: validatedBody.freeDesignName,
+//                 freeDesignTypographys: validatedBody.freeDesignTypographys,
+//             },
+//         });
 
-        // Respond with the updated project data
-        return sendResponse(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            data: {
-                ...updatedProject,
-                CreateProjectDesigns: updatedCreateProjectDesigns,
-            },
-            message: 'Project updated successfully.',
-        });
-    } catch (error) {
-        // Handle validation errors
-        if (error instanceof z.ZodError) {
-            return sendResponse(res, {
-                statusCode: httpStatus.BAD_REQUEST,
-                success: false,
-                message: 'Validation failed',
-                data: error.errors,
-            });
-        }
+//         // Respond with the updated project data
+//         return sendResponse(res, {
+//             statusCode: httpStatus.OK,
+//             success: true,
+//             data: {
+//                 ...updatedProject,
+//                 CreateProjectDesigns: updatedCreateProjectDesigns,
+//             },
+//             message: 'Project updated successfully.',
+//         });
+//     } catch (error) {
+//         // Handle validation errors
+//         if (error instanceof z.ZodError) {
+//             return sendResponse(res, {
+//                 statusCode: httpStatus.BAD_REQUEST,
+//                 success: false,
+//                 message: 'Validation failed',
+//                 data: error.errors,
+//             });
+//         }
 
-        // Handle Prisma-related errors
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            return sendResponse(res, {
-                statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-                success: false,
-                message: `Prisma error: ${error.message}`,
-            });
-        }
+//         // Handle Prisma-related errors
+//         if (error instanceof Prisma.PrismaClientKnownRequestError) {
+//             return sendResponse(res, {
+//                 statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+//                 success: false,
+//                 message: `Prisma error: ${error.message}`,
+//             });
+//         }
 
-        // Handle other errors
-        return sendResponse(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            message: 'Internal server error',
-        });
-    }
-};
+//         // Handle other errors
+//         return sendResponse(res, {
+//             statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+//             success: false,
+//             message: 'Internal server error',
+//         });
+//     }
+// };
 
 
 
 export const projects = {
-    createProject, deleteProject, getAllProjects, getProjectById, updateProject
+    createProject, deleteProject, getAllProjects,
 };
