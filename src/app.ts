@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import helmet from 'helmet';
 import { PORT } from './config/config';
 import router from './routes/route';
+import ServerlessHttp from 'serverless-http';
 
 // 
 const app: Application = express()
@@ -37,7 +38,7 @@ app.use(helmet({
 app.use('/api/v1', router)
 
 app.get('/', (req: Request, res: Response) => {
-    return res.json({message : "Hello world"})
+    return res.json({ message: "Hello world" })
 })
 
 // Middleware to handle CORS headers for unsupported routes
@@ -77,3 +78,5 @@ app.listen(PORT, async () => {
         process.exit(1);
     }
 });
+
+export const handler = ServerlessHttp(app);

@@ -5,9 +5,26 @@ import sendResponse from '../libs/sendResponse';
 
 
 
-const upsertSocialMediaLink = async (req: Request, res: Response) => {
+const   upsertSocialMediaLink = async (req: Request, res: Response) => {
+    if (!req.user || !req.user.email) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'User information is missing or email is required',
+        });
+    }
+    const user = req.user
+    const { email } = user
+    console.log(email);
 
-    const { email,
+    if (!email) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Email is required',
+        });
+    }
+    const {
         facebook,
         instagram,
         linkedin,
@@ -21,13 +38,7 @@ const upsertSocialMediaLink = async (req: Request, res: Response) => {
         nextdoor,
     } = req.body;
 
-    if (!email) {
-        return sendResponse(res, {
-            statusCode: httpStatus.BAD_REQUEST,
-            success: false,
-            message: 'Email is required to upsert social media links',
-        });
-    }
+
 
     try {
         // Find the user by email
@@ -93,14 +104,22 @@ const upsertSocialMediaLink = async (req: Request, res: Response) => {
 };
 
 const getSocialMediaLinks = async (req: Request, res: Response) => {
-    const { email } = req.params;
-    console.log(email);
-    
-    if (!email || typeof email !== 'string') {
-        return sendResponse(res, {
+    if (!req.user || !req.user.email) {
+        return sendResponse<any>(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
-            message: 'Valid email query parameter is required',
+            message: 'User information is missing or email is required',
+        });
+    }
+    const user = req.user
+    const { email } = user
+    console.log(email, 'heck');
+    
+    if (!email) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Email is required',
         });
     }
 
@@ -121,6 +140,9 @@ const getSocialMediaLinks = async (req: Request, res: Response) => {
         // Find social media links for the user
         const socialMediaLinks = await prisma.socialMediaLinks.findUnique({
             where: { userId: user.id },
+            include: {
+                user: true
+            }
         });
 
         if (!socialMediaLinks) {

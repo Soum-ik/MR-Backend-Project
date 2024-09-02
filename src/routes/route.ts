@@ -20,8 +20,9 @@ router.get('/verify-otp/:email', UserController.verifyOtp);
 router.put('/set-new-pass/', authenticateToken, UserController.setNewPass);
 router.get('/all-user/', UserController.getAllUser);
 router.post('/update-user/', UserController.updateUser);
-router.post('/social-media-link/', SocialMediaLinkController.upsertSocialMediaLink);
-router.get('/social-media-link/:email', SocialMediaLinkController.getSocialMediaLinks);
+
+router.post('/social-media-link/', authenticateToken, SocialMediaLinkController.upsertSocialMediaLink);
+router.get('/social-media-link/', authenticateToken, SocialMediaLinkController.getSocialMediaLinks);
 // middleware applyed
 router.get('/get-singel-user/', authenticateToken, UserController.getSingelUser);
 
@@ -34,4 +35,6 @@ router.use('/designs', DesignsRoute)
 router.use('/create-project', createProjectRoute)
 
 export default router
+
+
 
