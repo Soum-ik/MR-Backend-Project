@@ -5,7 +5,6 @@ import { prisma } from '../libs/prismaHelper';
 import { createToken } from '../libs/authHelper';
 import sendVeficationEmail from '../helper/email/emailSend';
 
-// types
 interface SignupRequestBody {
     country?: string;
     fullName?: string;
@@ -109,7 +108,22 @@ const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
         const { password, email } = req.body;
 
         // Find user by email and password
-        const user = await prisma.user.findUnique({ where: { email, password } });
+        const user = await prisma.user.findUnique({
+            where: { email, password }, select: {
+                address: true,
+                city: true,
+                country: true,
+                description: true,
+                email: true,
+                fullName: true,
+                id: true,
+                image: true,
+                industryName: true,
+                userName: true,
+                number: true,
+                SocialMediaLinks: true, role: true, language: true
+            }
+        });
 
         if (!user) {
             return sendResponse(res, {
@@ -236,7 +250,22 @@ const setNewPass = async (req: Request, res: Response) => {
     }
 }
 const getAllUser = async (req: Request, res: Response) => {
-    const allUser = await prisma.user.findMany()
+    const allUser = await prisma.user.findMany({
+        select: {
+            address: true,
+            city: true,
+            country: true,
+            description: true,
+            email: true,
+            fullName: true,
+            id: true,
+            image: true,
+            industryName: true,
+            userName: true,
+            number: true,
+            SocialMediaLinks: true, role: true, language: true
+        }
+    })
     return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, data: allUser, message: 'all user successfully get', })
 
 }
@@ -266,6 +295,20 @@ const updateUser = async (req: Request, res: Response) => {
                 language,
                 image, description
             },
+            select: {
+                address: true,
+                city: true,
+                country: true,
+                description: true,
+                email: true,
+                fullName: true,
+                id: true,
+                image: true,
+                industryName: true,
+                userName: true,
+                number: true,
+                SocialMediaLinks: true, role: true, language: true
+            }
         });
 
         console.log('User updated:', updatedUser);
@@ -307,7 +350,7 @@ const getSingelUser = async (req: AuthenticatedRequest, res: Response): Promise<
     }
 
     try {
-        const findByEmail = await prisma.user.findUnique({ where: { email } })
+        const findByEmail = await prisma.user.findUnique({ where: { email }, include: { SocialMediaLinks: true } })
         if (findByEmail) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.OK,
