@@ -8,9 +8,12 @@ service: mr-project
 provider:
   name: aws
   runtime: nodejs20.x
+  stage: dev
+  region: ap-south-1
 
 functions:
   api:
     handler: dist/app.handler
     events:
-      - httpApi: '*'
+      - http: ANY /
+      - http: 'ANY {proxy+}'

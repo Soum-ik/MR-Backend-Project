@@ -83,7 +83,7 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 success: true,
                 data: null,
                 message: `Something probelm in serial number`,
-            }); 
+            });
         }
 
 
@@ -235,6 +235,40 @@ export const UpdateDesign = async (req: Request, res: Response) => {
     }
 };
 
+
+const getSingelUploadDesign = async (req: Request, res: Response) => {
+    try {
+
+        // Find the existing design by designId
+        const { designId } = req.params;
+        const findall = await prisma.uploadDesign.findMany({
+            where: {
+                designId: designId
+            }
+        })
+        if (!findall) {
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+                success: false,
+                data: null,
+                message: `Upload design are not found!`,
+            });
+        }
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            data: findall,
+            message: `Get data successfully`,
+        });
+    } catch (error) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            data: error,
+            message: `Internal server error`,
+        });
+    }
+}
 export const uploaders = {
-    UploadDesign, getAllUploadDesign, deleteDesign, UpdateDesign
+    UploadDesign, getAllUploadDesign, deleteDesign, UpdateDesign, getSingelUploadDesign
 }
