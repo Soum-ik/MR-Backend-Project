@@ -9,6 +9,7 @@ import { SubFolderRouter } from '../modules/Upload-design/subFolders/subfolders.
 import { IndustrysRoute } from '../modules/Upload-design/industries/industries.route';
 import { DesignsRoute } from '../modules/Upload-design/designs/designs.route';
 import { createProjectRoute } from '../modules/create-project-admin/createProject.route';
+import { getTogetherRoute } from '../modules/Upload-design/together/together.route';
 const router = express.Router()
 
 
@@ -33,6 +34,8 @@ router.use('/subFolderRouter', SubFolderRouter)
 router.use('/industrys', IndustrysRoute)
 router.use('/designs', DesignsRoute)
 router.use('/create-offer-project', createProjectRoute)
+router.use('/getTogether', getTogetherRoute)
+
 
 export default router
 
