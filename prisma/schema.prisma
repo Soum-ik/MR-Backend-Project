@@ -58,7 +58,7 @@ model SocialMediaLinks {
   @@map("SocialMediaLinks")
 }
 
-model CreateProject {
+model CreateOfferProject {
   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
   projectImage            String?
   originalAmount          String?
@@ -77,7 +77,7 @@ model CreateProject {
 
   designs Json[] @default([])
 
-  @@map("CreateProjectAdmin")
+  @@map("CreateOfferProject")
 }
 
 model Category {

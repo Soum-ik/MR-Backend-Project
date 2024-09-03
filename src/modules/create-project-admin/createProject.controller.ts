@@ -19,13 +19,13 @@ const createProject = async (req: Request, res: Response) => {
         const validatedBody = createProjectSchema.parse(req.body);
 
         // Check if a project already exists (you should add a specific condition in the where clause)
-        const findProject = await prisma.createProject.findFirst();
+        const findProject = await prisma.createOfferProject.findFirst();
 
         let project;
 
         if (findProject?.id) {
             // Update the existing project
-            project = await prisma.createProject.update({
+            project = await prisma.createOfferProject.update({
                 where: {
                     id: findProject.id
                 },
@@ -33,7 +33,7 @@ const createProject = async (req: Request, res: Response) => {
             });
         } else {
             // Create a new project if it doesn't exist
-            project = await prisma.createProject.create({
+            project = await prisma.createOfferProject.create({
                 data: validatedBody,
             });
         }
@@ -72,7 +72,7 @@ const deleteProject = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         // Check if the project exists
-        const existingProject = await prisma.createProject.findUnique({
+        const existingProject = await prisma.createOfferProject.findUnique({
             where: { id },
         });
 
@@ -87,7 +87,7 @@ const deleteProject = async (req: Request, res: Response) => {
 
 
         // Delete the project
-        await prisma.createProject.delete({
+        await prisma.createOfferProject.delete({
             where: { id },
         });
 
@@ -112,7 +112,7 @@ const deleteProject = async (req: Request, res: Response) => {
 const getAllProjects = async (req: Request, res: Response) => {
     try {
         // Fetch all projects
-        const projects = await prisma.createProject.findMany()
+        const projects = await prisma.createOfferProject.findMany()
 
         // Respond with the list of projects
         return sendResponse(res, {
@@ -148,7 +148,7 @@ const getAllProjects = async (req: Request, res: Response) => {
 //         }
 
 //         // Fetch the existing project to ensure it exists
-//         const existingProject = await prisma.createProject.findUnique({
+//         const existingProject = await prisma.createOfferProject.findUnique({
 //             where: { id: projectId },
 //             include: { CreateProjectDesigns: true },
 //         });
@@ -189,7 +189,7 @@ const getAllProjects = async (req: Request, res: Response) => {
 //         const updatedCreateProjectDesigns = await Promise.all(createProjectDesignsOperations);
 
 //         // Update the main project
-//         const updatedProject = await prisma.createProject.update({
+//         const updatedProject = await prisma.createOfferProject.update({
 //             where: { id: projectId },
 //             data: {
 //                 bullPoints: validatedBody.bullPoints,

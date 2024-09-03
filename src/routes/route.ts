@@ -32,7 +32,7 @@ router.use('/folder', FolderRouter)
 router.use('/subFolderRouter', SubFolderRouter)
 router.use('/industrys', IndustrysRoute)
 router.use('/designs', DesignsRoute)
-router.use('/create-project', createProjectRoute)
+router.use('/create-offer-project', createProjectRoute)
 
 export default router
 
