@@ -60,7 +60,7 @@ model SocialMediaLinks {
 
 model CreateOfferProject {
   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
-  projectImage            String?
+  projectImage            Json?
   originalAmount          String?
   offerAmount             String?
   delivery                String?
