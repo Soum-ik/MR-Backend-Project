@@ -4,7 +4,10 @@ import { z } from 'zod';
 
 export const createProjectSchema = z.object({
   id: z.string().optional(),
-  projectImage: z.string().url().optional(),
+  projectImage: z.object({
+    name : z.string(),
+    url : z.string()
+  }).optional(),
   originalAmount: z.string().optional(),
   offerAmount: z.string().optional(),
   delivery: z.string().optional(),
