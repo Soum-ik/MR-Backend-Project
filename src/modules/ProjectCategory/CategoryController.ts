@@ -5,6 +5,7 @@ import sendResponse from '../../libs/sendResponse';
 import { z } from 'zod';
 import { categorySchema, subCategorySchema } from './CategoryValidation';
 import { Prisma } from '@prisma/client';
+import { getPaginationOptions } from '../../paginations/paginations';
 // Assuming you have the Zod schemas already defined
 
 
@@ -50,8 +51,11 @@ const createCategoryWithSubCategory = async (req: Request, res: Response) => {
 
 const getAllCategories = async (req: Request, res: Response) => {
     try {
+        // Get pagination and sorting options from the query params
+        const paginationOptions = getPaginationOptions(req.query);
         // Fetch all categories and include their associated subCategories
         const categories = await prisma.category.findMany({
+            ...paginationOptions,
             include: {
                 subCategory: true, // Include subCategory records
             },
@@ -197,7 +201,7 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
                 bulletPoint: validatedData.bulletPoint,
                 requirements: validatedData.requirements,
             },
-            
+
         });
 
         // Send success response

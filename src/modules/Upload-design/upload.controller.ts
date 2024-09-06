@@ -8,7 +8,7 @@ import httpStatus from 'http-status';
 import { getLastSerialNumber } from '../../libs/utlitys/desginNumber';
 import { designSerialGenerator } from '../../helper/SerialCodeGenerator/serialGenerator';
 import { findOrCreateEntity } from './upload.utlity';
-
+import { getPaginationOptions } from '../../paginations/paginations'
 
 export const UploadDesign = async (req: Request, res: Response) => {
     try {
@@ -111,7 +111,8 @@ export const UploadDesign = async (req: Request, res: Response) => {
 
 const getAllUploadDesign = async (req: Request, res: Response) => {
     try {
-        const findall = await prisma.uploadDesign.findMany({})
+        const paginationOptions = getPaginationOptions(req.query);
+        const findall = await prisma.uploadDesign.findMany({ ...paginationOptions })
         if (!findall) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.INTERNAL_SERVER_ERROR,

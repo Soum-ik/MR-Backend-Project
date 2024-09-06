@@ -4,6 +4,7 @@ import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
 import { DataItem } from '../upload.inteface';
+import { getPaginationOptions } from '../../../paginations/paginations';
 
 const getByNameSchema = z.object({
     name: z.union([z.string(), z.array(z.string())]),
@@ -69,9 +70,13 @@ const getByname = async (req: Request, res: Response) => {
 
 const getAll = async (req: Request, res: Response) => {
     try {
+        // Get pagination and sorting options from the query params
+        const paginationOptions = getPaginationOptions(req.query);
         // Fetch all folders from the database
-        const findAll = await prisma.designs.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
-
+        const findAll = await prisma.designs.findMany({
+            select: { name: true }, // Select only the 'name' field
+            ...paginationOptions,   // Add pagination options (skip, take, orderBy)
+        });
 
         function extractNames(data: DataItem[]): string[] {
             const names = data.flatMap(item => item.name); // Flatten all 'name' arrays into one array

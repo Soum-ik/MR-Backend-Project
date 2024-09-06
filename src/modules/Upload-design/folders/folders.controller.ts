@@ -68,7 +68,7 @@ const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
         const findAll = await prisma.folders.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
-    
+
         // const extractDatas = extractNames(findAll)
         // Send success response with retrieved data
         return sendResponse<any>(res, {

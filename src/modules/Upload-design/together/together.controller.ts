@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
+import { getPaginationOptions } from '../../../paginations/paginations';
 
 
 const getByNameSchema = z.object({
@@ -12,6 +13,7 @@ const getByNameSchema = z.object({
 
 const getTogether = async (req: Request, res: Response) => {
     try {
+
         // Validate the query using Zod
         let { design, industry } = getByNameSchema.parse(req.query);
 
@@ -22,6 +24,8 @@ const getTogether = async (req: Request, res: Response) => {
         if (typeof industry === 'string') {
             industry = [industry]; // Convert single string to an array
         }
+        // Get pagination and sorting options from the query params
+        const paginationOptions = getPaginationOptions(req.query);
 
 
         const data = await prisma.uploadDesign.findMany({
@@ -29,6 +33,7 @@ const getTogether = async (req: Request, res: Response) => {
                 designs: design ? { hasSome: design } : undefined,
                 industrys: industry ? { hasSome: industry } : undefined,
             },
+            ...paginationOptions
         });
 
 
