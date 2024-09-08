@@ -253,8 +253,6 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
 const updateAllCategory = async (req: Request, res: Response) => {
   const { items }: { items: any } = req.body;
   try {
-    // Use a transaction to update all items
-    // await prisma.$transaction(async (tx) => {
     for (const item of items) {
       await prisma.category.update({
         where: { id: item.id }, // Use the id to identify the item to update

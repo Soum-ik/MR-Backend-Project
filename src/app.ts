@@ -7,7 +7,7 @@ import router from './routes/route';
 import ServerlessHttp from 'serverless-http';
 
 // 
-const app: Application = express()
+export const app: Application = express()
 
 const corsOptions = {
     origin: [
@@ -65,7 +65,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     });
     next();
 });
-
 
 
 

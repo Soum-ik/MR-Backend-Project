@@ -263,7 +263,8 @@ const getAllUser = async (req: Request, res: Response) => {
             industryName: true,
             userName: true,
             number: true,
-            SocialMediaLinks: true, role: true, language: true
+            SocialMediaLinks: true, role: true, language: true,
+            createdAt : true, updateAt : true, otp : true
         }
     })
     return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, data: allUser, message: 'all user successfully get', })
