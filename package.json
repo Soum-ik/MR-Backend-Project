@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch run ./dist/app.js",
-    "build": "rimraf dist && tsc && prisma generate",
+    "build": "tsc",
     "start": " bun --watch run ./src/app.js"
   },
   "devDependencies": {

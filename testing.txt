@@ -1,3 +1,0 @@
-
-
-serverless config credentials --provider aws --key AKIAT7JJVHFUKF7JEXX6 --secret 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
