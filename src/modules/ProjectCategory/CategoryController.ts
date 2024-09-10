@@ -18,6 +18,16 @@ const createCategoryWithSubCategory = async (req: Request, res: Response) => {
     const validatedData = categoryWithSubCategorySchema.parse(req.body);
     console.log(validatedData, "validation data");
 
+    // Fetch the maximum order value from the database
+    const maxOrderResult = await prisma.category.aggregate({
+      _max: {
+        order: true,
+      },
+    });
+
+    // Determine the next order value
+    const nextOrder = (maxOrderResult._max.order ?? -1) + 1;
+
     // If validation passes, create the category and subCategories using Prisma
     const newCategory = await prisma.category.create({
       data: {
@@ -28,6 +38,7 @@ const createCategoryWithSubCategory = async (req: Request, res: Response) => {
         subCategory: {
           create: validatedData.subCategory, // Create associated subCategories
         },
+        order: nextOrder,
       },
       include: { subCategory: true }, // Include subCategory in the response
     });
@@ -67,6 +78,9 @@ const getAllCategories = async (req: Request, res: Response) => {
     // Fetch all categories and include their associated subCategories
     const categories = await prisma.category.findMany({
       ...paginationOptions,
+      orderBy: {
+        order: "asc", // Sorting by order in ascending order
+      },
       include: {
         subCategory: true, // Include subCategory records
       },

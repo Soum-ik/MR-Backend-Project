@@ -89,6 +89,7 @@ model Category {
   subCategory  subCategory[]
   createdAt    DateTime      @default(now())
   updateAt     DateTime      @updatedAt
+  order Int
 
   @@map("Categorys")
 }
