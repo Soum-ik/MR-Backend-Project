@@ -139,6 +139,17 @@ model UploadDesign {
   designId String @unique
 }
 
+//Start - Here You will get the schema for home page feature category reordering
+
+model FeatureAllFolder {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String   @unique
+  folder    String
+  order     Int
+}
+
+//End - Here You will get the schema for home page feature category reordering
+
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
