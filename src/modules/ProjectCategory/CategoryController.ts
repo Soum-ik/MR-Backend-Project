@@ -251,20 +251,57 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
 };
 
 const updateAllCategory = async (req: Request, res: Response) => {
-  const { items }: { items: any } = req.body;
+  const { items }: { items: any[] } = req.body;
+
+  // Validate input
+  if (!Array.isArray(items) || items.length === 0) {
+    return sendResponse<any>(res, {
+      statusCode: httpStatus.BAD_REQUEST,
+      success: false,
+      message: 'Invalid input: items must be a non-empty array',
+      data: null,
+    });
+  }
+
   try {
-    for (const item of items) {
-      await prisma.category.update({
-        where: { id: item.id }, // Use the id to identify the item to update
-        data: item, // Update the item with the full data object
-      });
-    }
-    // });
-    res.sendStatus(200);
+    const updatedCategories = await prisma.$transaction(
+      items.map(item =>
+        prisma.category.update({
+          where: { id: item.id },
+          data: {
+            categoryName: item.categoryName,
+            image: item.image,
+            bulletPoint: item.bulletPoint,
+            requirements: item.requirements,
+            subCategory: {
+              updateMany: item.subCategory.map((sub: { id: any; }) => ({
+                where: { id: sub.id },
+                data: sub,
+              })),
+            },
+          },
+        })
+      )
+    );
+
+    return sendResponse<any>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Categories updated successfully',
+      data: updatedCategories,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error updating items" });
+    console.error('Error updating categories:', error);
+
+    return sendResponse<any>(res, {
+      statusCode: httpStatus.BAD_GATEWAY,
+      success: false,
+      message: 'Error updating categories',
+      data: error,
+    });
   }
 };
+
 
 export const Category = {
   createCategoryWithSubCategory,
