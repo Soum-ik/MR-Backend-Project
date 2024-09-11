@@ -10,6 +10,8 @@ import { IndustrysRoute } from '../modules/Upload-design/industries/industries.r
 import { DesignsRoute } from '../modules/Upload-design/designs/designs.route';
 import { createProjectRoute } from '../modules/create-project-admin/createProject.route';
 import { getTogetherRoute } from '../modules/Upload-design/together/together.route';
+import { upload } from '../libs/utlitys/multer';
+import uploadImage from '../modules/uploadImage/uploadController';
 const router = express.Router()
 
 
@@ -36,6 +38,8 @@ router.use('/designs', DesignsRoute)
 router.use('/create-offer-project', createProjectRoute)
 router.use('/getTogether', getTogetherRoute)
 
+
+router.post('/upload-iamge', upload.single('fileName'), uploadImage)
 
 export default router
 
