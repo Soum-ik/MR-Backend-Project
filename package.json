@@ -3,7 +3,7 @@
   "module": "server.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch run ./dist/app.js",
+    "dev": "bun --watch run ./src/app.js",
     "build": "tsc",
     "start": " bun --watch run ./src/app.js"
   },
@@ -24,12 +24,14 @@
     "@types/nodemailer": "^6.4.15",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.4.0",
+    "colors": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "helmet": "^7.1.0",
     "http-status": "^1.7.4",
     "jsonwebtoken": "^9.0.2",
+    "moment": "^2.30.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.14",
     "prisma": "^5.18.0",

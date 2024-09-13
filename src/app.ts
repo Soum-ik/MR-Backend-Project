@@ -5,9 +5,16 @@ import helmet from 'helmet';
 import { PORT } from './config/config';
 import router from './routes/route';
 import ServerlessHttp from 'serverless-http';
-
+import socketServer from './socket/socket-server';
+import { createServer } from 'node:http'
 // 
 export const app: Application = express()
+
+const httpServer = createServer(app);
+
+// init socket server
+socketServer.registerSocketServer(httpServer);
+
 
 const corsOptions = {
     origin: [
@@ -18,6 +25,8 @@ const corsOptions = {
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
 };
+
+
 
 // middlewares
 app.use(cors(corsOptions));
@@ -68,7 +77,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 
 
-app.listen(PORT, async () => {
+httpServer.listen(PORT, async () => {
     try {
         // await dbConnection();
         console.log(`Application listening on port ${PORT}`);

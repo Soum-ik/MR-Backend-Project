@@ -12,6 +12,7 @@ import { createProjectRoute } from '../modules/create-project-admin/createProjec
 import { getTogetherRoute } from '../modules/Upload-design/together/together.route';
 import { upload } from '../libs/utlitys/multer';
 import uploadImage from '../modules/uploadImage/uploadController';
+
 const router = express.Router()
 
 
@@ -39,7 +40,7 @@ router.use('/create-offer-project', createProjectRoute)
 router.use('/getTogether', getTogetherRoute)
 
 
-router.post('/upload-iamge', upload.single('fileName'), uploadImage)
+router.post('/upload-iamge', upload.array('fileName', 10), uploadImage)
 
 export default router
 
