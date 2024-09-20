@@ -24,9 +24,14 @@ const addNewConnectedUser = ({
     role: string;
 }) => {
     connectedUsers.set(socketId, { userId, role, });
+    console.log(connectedUsers, 'testing');
     print.yellow('user connected 💥' + socketId);
 
 };
+
+
+
+
 // remove connected user
 const removeConnectedUser = async (socketId: string) => {
     if (connectedUsers.has(socketId)) {
@@ -58,7 +63,7 @@ const getOnlineUsers = () => {
         onlineUsers.push({
             socketId: key,
             userId: value.userId,
-            role: value.role, 
+            role: value.role,
         });
     });
 

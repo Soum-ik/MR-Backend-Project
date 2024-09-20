@@ -12,6 +12,9 @@ import { getTogetherRoute } from "../modules/Upload-design/together/together.rou
 import { UploadRoute } from "../modules/Upload-design/upload.route";
 import { createProjectRoute } from "../modules/create-project-admin/createProject.route";
 import uploadImage from "../modules/uploadImage/uploadController";
+import { startContact } from '../modules/contact/contact.controller'
+import { chating } from "../modules/chat/chat.controller";
+
 
 const router = express.Router();
 
@@ -44,6 +47,9 @@ router.use('/getTogether', getTogetherRoute)
 
 
 router.post('/upload-iamge', upload.any(), uploadImage)
+router.post('/contactForChat', authenticateToken, startContact)
+
+router.get('/avaiableforchat', chating.AvaiableForChat)
 
 
 export default router;

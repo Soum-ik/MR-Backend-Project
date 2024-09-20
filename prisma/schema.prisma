@@ -13,19 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
- 
-model Message {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  content    String
-  senderId   String   @db.ObjectId
-  receiverId String   @db.ObjectId
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-
-  @@map("Messages")
-}
-
 model User {
   id               String            @id @default(auto()) @map("_id") @db.ObjectId
   fullName         String?
@@ -45,12 +32,21 @@ model User {
   createdAt        DateTime          @default(now())
   updateAt         DateTime          @updatedAt
   SocialMediaLinks SocialMediaLinks?
-
-  // Relations for messages
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  contactForChat   contactForChat?
+  totalOrder       Int?              @default(0)
 
   @@map("Users")
+}
+
+model contactForChat {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String @unique
+  name          String
+  email         String
+  website       String
+  exampleDesign Json
+  message       String
+  user          User   @relation(fields: [userId], references: [id])
 }
 
 model SocialMediaLinks {

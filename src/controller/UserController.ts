@@ -340,7 +340,7 @@ const getSingelUser = async (req: AuthenticatedRequest, res: Response): Promise<
         });
     }
     const user = req.user
-    const { email } = user
+    const { email,  } = user
 
     if (!email) {
         return sendResponse<any>(res, {
