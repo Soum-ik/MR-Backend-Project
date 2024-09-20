@@ -13,6 +13,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+ 
+model Message {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  content    String
+  senderId   String   @db.ObjectId
+  receiverId String   @db.ObjectId
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@map("Messages")
+}
+
 model User {
   id               String            @id @default(auto()) @map("_id") @db.ObjectId
   fullName         String?
@@ -32,6 +45,10 @@ model User {
   createdAt        DateTime          @default(now())
   updateAt         DateTime          @updatedAt
   SocialMediaLinks SocialMediaLinks?
+
+  // Relations for messages
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 
   @@map("Users")
 }
@@ -89,7 +106,7 @@ model Category {
   subCategory  subCategory[]
   createdAt    DateTime      @default(now())
   updateAt     DateTime      @updatedAt
-  order Int
+  order        Int
 
   @@map("Categorys")
 }
@@ -142,10 +159,10 @@ model UploadDesign {
 //Start - Here You will get the schema for home page feature category reordering
 
 model FeatureAllFolder {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  slug      String   @unique
-  folder    String
-  order     Int
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  slug   String @unique
+  folder String
+  order  Int
 }
 
 //End - Here You will get the schema for home page feature category reordering

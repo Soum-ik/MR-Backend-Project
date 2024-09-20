@@ -1,5 +1,17 @@
 // multer-config.js
 
-import multer from 'multer'
-export const upload = multer({ dest: 'uploads/' }); // 'uploads/' is a temporary folder to store files
+import multer from "multer";
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const fileOriginalName = file.originalname;
+    cb(null, fileOriginalName);
+  },
+});
+
+export const upload = multer({ storage: storage });
+
+// export const upload = multer({ dest: 'uploads/' }); // 'uploads/' is a temporary folder to store files
