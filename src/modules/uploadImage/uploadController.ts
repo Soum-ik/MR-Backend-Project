@@ -20,6 +20,9 @@ const uploadImage = async (req: MulterRequest, res: Response) => {
       });
     }
 
+    console.log(req.files);
+    
+
     let filesArray: Express.Multer.File[] = [];
 
     // If req.files is an array

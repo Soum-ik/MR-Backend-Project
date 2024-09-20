@@ -40,7 +40,7 @@ router.use('/create-offer-project', createProjectRoute)
 router.use('/getTogether', getTogetherRoute)
 
 
-router.post('/upload-iamge', upload.array('fileName', 10), uploadImage)
+router.post('/upload-iamge', upload.any(), uploadImage)
 
 export default router
 
