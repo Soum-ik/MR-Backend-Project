@@ -10,11 +10,11 @@ import { IndustrysRoute } from "../modules/Upload-design/industries/industries.r
 import { SubFolderRouter } from "../modules/Upload-design/subFolders/subfolders.route";
 import { getTogetherRoute } from "../modules/Upload-design/together/together.route";
 import { UploadRoute } from "../modules/Upload-design/upload.route";
-import { createProjectRoute } from "../modules/create-project-admin/createProject.route";
-import uploadImage from "../modules/uploadImage/uploadController";
-import { startContact } from '../modules/contact/contact.controller'
 import { chating } from "../modules/chat/chat.controller";
-
+import { startContact } from "../modules/contact/contact.controller";
+import { createProjectRoute } from "../modules/create-project-admin/createProject.route";
+import { multiProjectRoute } from "../modules/multi-project/multiProject.route.js";
+import uploadImage from "../modules/uploadImage/uploadController";
 
 const router = express.Router();
 
@@ -34,22 +34,27 @@ router.get(
 );
 // middleware applyed
 
-router.get('/get-singel-user/', authenticateToken, UserController.getSingelUser);
+router.get(
+  "/get-singel-user/",
+  authenticateToken,
+  UserController.getSingelUser
+);
 
-router.use('/category', CategoryRoute)
-router.use('/upload', UploadRoute)
-router.use('/folder', FolderRouter)
-router.use('/subFolderRouter', SubFolderRouter)
-router.use('/industrys', IndustrysRoute)
-router.use('/designs', DesignsRoute)
-router.use('/create-offer-project', createProjectRoute)
-router.use('/getTogether', getTogetherRoute)
+router.use("/category", CategoryRoute);
+router.use("/upload", UploadRoute);
+router.use("/folder", FolderRouter);
+router.use("/subFolderRouter", SubFolderRouter);
+router.use("/industrys", IndustrysRoute);
+router.use("/designs", DesignsRoute);
+router.use("/create-offer-project", createProjectRoute);
+router.use("/getTogether", getTogetherRoute);
 
+router.post("/upload-image", upload.any(), uploadImage);
+router.post("/contactForChat", authenticateToken, startContact);
 
-router.post('/upload-iamge', upload.any(), uploadImage)
-router.post('/contactForChat', authenticateToken, startContact)
+router.get("/avaiableforchat", chating.AvaiableForChat);
 
-router.get('/avaiableforchat', chating.AvaiableForChat)
-
+//Multi-Project Route
+router.use("/multi-project", multiProjectRoute);
 
 export default router;

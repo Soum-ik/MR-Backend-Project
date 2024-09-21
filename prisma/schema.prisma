@@ -209,6 +209,17 @@ model projectSerialNumberGenerator {
   updateAt     DateTime @updatedAt
 }
 
+//Start - Here You will get the schema for multi-project
+
+model MultiProject {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectTitle  String
+  projectImage  Json     // Use Json to store image metadata
+  requirements  String[] // This will be stored as an array of strings
+}
+
+//End - Here You will get the schema for multi-project
+
 enum Role {
   ADMIN
   USER
