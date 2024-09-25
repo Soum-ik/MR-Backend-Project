@@ -29,20 +29,8 @@ const authSocket = async (socket: CustomSocket, next: (err?: any) => void) => {
                     message: 'Token is invalid',
                 });
             }
-
-            const { user_id, role, email } = decoded;
-
-            console.log(decoded);
-
-
-            const user = await prisma.user.findUnique({
-                where: { id: user_id, role, email },
-            });
-
-
-
             // Attach the decoded token data (user) to the socket object
-            socket.user = user as JwtPayload
+            socket.user = decoded
             next(); // Continue to the next middleware or handler
         } else {
             return sendSocketResponse(socket, {

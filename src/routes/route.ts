@@ -13,7 +13,7 @@ import { UploadRoute } from "../modules/Upload-design/upload.route";
 import { chating } from "../modules/chat/chat.controller";
 import { startContact } from "../modules/contact/contact.controller";
 import { createProjectRoute } from "../modules/create-project-admin/createProject.route";
-import { multiProjectRoute } from "../modules/multi-project/multiProject.route.js";
+// import { multiProjectRoute } from "../modules/multi-project/multiProject.route.js";
 import uploadImage from "../modules/uploadImage/uploadController";
 
 const router = express.Router();
@@ -31,6 +31,11 @@ router.get(
   "/social-media-link/",
   authenticateToken,
   SocialMediaLinkController.getSocialMediaLinks
+);
+router.post(
+  "/social-media-link/",
+  authenticateToken,
+  SocialMediaLinkController.upsertSocialMediaLink
 );
 // middleware applyed
 
@@ -55,6 +60,6 @@ router.post("/contactForChat", authenticateToken, startContact);
 router.get("/avaiableforchat", chating.AvaiableForChat);
 
 //Multi-Project Route
-router.use("/multi-project", multiProjectRoute);
+// router.use("/multi-project", multiProjectRoute);
 
 export default router;

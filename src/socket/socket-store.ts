@@ -23,14 +23,10 @@ const addNewConnectedUser = ({
     userId: number;
     role: string;
 }) => {
-    connectedUsers.set(socketId, { userId, role, });
-    console.log(connectedUsers, 'testing');
+    connectedUsers.set(socketId, { userId, role, })
     print.yellow('user connected 💥' + socketId);
 
 };
-
-
-
 
 // remove connected user
 const removeConnectedUser = async (socketId: string) => {
@@ -40,18 +36,8 @@ const removeConnectedUser = async (socketId: string) => {
         print.yellow('user disconnected 💥' + socketId);
     }
 };
-// get active connections
-const getActiveConnections = (userId: number): any[] => {
-    const activeConnections: any[] = [];
 
-    connectedUsers.forEach(function (value, key) {
-        if (value.userId === userId) {
-            activeConnections.push(key);
-        }
-    });
-    return activeConnections;
-};
-// get online users
+// Function to get online users
 const getOnlineUsers = () => {
     const onlineUsers: {
         socketId: string;
@@ -70,14 +56,14 @@ const getOnlineUsers = () => {
     return onlineUsers;
 };
 
+
 // socket store
 const socketStore = {
     addNewConnectedUser,
     removeConnectedUser,
-    getActiveConnections,
     setSocketServerInstance,
     getSocketServerInstance,
-    getOnlineUsers,
+    getOnlineUsers, 
 };
 
 export default socketStore;

@@ -5,7 +5,6 @@ import socketStore from "../socket-store";
 const newConnectionHandler = async (socket: Socket, io: any) => {
   print.green("user connected 💥" + socket.id);
   const userDetails = socket.user;
-  console.log(userDetails, 'use deatails');
 
   socket.on("message", (msg) => {
     console.log("Message received: " + JSON.stringify(msg));
@@ -14,7 +13,7 @@ const newConnectionHandler = async (socket: Socket, io: any) => {
 
   socketStore.addNewConnectedUser({
     socketId: socket.id,
-    userId: userDetails?.id,
+    userId: userDetails?.user_id,
     role: userDetails?.role,
   });
 };

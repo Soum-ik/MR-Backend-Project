@@ -1,12 +1,16 @@
 import { Server } from "http";
 import { Socket } from "socket.io";
 import disconnectHandler from "./handlers/disconnectHandler";
-// import { emitOnlineUsers } from './handlers/emitOnlineUserHandler';
 import { print } from "../helper/colorConsolePrint.ts/colorizedConsole";
 import { authSocket } from "../socket/middleware/authSocket";
 import newConnectionHandler from "./handlers/newConnectionHandler";
 
 import socketStore from "./socket-store";
+import messageHandler from "./handlers/adminMessageHandler";
+import adminMessageHandler from "./handlers/adminMessageHandler";
+import adminViewUsersHandler from "./handlers/adminViewUsersHandler";
+import userMessageHandler from "./handlers/userMessageToAdminHandler";
+import getOwnSocketIdHandler from "./handlers/getOwnSocketIdHandler";
 
 const registerSocketServer = (server: Server) => {
   const io = require("socket.io")(server, {
@@ -34,6 +38,13 @@ const registerSocketServer = (server: Server) => {
     // add connected user to online users list
     newConnectionHandler(socket, io);
 
+    // send message to user
+    adminMessageHandler(socket, io)
+    adminViewUsersHandler(socket, io)
+    userMessageHandler(socket, io)
+
+    // get your own socket id
+    getOwnSocketIdHandler(socket)
     // disconnect socket
     socket.on("disconnect", () => {
       // remove connected user from online users list

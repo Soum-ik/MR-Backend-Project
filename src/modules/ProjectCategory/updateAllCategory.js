@@ -1,6 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '../../libs/prismaHelper';
 
-const prisma = new PrismaClient();
+import { Request, Response } from "express";
+import httpStatus from "http-status";
+import { z } from "zod";
+import { prisma } from "../../libs/prismaHelper";
+import sendResponse from "../../libs/sendResponse";
+
 
 export default async function updateAllCategory(req, res) {
   if (req.method === "POST") {
