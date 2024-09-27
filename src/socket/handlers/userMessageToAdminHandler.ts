@@ -3,7 +3,7 @@ import socketStore from "../socket-store";
 
 const userMessageHandler = (socket: Socket, io: any) => {
     // Listen for a user message event
-    socket.on("user-message", (message: { text: string; userId: number }) => {
+    socket.on("user-message", (message) => {
         console.log(message, "check user message testing");
 
         const onlineUsers = socketStore.getOnlineUsers();
@@ -16,9 +16,8 @@ const userMessageHandler = (socket: Socket, io: any) => {
             // Emit the message to the admin's socket ID
             io.to(adminSocket.socketId).emit("message", {
                 from: message.userId,
-                text: message.text,
+                ...message
             });
-            console.log(`Message sent to admin from user ${message.userId}: ${message.text}`);
         } else {
             console.log("Admin is not online.");
         }
