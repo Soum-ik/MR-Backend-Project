@@ -34,8 +34,20 @@ model User {
   SocialMediaLinks SocialMediaLinks?
   contactForChat   contactForChat?
   totalOrder       Int?              @default(0)
+  QuickResponse    QuickResponse[]
 
   @@map("Users")
+}
+
+model QuickResponse {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  description String
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("quick_response")
 }
 
 model contactForChat {
@@ -212,10 +224,10 @@ model projectSerialNumberGenerator {
 //Start - Here You will get the schema for multi-project
 
 model MultiProject {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  projectTitle  String
-  projectImage  Json     // Use Json to store image metadata
-  requirements  String[] // This will be stored as an array of strings
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectTitle String
+  projectImage Json // Use Json to store image metadata
+  requirements String[] // This will be stored as an array of strings
 }
 
 //End - Here You will get the schema for multi-project

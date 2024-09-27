@@ -15,6 +15,8 @@ import { startContact } from "../modules/contact/contact.controller";
 import { createProjectRoute } from "../modules/create-project-admin/createProject.route";
 // import { multiProjectRoute } from "../modules/multi-project/multiProject.route.js";
 import uploadImage from "../modules/uploadImage/uploadController";
+import { quickResponseRouter } from "../modules/QuickResponses/quickResponses.router";
+
 
 const router = express.Router();
 
@@ -53,6 +55,9 @@ router.use("/industrys", IndustrysRoute);
 router.use("/designs", DesignsRoute);
 router.use("/create-offer-project", createProjectRoute);
 router.use("/getTogether", getTogetherRoute);
+router.use("/quickResponse", authenticateToken, quickResponseRouter);
+
+
 
 router.post("/upload-image", upload.any(), uploadImage);
 router.post("/contactForChat", authenticateToken, startContact);

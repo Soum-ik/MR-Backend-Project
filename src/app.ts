@@ -47,9 +47,6 @@ app.use(helmet({
 
 app.use('/api/v1', router)
 
-app.get('/', (req: Request, res: Response) => {
-    return res.json({ message: "Hello world" })
-})
 
 // Middleware to handle CORS headers for unsupported routes
 app.use((req: Request, res: Response, next: NextFunction) => {
