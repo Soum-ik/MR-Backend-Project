@@ -36,12 +36,36 @@ model User {
   totalOrder       Int?              @default(0)
   QuickResponse    QuickResponse[]
 
+  // Relation to Message
+  sentMessages     Message[] @relation("SentMessages") // Messages sent by the user
+  receivedMessages Message[] @relation("ReceivedMessages") // Messages received by the user
+
   @@map("Users")
+}
+
+model Message {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  senderId    String // ID of the user who sent the message
+  recipientId String // ID of the user/admin receiving the message
+  messageText String // The main text of the message
+  attachment  String? // URL or path of attachment if any
+  createdAt   DateTime @default(now())
+  replyTo     String? // The ID of the message being replied to
+  isFromAdmin Role // To identify if the message is from an admin
+  customOffer String? // Any custom offer if applicable
+  msgDate     DateTime
+  msgTime     String
+
+  // Relations
+  sender    User @relation("SentMessages", fields: [senderId], references: [id])
+  recipient User @relation("ReceivedMessages", fields: [recipientId], references: [id])
+
+  @@map("Messages")
 }
 
 model QuickResponse {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
-  title      String
+  title       String
   description String
 
   userId String @db.ObjectId

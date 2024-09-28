@@ -13,10 +13,10 @@ import { UploadRoute } from "../modules/Upload-design/upload.route";
 import { chating } from "../modules/chat/chat.controller";
 import { startContact } from "../modules/contact/contact.controller";
 import { createProjectRoute } from "../modules/create-project-admin/createProject.route";
-// import { multiProjectRoute } from "../modules/multi-project/multiProject.route.js";
+import { multiProjectRoute } from "../modules/multi-project/multiProject.route.js";
 import uploadImage from "../modules/uploadImage/uploadController";
 import { quickResponseRouter } from "../modules/QuickResponses/quickResponses.router";
-
+import { handleMessageRoute } from '../modules/chat/user-admin-converstion/user-admin.router'
 
 const router = express.Router();
 
@@ -56,7 +56,7 @@ router.use("/designs", DesignsRoute);
 router.use("/create-offer-project", createProjectRoute);
 router.use("/getTogether", getTogetherRoute);
 router.use("/quickResponse", authenticateToken, quickResponseRouter);
-
+router.use('/message', authenticateToken, handleMessageRoute)
 
 
 router.post("/upload-image", upload.any(), uploadImage);
@@ -65,6 +65,6 @@ router.post("/contactForChat", authenticateToken, startContact);
 router.get("/avaiableforchat", chating.AvaiableForChat);
 
 //Multi-Project Route
-// router.use("/multi-project", multiProjectRoute);
+router.use("/multi-project", multiProjectRoute);
 
 export default router;
