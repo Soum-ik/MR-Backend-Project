@@ -8,7 +8,6 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
     const authHeader = req.headers.authorization;
     if (typeof authHeader === 'string') {
         const token = authHeader.split(' ')[1] || authHeader
-        console.log(token, 'middleware token');
 
         if (!token) {
             return sendResponse(res, {
@@ -40,4 +39,3 @@ export default authenticateToken
 
 
 
-        

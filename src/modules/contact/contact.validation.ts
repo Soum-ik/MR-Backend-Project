@@ -11,10 +11,10 @@ const formSchema = z.object({
         .email({ message: "Invalid email address" }),
     websiteOrFacebook: z
         .string(), // Optional field, not required
-    exampleDesign: z.object({
+    exampleDesign: z.array(z.object({
         name: z.string(),
         url: z.string()
-    }),
+    })),
     message: z
         .string()
         .min(1, { message: "Message is required" })

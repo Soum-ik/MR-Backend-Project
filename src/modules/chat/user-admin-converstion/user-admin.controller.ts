@@ -25,10 +25,15 @@ const sendMessage = async (req: Request, res: Response) => {
         return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Token are required!', })
     }
 
-    const { senderId, recipientId, messageText, attachment, replyTo, isFromAdmin, customOffer } = req.body;
+    const user = await prisma.user.findUnique({
+        where: {
+            id: user_id as string
+        }
+    })
+    const { recipientId, messageText, attachment, replyTo, customOffer } = req.body;
 
     // Validate required fields
-    if (!senderId || !recipientId || !messageText) {
+    if (!recipientId || !messageText) {
         return sendResponse(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
@@ -39,12 +44,14 @@ const sendMessage = async (req: Request, res: Response) => {
     try {
         const message = await prisma.message.create({
             data: {
-                senderId,
+                senderId: user_id as string,
+                userImage: user?.fullName,
+                userProfilePic: user?.image,
                 recipientId,
                 messageText,
                 attachment,
                 replyTo,
-                isFromAdmin: role,
+                isFromAdmin: role as string,
                 customOffer,
                 msgDate: new Date(),
                 msgTime: new Date().toLocaleTimeString(),
@@ -68,15 +75,15 @@ const sendMessage = async (req: Request, res: Response) => {
 
 // Reply to a message
 const replyToMessage = async (req: Request, res: Response) => {
-    const { role } = req.user as TokenCredential
+    const { role, user_id } = req.user as TokenCredential
     if (!role) {
         return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Token are required!', })
     }
 
-    const { senderId, recipientId, messageText, attachment, replyTo, isFromAdmin, customOffer } = req.body;
+    const { recipientId, messageText, attachment, replyTo, isFromAdmin, customOffer } = req.body;
 
     // Validate required fields
-    if (!senderId || !recipientId || !messageText) {
+    if (!recipientId || !messageText) {
         return sendResponse(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
@@ -87,11 +94,11 @@ const replyToMessage = async (req: Request, res: Response) => {
     try {
         const message = await prisma.message.create({
             data: {
-                senderId,
+                senderId: user_id as string,
                 recipientId,
                 messageText,
                 attachment,
-                isFromAdmin: role,
+                isFromAdmin: role as string,
                 replyTo,
                 customOffer,
                 msgDate: new Date(),
