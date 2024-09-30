@@ -6,30 +6,34 @@ import sendResponse from "../../libs/sendResponse";
 
 const AvaiableForChat = async (req: Request, res: Response) => {
 	try {
+		// Fetch users with necessary filtering and including relevant data
 		const listOfUser = await prisma.user.findMany({
 			include: {
-				contactForChat: true, // Include contactForChat data
+				contactForChat: true
+			},
+			where: {
+				contactForChat: {
+					some: {}, // This ensures the contactForChat array is not empty
+				},
 			},
 		});
 
-		// Filter out users whose contactForChat is null or empty
-		const usersWithContact = listOfUser.filter(
-			(user) => user.contactForChat !== null && user.role === "USER"
-		);
+		console.log(listOfUser, 'checking list of user');
+
 
 		// Select only the required fields
-		const filteredUsers = usersWithContact.map((user) => {
+		const filteredUsers = listOfUser.map((user) => {
 			const status = user.totalOrder === 0 ? "New Client" : "Repeated Client";
 
 			return {
 				fullName: user.fullName,
 				image: user.image,
 				createdAt: user.createdAt,
-				contactForChat: user.contactForChat, // Include contactForChat if needed
+				contactForChat: user.contactForChat,
 				totalOrder: user.totalOrder,
 				userName: user.userName,
 				id: user.id,
-				status: status, // Add the status field
+				status: status,
 			};
 		});
 
@@ -39,7 +43,7 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 			return sendResponse<any>(res, {
 				statusCode: httpStatus.OK,
 				success: true,
-				message: "There is no user avaiable for chat",
+				message: "There is no user available for chat",
 				data: null,
 			});
 		}
@@ -51,7 +55,7 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 			data: filteredUsers,
 		});
 	} catch (error) {
-		console.log(error, "checking error ");
+		console.error("Error retrieving available users for chat: ", error);
 
 		if (error instanceof z.ZodError) {
 			return sendResponse(res, {
@@ -66,7 +70,7 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 			statusCode: httpStatus.INTERNAL_SERVER_ERROR,
 			success: false,
 			message: "Internal server error",
-			data: error
+			data: error,
 		});
 	}
 };

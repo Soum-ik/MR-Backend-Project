@@ -24,7 +24,6 @@ const startContact = async (req: Request, res: Response) => {
     }
 
     const { user_id, role } = req.user;
-    
     // Prevent ADMIN from sending messages
     if (role === ADMIN_ROLE) {
       return sendResponse(res, {
@@ -79,7 +78,7 @@ const startContact = async (req: Request, res: Response) => {
           exampleDesign: validatedBody.exampleDesign,
           messageText: validatedBody.message,
         },
-        contactForChatId,
+        // contactForChatId,
         isFromAdmin: MSG_FROM_ADMIN_NO,
         msgDate: new Date(),
         msgTime: new Date().toISOString().split("T")[1].slice(0, 8),

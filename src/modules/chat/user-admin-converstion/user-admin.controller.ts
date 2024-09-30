@@ -5,31 +5,30 @@ import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
 import { TokenCredential } from "../../../libs/authHelper";
 
-
-//   userImage: userProfilePic,
-//   senderName: user?.fullName,
-//   messageId: 1,
-//   msgDate: "Apr 22, 2023",
-//   msgTime: "07:33 AM",
-//   messageText:
-//     "hello, looking for a flyer for my bathroom and kitchen company. I like the black and gold one you have listed",
-//   attachment: [],
-//   customOffer: null,
-//   contactForm: null,
-// },
+//   senderName: user?.fullName,   
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
     const { user_id, role } = req.user as TokenCredential
-    if (!role) {
+
+    if (!user_id) {
         return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Token are required!', })
     }
+
+    console.log(user_id, "user collection");
+
 
     const user = await prisma.user.findUnique({
         where: {
             id: user_id as string
         }
     })
+
+
+    console.log(user, 'get ');
+
+
+
     const { recipientId, messageText, attachment, replyTo, customOffer } = req.body;
 
     // Validate required fields
@@ -45,8 +44,8 @@ const sendMessage = async (req: Request, res: Response) => {
         const message = await prisma.message.create({
             data: {
                 senderId: user_id as string,
-                userImage: user?.fullName,
-                userProfilePic: user?.image,
+                userImage: user?.image,
+                senderName: user?.fullName,
                 recipientId,
                 messageText,
                 attachment,
@@ -57,6 +56,7 @@ const sendMessage = async (req: Request, res: Response) => {
                 msgTime: new Date().toLocaleTimeString(),
             },
         });
+
 
         return sendResponse(res, {
             statusCode: httpStatus.CREATED,

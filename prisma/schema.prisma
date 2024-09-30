@@ -32,13 +32,14 @@ model User {
   createdAt        DateTime          @default(now())
   updateAt         DateTime          @updatedAt
   SocialMediaLinks SocialMediaLinks?
-  contactForChat   contactForChat?
+  contactForChat   contactForChat[]
   totalOrder       Int?              @default(0)
   QuickResponse    QuickResponse[]
 
   // Relation to Message
-  sentMessages     Message[] @relation("SentMessages") // Messages sent by the user
-  receivedMessages Message[] @relation("ReceivedMessages") // Messages received by the user
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  contactForChatId String?    @db.ObjectId
 
   @@map("Users")
 }
@@ -46,15 +47,15 @@ model User {
 model Message {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   userImage      String?
-  userProfilePic String?
-  senderId       String // ID of the user who sent the message
-  recipientId    String // ID of the user/admin receiving the message
-  messageText    String // The main text of the message
-  attachment     String? // URL or path of attachment if any
+  senderName String?
+  senderId       String
+  recipientId    String
+  messageText    String
+  attachment     String?
   createdAt      DateTime @default(now())
-  replyTo        String? // The ID of the message being replied to
-  isFromAdmin    String // To identify if the message is from an admin
-  customOffer    String? // Any custom offer if applicable
+  replyTo        String?
+  isFromAdmin    String
+  customOffer    String?
   msgDate        DateTime
   msgTime        String
   contactForm    Json?
@@ -62,23 +63,19 @@ model Message {
   sender    User @relation("SentMessages", fields: [senderId], references: [id])
   recipient User @relation("ReceivedMessages", fields: [recipientId], references: [id])
 
-  contactForChatId String          @db.ObjectId // Foreign key to reference the contactForChat model
-  contactForChat   contactForChat? @relation(fields: [contactForChatId], references: [id])
-
   @@map("Messages")
 }
 
 model contactForChat {
   id            String @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String @unique
   name          String
   email         String
   website       String
   exampleDesign Json?
   messageText   String
 
-  user    User      @relation(fields: [userId], references: [id])
-  Message Message[]
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model QuickResponse {
