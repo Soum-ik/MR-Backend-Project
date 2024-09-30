@@ -10,7 +10,7 @@ router.post('/send', messageControlller.sendMessage);
 router.post('/reply', messageControlller.replyToMessage);
 
 // Route to get messages between user and admin
-router.get('/:userId/:adminId', messageControlller.getMessages);
+router.get('/:userId', messageControlller.getMessages);
 
 router.delete('/:id', messageControlller.deleteMessage)
 

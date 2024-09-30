@@ -123,14 +123,20 @@ const replyToMessage = async (req: Request, res: Response) => {
 
 // Get messages between user and admin
 const getMessages = async (req: Request, res: Response) => {
-    const { userId, adminId } = req.params;
+    const { userId } = req.params;
+
+    const { user_id, role } = req.user as TokenCredential
+    if (!user_id) {
+        return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Token are required!', })
+    }
+
 
     try {
         const messages = await prisma.message.findMany({
             where: {
                 OR: [
-                    { senderId: userId, recipientId: adminId },
-                    { senderId: adminId, recipientId: userId },
+                    { senderId: userId, recipientId: user_id as string },
+                    { senderId: user_id as string, recipientId: userId },
                 ],
             },
             orderBy: { createdAt: 'asc' },
