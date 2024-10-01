@@ -33,7 +33,7 @@ const sendMessage = async (req: Request, res: Response) => {
     req.body;
 
   // Validate required fields
-  if (!recipientId || !messageText) {
+  if (!recipientId) {
     return sendResponse(res, {
       statusCode: httpStatus.BAD_REQUEST,
       success: false,
@@ -115,6 +115,17 @@ const replyToMessage = async (req: Request, res: Response) => {
   }
 
   try {
+    const date = new Date();
+    const msgDate = date.toLocaleDateString([], {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    const msgTime = date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
     const message = await prisma.message.create({
       data: {
         senderId: user_id as string,
@@ -124,8 +135,8 @@ const replyToMessage = async (req: Request, res: Response) => {
         isFromAdmin: role as string,
         replyTo,
         customOffer,
-        msgDate: new Date(),
-        msgTime: new Date().toLocaleTimeString(),
+        msgDate,
+        msgTime,
       },
     });
 
