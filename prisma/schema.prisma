@@ -48,6 +48,7 @@ model Message {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   userImage      String?
   senderName String?
+  senderUserName String?
   senderId       String
   recipientId    String
   messageText    String
@@ -56,7 +57,7 @@ model Message {
   replyTo        String?
   isFromAdmin    String
   customOffer    String?
-  msgDate        DateTime
+  msgDate        String?
   msgTime        String
   contactForm    Json?
 
