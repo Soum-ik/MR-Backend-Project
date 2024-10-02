@@ -65,7 +65,6 @@ const startContact = async (req: Request, res: Response) => {
     // Select a random admin
     const randomAdmin = admins[Math.floor(Math.random() * admins.length)];
 
-
     const date = new Date();
     const msgDate = date.toLocaleDateString([], {
       year: "numeric",
@@ -83,7 +82,7 @@ const startContact = async (req: Request, res: Response) => {
       data: {
         senderId: user_id,
         recipientId: randomAdmin.id,
-        messageText: validatedBody.message,
+        messageText: "",
         contactForm: {
           name: validatedBody.name,
           email: validatedBody.email,
