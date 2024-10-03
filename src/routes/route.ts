@@ -17,6 +17,7 @@ import { multiProjectRoute } from "../modules/multi-project/multiProject.route.j
 import uploadImage from "../modules/uploadImage/uploadController";
 import { quickResponseRouter } from "../modules/QuickResponses/quickResponses.router";
 import { handleMessageRoute } from '../modules/chat/user-admin-converstion/user-admin.router'
+import { bookMarkRoute } from '../modules/book_mark/book_mark.router'
 
 const router = express.Router();
 
@@ -57,12 +58,16 @@ router.use("/create-offer-project", createProjectRoute);
 router.use("/getTogether", getTogetherRoute);
 router.use("/quickResponse", authenticateToken, quickResponseRouter);
 router.use('/message', authenticateToken, handleMessageRoute)
+router.use('/bookMark', bookMarkRoute)
+
 
 
 router.post("/upload-image", upload.any(), uploadImage);
 router.post("/contactForChat", authenticateToken, startContact);
 
 router.get("/avaiableforchat", chating.AvaiableForChat);
+
+
 
 //Multi-Project Route
 router.use("/multi-project", multiProjectRoute);

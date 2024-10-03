@@ -5,4 +5,4 @@ const router = express.Router();
 router.post("/update/:userId", toggleBookmarkStatus);
 router.get("/get", getBookmarkStatus);
 
-export const multiProjectRoute = router;
+export const bookMarkRoute = router;
