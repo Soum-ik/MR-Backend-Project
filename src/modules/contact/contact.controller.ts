@@ -80,7 +80,7 @@ const startContact = async (req: Request, res: Response) => {
         },
         // contactForChatId,
         isFromAdmin: MSG_FROM_ADMIN_NO,
-        msgDate: new Date(),
+        msgDate: new Date().toDateString(),
         msgTime: new Date().toISOString().split("T")[1].slice(0, 8),
       },
     });
