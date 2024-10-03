@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch run ./src/app.js",
-    "build": "tsc",
+    "build": "bunx tsc",
     "start": " bun --watch run ./src/app.js"
   },
   "devDependencies": {
@@ -16,10 +16,9 @@
     "ts-node": "^10.9.2",
     "typedoc": "^0.26.7"
   },
-  "peerDependencies": {
-    "typescript": "^5.5.4"
-  },
+  
   "dependencies": {
+    "typescript": "^5.5.4",
     "@prisma/client": "^5.18.0",
     "@types/cors": "^2.8.17",
     "@types/nodemailer": "^6.4.15",
