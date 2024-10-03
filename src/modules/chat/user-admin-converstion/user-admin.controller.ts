@@ -209,6 +209,7 @@ const deleteMessage = async (req: Request, res: Response) => {
     const message = await prisma.message.findUnique({
       where: {
         id: messageId,
+        senderId: user_id as string,
       },
     });
 
@@ -217,7 +218,7 @@ const deleteMessage = async (req: Request, res: Response) => {
       return sendResponse(res, {
         statusCode: httpStatus.NOT_FOUND,
         success: false,
-        message: "Message not found",
+        message: "this message are not for you",
       });
     }
 

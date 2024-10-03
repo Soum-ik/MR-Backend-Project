@@ -69,10 +69,10 @@ model Message {
 }
 
 model contactForChat {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  email         String
-  website       String
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?
+  website       String?
   exampleDesign Json?
   messageText   String
 
@@ -265,4 +265,6 @@ model MultiProject {
 enum Role {
   ADMIN
   USER
+  SUPER_ADMIN
+  SUB_ADMIN
 }

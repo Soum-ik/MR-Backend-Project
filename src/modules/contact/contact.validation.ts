@@ -2,18 +2,16 @@ import { z } from "zod";
 
 const formSchema = z.object({
   name: z
-    .string()
-    .min(1, { message: "Name is required" })
-    .max(100, { message: "Name can't exceed 100 characters" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  websiteOrFacebook: z.string(), // Optional field, not required
+    .string().optional(),
+  email: z.string().email({ message: "Invalid email address" }).optional(),
+  websiteOrFacebook: z.string().optional(), // Optional field, not required
   exampleDesign: z.array(
     z.object({
       name: z.string(),
       url: z.string(),
       size: z.number(),
     })
-  ),
+  ).optional(),
   message: z
     .string()
     .min(1, { message: "Message is required" })

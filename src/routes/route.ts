@@ -18,17 +18,12 @@ import uploadImage from "../modules/uploadImage/uploadController";
 import { quickResponseRouter } from "../modules/QuickResponses/quickResponses.router";
 import { handleMessageRoute } from '../modules/chat/user-admin-converstion/user-admin.router'
 import { bookMarkRoute } from '../modules/book_mark/book_mark.router'
+import { handleRoleRoute } from "../modules/role_controller_super_admin/role_controller.router";
+import authenticateSuperAdmin from "../middleware/super_admin_auth";
+import { UserRoute } from "../modules/user/userRotue";
 
 const router = express.Router();
 
-// get users api route -done
-router.post("/sign-up", UserController.SignUp);
-router.post("/sign-in", UserController.SignIn);
-router.get("/forgot-pass/:email", UserController.forgotPass);
-router.get("/verify-otp/:email", UserController.verifyOtp);
-router.put("/set-new-pass/", authenticateToken, UserController.setNewPass);
-router.get("/all-user/", UserController.getAllUser);
-router.post("/update-user/", UserController.updateUser);
 
 router.get(
   "/social-media-link/",
@@ -48,6 +43,7 @@ router.get(
   UserController.getSingelUser
 );
 
+router.use("/", UserRoute);
 router.use("/category", CategoryRoute);
 router.use("/upload", UploadRoute);
 router.use("/folder", FolderRouter);
@@ -59,7 +55,7 @@ router.use("/getTogether", getTogetherRoute);
 router.use("/quickResponse", authenticateToken, quickResponseRouter);
 router.use('/message', authenticateToken, handleMessageRoute)
 router.use('/bookMark', bookMarkRoute)
-
+router.use('/role', authenticateSuperAdmin, handleRoleRoute)
 
 
 router.post("/upload-image", upload.any(), uploadImage);

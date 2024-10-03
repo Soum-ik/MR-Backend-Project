@@ -174,6 +174,68 @@ const deleteCategoriesById = async (req: Request, res: Response) => {
   }
 };
 
+const deleteSubCategoryById = async (req: Request, res: Response) => {
+  try {
+    // Extract the subcategory ID from the request parameters
+    const { id } = req.params;
+
+    // Validate the ObjectId format
+    if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
+      return sendResponse<any>(res, {
+        statusCode: httpStatus.BAD_REQUEST,
+        success: false,
+        message: "Invalid subcategory ID format",
+        data: null,
+      });
+    }
+
+    // Fetch the subcategory to check if it exists
+    const existingSubCategory = await prisma.subCategory.findUnique({
+      where: { id },
+    });
+
+    if (!existingSubCategory) {
+      return sendResponse<any>(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: "Subcategory not found",
+        data: null,
+      });
+    }
+
+    // Delete the subcategory
+    const deletedSubCategory = await prisma.subCategory.delete({
+      where: { id },
+    });
+
+    // If the subcategory is successfully deleted, send a success response
+    return sendResponse<any>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Subcategory deleted successfully",
+      data: deletedSubCategory,
+    });
+  } catch (error: any) {
+    // Check if the error is related to the subcategory not being found
+    if (error.code === "P2025") {
+      return sendResponse<any>(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: "Subcategory not found",
+        data: null,
+      });
+    }
+
+    // Handle any other server errors
+    return sendResponse<any>(res, {
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "An error occurred while deleting the subcategory",
+      data: error.message,
+    });
+  }
+};
+
 const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
   try {
     // Validate request body against the combined schema
@@ -323,4 +385,5 @@ export const Category = {
   deleteCategoriesById,
   updateCategoryWithSubCategory,
   updateAllCategory,
+  deleteSubCategoryById
 };

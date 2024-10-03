@@ -36,11 +36,11 @@ const startContact = async (req: Request, res: Response) => {
     // Create a new contact entry
     const contactEntry = await prisma.contactForChat.create({
       data: {
-        email: validatedBody.email,
+        email: validatedBody.email ?? '',
         messageText: validatedBody.message,
-        exampleDesign: validatedBody.exampleDesign,
-        name: validatedBody.name,
-        website: validatedBody.websiteOrFacebook,
+        exampleDesign: validatedBody.exampleDesign ?? '',
+        name: validatedBody.name ?? '',
+        website: validatedBody.websiteOrFacebook ?? '',
         userId: user_id,
       },
     });

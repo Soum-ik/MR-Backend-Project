@@ -6,3 +6,21 @@ export const USER_ROLE = {
     employee: 'employee',
     valet: 'valet',
 } as const;
+
+
+export interface SignupRequestBody {
+    country?: string;
+    fullName?: string;
+    userName: string;
+    email: string;
+    password: string;
+}
+
+// Define the User interface
+export interface User {
+    user_id?: string;
+    role?: string;
+    email?: string;
+    iat?: number;
+    exp?: number;
+}
