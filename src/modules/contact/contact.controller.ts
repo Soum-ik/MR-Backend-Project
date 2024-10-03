@@ -65,12 +65,24 @@ const startContact = async (req: Request, res: Response) => {
     // Select a random admin
     const randomAdmin = admins[Math.floor(Math.random() * admins.length)];
 
+    const date = new Date();
+    const msgDate = date.toLocaleDateString([], {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    const msgTime = date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
     // Create a new message entry
     const newMessage = await prisma.message.create({
       data: {
         senderId: user_id,
         recipientId: randomAdmin.id,
-        messageText: validatedBody.message,
+        messageText: "",
         contactForm: {
           name: validatedBody.name,
           email: validatedBody.email,
@@ -80,8 +92,8 @@ const startContact = async (req: Request, res: Response) => {
         },
         // contactForChatId,
         isFromAdmin: MSG_FROM_ADMIN_NO,
-        msgDate: new Date().toDateString(),
-        msgTime: new Date().toISOString().split("T")[1].slice(0, 8),
+        msgDate,
+        msgTime,
       },
     });
 

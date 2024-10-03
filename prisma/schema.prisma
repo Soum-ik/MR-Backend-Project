@@ -53,11 +53,11 @@ model Message {
   senderId       String
   recipientId    String
   messageText    String
-  attachment     String?
+  attachment     Json[]   @default([])
   createdAt      DateTime @default(now())
   replyTo        String?
   isFromAdmin    String
-  customOffer    String?
+  customOffer    Json?
   msgDate        String?
   msgTime        String
   contactForm    Json?
