@@ -29,7 +29,7 @@ const sendMessage = async (req: Request, res: Response) => {
 
   console.log(user, "get ");
 
-  const { recipientId, messageText, attachment, replyTo, customOffer } =
+  const { recipientId, messageText, attachment, replyTo, customOffer, msgDate, msgTime } =
     req.body;
 
   // Validate required fields
@@ -42,17 +42,17 @@ const sendMessage = async (req: Request, res: Response) => {
   }
 
   try {
-    const date = new Date();
-    const msgDate = date.toLocaleDateString([], {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-    const msgTime = date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    // const date = new Date();
+    // const msgDate = date.toLocaleDateString([], {
+    //   year: "numeric",
+    //   month: "short",
+    //   day: "numeric",
+    // });
+    // const msgTime = date.toLocaleTimeString([], {
+    //   hour: "2-digit",
+    //   minute: "2-digit",
+    //   hour12: true,
+    // });
     const message = await prisma.message.create({
       data: {
         senderId: user_id as string,

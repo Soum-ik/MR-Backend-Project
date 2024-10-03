@@ -21,6 +21,7 @@ const registerSocketServer = (server: Server) => {
         "https://mr-project-fiverr-system.vercel.app",
         "https://mahfujurrahm535.com/",
         "https://dev.mahfujurrahm535.com/",
+        "wss://dev.mahfujurrahm535.com/",
         "https://www.mahfujurrahm535.com/",
       ],
       methods: ["GET", "POST"],

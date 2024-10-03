@@ -21,6 +21,7 @@ const corsOptions = {
         'http://localhost:3000',
         'http://localhost:5173',
         'https://dev.mahfujurrahm535.com',
+        'https://mahfujurrahm535.com',
         'https://mr-project-fiverr-system.vercel.app'
     ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
