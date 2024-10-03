@@ -20,6 +20,7 @@ const registerSocketServer = (server: Server) => {
         "http://localhost:5173",
         "https://mr-project-fiverr-system.vercel.app",
         "https://mahfujurrahm535.com/",
+        "https://dev.mahfujurrahm535.com/",
         "https://www.mahfujurrahm535.com/",
       ],
       methods: ["GET", "POST"],
