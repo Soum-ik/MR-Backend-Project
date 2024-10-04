@@ -16,9 +16,7 @@
     "ts-node": "^10.9.2",
     "typedoc": "^0.26.7"
   },
-  
   "dependencies": {
-    "typescript": "^5.5.4",
     "@prisma/client": "^5.18.0",
     "@types/cors": "^2.8.17",
     "@types/nodemailer": "^6.4.15",
@@ -38,8 +36,10 @@
     "prisma": "^5.18.0",
     "serverless-http": "^3.2.0",
     "socket.io": "^4.7.5",
+    "stripe": "^17.1.0",
     "ts-node-dev": "^2.0.0",
     "tsc": "^2.0.4",
+    "typescript": "^5.5.4",
     "zod": "^3.23.8"
   }
 }
