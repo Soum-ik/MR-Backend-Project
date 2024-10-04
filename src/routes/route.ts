@@ -21,6 +21,7 @@ import { bookMarkRoute } from '../modules/book_mark/book_mark.router'
 import { handleRoleRoute } from "../modules/role_controller_super_admin/role_controller.router";
 import authenticateSuperAdmin from "../middleware/super_admin_auth";
 import { UserRoute } from "../modules/user/userRotue";
+import { payment } from "../modules/payment/payment.controller";
 
 const router = express.Router();
 
@@ -67,5 +68,8 @@ router.get("/avaiableforchat", chating.AvaiableForChat);
 
 //Multi-Project Route
 router.use("/multi-project", multiProjectRoute);
+
+//payment route
+router.post('/api/checkout-session', payment.stripePayment)
 
 export default router;

@@ -20,3 +20,4 @@ export const WEB_CACHE = false;
 
 export const PORT = 3000;
 export const RESEND_API_KEY = "re_R83HxEnd_Am5p3SgxLfQWcYTACs3AgqFg"
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
