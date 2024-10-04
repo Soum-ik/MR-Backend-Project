@@ -236,6 +236,9 @@ const deleteSubCategoryById = async (req: Request, res: Response) => {
   }
 };
 
+
+
+
 const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
   try {
     // Validate request body against the combined schema
@@ -255,37 +258,53 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
       });
     }
 
+    // Get the IDs of subcategories in the request
+    const requestSubCategoryIds = validatedData.subCategory
+      .filter(sub => sub.id)
+      .map(sub => sub.id);
+
+    // Identify subcategories to delete
+    const subCategoriesToDelete = existingCategory.subCategory
+      .filter(sub => !requestSubCategoryIds.includes(sub.id))
+      .map(sub => sub.id);
+
     // Prepare the subcategory update/create/delete operations
-    const subCategoryOperations = validatedData.subCategory.map((sub) => {
-      if (sub.id) {
-        // Update existing subcategory
-        return prisma.subCategory.update({
-          where: { id: sub.id },
-          data: {
-            subTitle: sub.subTitle,
-            subAmount: sub.subAmount,
-            regularDeliveryDays: sub.regularDeliveryDays,
-            fastDeliveryDays: sub.fastDeliveryDays,
-            fastDeliveryPrice: sub.fastDeliveryPrice,
-          },
-        });
-      } else {
-        // Create new subcategory
-        return prisma.subCategory.create({
-          data: {
-            subTitle: sub.subTitle,
-            subAmount: sub.subAmount,
-            regularDeliveryDays: sub.regularDeliveryDays,
-            fastDeliveryDays: sub.fastDeliveryDays,
-            fastDeliveryPrice: sub.fastDeliveryPrice,
-            categoryId: existingCategory.id,
-          },
-        });
-      }
-    });
+    const subCategoryOperations = [
+      ...validatedData.subCategory.map((sub) => {
+        if (sub.id) {
+          // Update existing subcategory
+          return prisma.subCategory.update({
+            where: { id: sub.id },
+            data: {
+              subTitle: sub.subTitle,
+              subAmount: sub.subAmount,
+              regularDeliveryDays: sub.regularDeliveryDays,
+              fastDeliveryDays: sub.fastDeliveryDays,
+              fastDeliveryPrice: sub.fastDeliveryPrice,
+            },
+          });
+        } else {
+          // Create new subcategory
+          return prisma.subCategory.create({
+            data: {
+              subTitle: sub.subTitle,
+              subAmount: sub.subAmount,
+              regularDeliveryDays: sub.regularDeliveryDays,
+              fastDeliveryDays: sub.fastDeliveryDays,
+              fastDeliveryPrice: sub.fastDeliveryPrice,
+              categoryId: existingCategory.id,
+            },
+          });
+        }
+      }),
+      // Delete subcategories not present in the request
+      ...subCategoriesToDelete.map(id => 
+        prisma.subCategory.delete({ where: { id } })
+      ),
+    ];
 
     // Execute all subcategory operations
-    const updatedSubCategories = await Promise.all(subCategoryOperations);
+    const updatedSubCategories = await prisma.$transaction(subCategoryOperations);
 
     // Update the main category
     const updatedCategory = await prisma.category.update({
@@ -296,6 +315,7 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
         bulletPoint: validatedData.bulletPoint,
         requirements: validatedData.requirements,
       },
+      include: { subCategory: true }, // Include updated subCategories in the response
     });
 
     // Send success response
@@ -303,14 +323,14 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
       statusCode: httpStatus.OK,
       success: true,
       message: "Category and SubCategories updated successfully",
-      data: { ...updatedCategory, subCategory: updatedSubCategories },
+      data: updatedCategory,
     });
   } catch (error) {
     console.log(error);
 
     if (error instanceof z.ZodError) {
       return sendResponse<any>(res, {
-        statusCode: httpStatus.BAD_GATEWAY,
+        statusCode: httpStatus.BAD_REQUEST,
         success: false,
         message: "Validation error",
         data: error,
@@ -325,6 +345,11 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+
+
+
 
 const updateAllCategory = async (req: Request, res: Response) => {
   const { items }: { items: any[] } = req.body;
