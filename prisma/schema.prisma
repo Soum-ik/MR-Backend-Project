@@ -208,15 +208,18 @@ model FeatureAllFolder {
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
+  name        String      @unique
+  subFolders  SubFolders[]
+  createdAt   DateTime    @default(now())
+  updateAt    DateTime    @updatedAt
 }
 
 model SubFolders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   name      String   @unique
+  folderId  String   @db.ObjectId
+  folder    Folders  @relation(fields: [folderId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
 }

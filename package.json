@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch run ./src/app.js",
-    "build": "bunx tsc",
+    "build": "tsc",
     "start": " bun --watch run ./src/app.js"
   },
   "devDependencies": {
