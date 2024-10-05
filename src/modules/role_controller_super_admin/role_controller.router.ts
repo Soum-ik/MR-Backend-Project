@@ -1,10 +1,9 @@
-import { Router } from 'express';
-import { controle_role_controller } from './role_controller.controller';
+import { Router } from "express";
+import { manage_role_controller } from "./role_controller.controller";
 
 const router = Router();
 
 // Route to send a message
-router.post('/controle_role', controle_role_controller.controle_role);
+router.post("/manage-role", manage_role_controller.manage_role);
 
 export const handleRoleRoute = router;
-
