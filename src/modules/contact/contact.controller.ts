@@ -63,8 +63,6 @@ const startContact = async (req: Request, res: Response) => {
     }
 
     // Select a random admin
-    const randomAdmin = admins[Math.floor(Math.random() * admins.length)];
-
     const date = new Date();
     const msgDate = date.toLocaleDateString([], {
       year: "numeric",
@@ -77,27 +75,29 @@ const startContact = async (req: Request, res: Response) => {
       hour12: true,
     });
 
-    // Create a new message entry
-    const newMessage = await prisma.message.create({
-      data: {
-        senderId: user_id,
-        recipientId: randomAdmin.id,
-        messageText: "",
-        contactForm: {
-          name: validatedBody.name,
-          email: validatedBody.email,
-          website: validatedBody.websiteOrFacebook,
-          exampleDesign: validatedBody.exampleDesign,
-          messageText: validatedBody.message,
+    // Create new message entries for all admins
+    const newMessages = await Promise.all(admins.map(admin => 
+      prisma.message.create({
+        data: {
+          senderId: user_id,
+          recipientId: admin.id,
+          messageText: "",
+          contactForm: {
+            name: validatedBody.name,
+            email: validatedBody.email,
+            website: validatedBody.websiteOrFacebook,
+            exampleDesign: validatedBody.exampleDesign,
+            messageText: validatedBody.message,
+          },
+          // contactForChatId,
+          isFromAdmin: MSG_FROM_ADMIN_NO,
+          msgDate,
+          msgTime,
         },
-        // contactForChatId,
-        isFromAdmin: MSG_FROM_ADMIN_NO,
-        msgDate,
-        msgTime,
-      },
-    });
+      })
+    ));
 
-    console.log("Message created:", newMessage);
+    console.log("Message created:", newMessages);
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,

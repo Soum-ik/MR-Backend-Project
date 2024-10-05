@@ -45,6 +45,24 @@ model User {
   @@map("Users")
 }
 
+model Notification {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  senderLogo     String?
+  type           String
+  senderUserName String
+  isOnline       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updateAt       DateTime @updatedAt
+
+  // recipientId String @db.ObjectId
+  // recipient   User   @relation(fields: [recipientId], references: [id])
+
+  messageId String?  @unique
+  message   Message? @relation(fields: [messageId], references: [id])
+
+  @@map("Notifications")
+}
+
 model Message {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   userImage      String?
@@ -62,8 +80,9 @@ model Message {
   msgTime        String
   contactForm    Json?
 
-  sender    User @relation("SentMessages", fields: [senderId], references: [id])
-  recipient User @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  sender       User          @relation("SentMessages", fields: [senderId], references: [id])
+  recipient    User          @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  Notification Notification?
 
   @@map("Messages")
 }
@@ -208,10 +227,10 @@ model FeatureAllFolder {
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name        String      @unique
-  subFolders  SubFolders[]
-  createdAt   DateTime    @default(now())
-  updateAt    DateTime    @updatedAt
+  name       String       @unique
+  subFolders SubFolders[]
+  createdAt  DateTime     @default(now())
+  updateAt   DateTime     @updatedAt
 }
 
 model SubFolders {

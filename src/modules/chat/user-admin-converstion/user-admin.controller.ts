@@ -140,6 +140,23 @@ const replyToMessage = async (req: Request, res: Response) => {
       },
     });
 
+    const user = await prisma.user.findUnique({
+      where: {
+        id: user_id as string,
+      },
+    });
+
+    // Create notification for the recipient
+    await prisma.notification.create({
+      data: {
+        type: messageText,
+        senderUserName: user?.userName as string,
+        senderLogo: user?.image as string,
+        messageId: message.id,
+        // recipientId: recipientId,
+      },
+    });
+
     return sendResponse(res, {
       statusCode: httpStatus.CREATED,
       success: true,
