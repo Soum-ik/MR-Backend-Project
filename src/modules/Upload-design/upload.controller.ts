@@ -50,6 +50,16 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 }
             });
 
+            await prisma.folders.create({
+                data: {
+                    name: validatedData.folder
+                },
+                include: {
+                    subFolders: true,
+                },
+            })
+
+
             // Check or create entities
             await findOrCreateEntity(prisma.folders, { name: validatedData.folder }, { name: validatedData.folder });
             await findOrCreateEntity(prisma.subFolders, { name: validatedData.subFolder }, { name: validatedData.subFolder });
