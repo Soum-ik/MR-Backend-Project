@@ -21,3 +21,9 @@ export const WEB_CACHE = false;
 export const PORT = 3000;
 export const RESEND_API_KEY = "re_R83HxEnd_Am5p3SgxLfQWcYTACs3AgqFg"
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
+export const AWS_REGION = process.env.AWS_REGION;
+export const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+
