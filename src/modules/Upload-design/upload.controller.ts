@@ -54,8 +54,10 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 data: {
                     name: validatedData.folder
                 },
-                include: {
-                    subFolders: true,
+            })
+            await prisma.subFolders.create({
+                data: {
+                    name: validatedData.subFolder
                 },
             })
 

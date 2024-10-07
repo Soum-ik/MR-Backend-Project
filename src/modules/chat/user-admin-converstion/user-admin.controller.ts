@@ -19,18 +19,54 @@ const sendMessage = async (req: Request, res: Response) => {
     });
   }
 
-  console.log(user_id, "user collection");
-
   const user = await prisma.user.findUnique({
     where: {
       id: user_id as string,
     },
   });
 
-  console.log(user, "get ");
-
   const { recipientId, messageText, attachment, replyTo, customOffer, msgDate, msgTime } =
     req.body;
+
+
+  if (role === "USER") {
+    const adminRoles = ["ADMIN", "SUPER_ADMIN", "SUB_ADMIN"] as const;
+    const admins = await prisma.user.findMany({
+      where: {
+        role: {
+          in: [...adminRoles]
+        }
+      },
+      select: {
+        id: true
+      }
+    });
+
+    const messages = admins.map(admin => ({
+      senderId: user_id as string,
+      userImage: user?.image,
+      senderName: user?.fullName,
+      senderUserName: user?.userName,
+      recipientId: admin.id,
+      messageText,
+      attachment,
+      replyTo,
+      isFromAdmin: "USER",
+      customOffer,
+      msgDate,
+      msgTime,
+    }));
+
+    await prisma.message.createMany({
+      data: messages
+    });
+
+    return sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: "Message sent to all admin roles successfully",
+    });
+  }
 
   // Validate required fields
   if (!recipientId) {
@@ -42,17 +78,6 @@ const sendMessage = async (req: Request, res: Response) => {
   }
 
   try {
-    // const date = new Date();
-    // const msgDate = date.toLocaleDateString([], {
-    //   year: "numeric",
-    //   month: "short",
-    //   day: "numeric",
-    // });
-    // const msgTime = date.toLocaleTimeString([], {
-    //   hour: "2-digit",
-    //   minute: "2-digit",
-    //   hour12: true,
-    // });
     const message = await prisma.message.create({
       data: {
         senderId: user_id as string,
@@ -147,15 +172,15 @@ const replyToMessage = async (req: Request, res: Response) => {
     });
 
     // Create notification for the recipient
-    await prisma.notification.create({
-      data: {
-        type: messageText,
-        senderUserName: user?.userName as string,
-        senderLogo: user?.image as string,
-        messageId: message.id,
-        // recipientId: recipientId,
-      },
-    });
+    // await prisma.notification.create({
+    //   data: {
+    //     type: messageText,
+    //     senderUserName: user?.userName as string,
+    //     senderLogo: user?.image as string,
+    //     messageId: message.id,
+    //     // recipientId: recipientId,
+    //   },
+    // });
 
     return sendResponse(res, {
       statusCode: httpStatus.CREATED,
@@ -174,7 +199,7 @@ const replyToMessage = async (req: Request, res: Response) => {
 
 // Get messages between user and admin
 const getMessages = async (req: Request, res: Response) => {
-  const { userId } = req.params;
+  const { userId } = req.query;
 
   const { user_id, role } = req.user as TokenCredential;
   if (!user_id) {
@@ -186,15 +211,41 @@ const getMessages = async (req: Request, res: Response) => {
   }
 
   try {
-    const messages = await prisma.message.findMany({
-      where: {
-        OR: [
-          { senderId: userId, recipientId: user_id as string },
-          { senderId: user_id as string, recipientId: userId },
-        ],
-      },
-      orderBy: { createdAt: "asc" },
-    });
+    let messages;
+    if (role === 'USER') {
+      const adminRoles = ['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN'] as const;
+      const admins = await prisma.user.findMany({
+        where: {
+          role: {
+            in: [...adminRoles]
+          }
+        },
+        select: {
+          id: true
+        }
+      });
+      const adminIds = admins.map(admin => admin.id);
+
+      messages = await prisma.message.findMany({
+        where: {
+          OR: [
+            { senderId: userId, recipientId: { in: adminIds } },
+            { senderId: { in: adminIds }, recipientId: userId },
+          ],
+        },
+        orderBy: { createdAt: "asc" },
+      });
+    } else {
+      messages = await prisma.message.findMany({
+        where: {
+          OR: [
+            { senderId: userId as string, recipientId: user_id as string },
+            { senderId: user_id as string, recipientId: userId as string },
+          ],
+        },
+        orderBy: { createdAt: "asc" },
+      });
+    }
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,

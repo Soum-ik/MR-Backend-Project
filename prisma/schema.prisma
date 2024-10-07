@@ -45,24 +45,6 @@ model User {
   @@map("Users")
 }
 
-model Notification {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  senderLogo     String?
-  type           String
-  senderUserName String
-  isOnline       Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updateAt       DateTime @updatedAt
-
-  // recipientId String @db.ObjectId
-  // recipient   User   @relation(fields: [recipientId], references: [id])
-
-  messageId String?  @unique
-  message   Message? @relation(fields: [messageId], references: [id])
-
-  @@map("Notifications")
-}
-
 model Message {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   userImage      String?
@@ -80,9 +62,8 @@ model Message {
   msgTime        String
   contactForm    Json?
 
-  sender       User          @relation("SentMessages", fields: [senderId], references: [id])
-  recipient    User          @relation("ReceivedMessages", fields: [recipientId], references: [id])
-  Notification Notification?
+  sender    User @relation("SentMessages", fields: [senderId], references: [id])
+  recipient User @relation("ReceivedMessages", fields: [recipientId], references: [id])
 
   @@map("Messages")
 }
@@ -123,7 +104,7 @@ model SocialMediaLinks {
   yelp      String?
   tiktok    String?
   nextdoor  String?
-  userId    String  @unique
+  userId    String  @unique 
   user      User    @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
@@ -227,18 +208,15 @@ model FeatureAllFolder {
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name       String       @unique
-  subFolders SubFolders[]
-  createdAt  DateTime     @default(now())
-  updateAt   DateTime     @updatedAt
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
 }
 
 model SubFolders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   name      String   @unique
-  folderId  String   @db.ObjectId
-  folder    Folders  @relation(fields: [folderId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
 }
@@ -285,8 +263,8 @@ model MultiProject {
 //End - Here You will get the schema for multi-project
 
 enum Role {
-  ADMIN
   USER
+  ADMIN
   SUPER_ADMIN
   SUB_ADMIN
 }
