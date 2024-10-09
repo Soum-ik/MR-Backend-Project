@@ -63,7 +63,7 @@ const sendMessage = async (req: Request, res: Response) => {
         //   hour12: true,
         // });
 
-        // const converString = timeAndDate as string;
+        const converString = timeAndDate.toString();
 
         const message = await prisma.message.create({
             data: {
@@ -79,7 +79,7 @@ const sendMessage = async (req: Request, res: Response) => {
                 customOffer,
                 msgDate,
                 msgTime,
-                timeAndDate: timeAndDate as string,
+                timeAndDate: converString,
             },
         });
 
@@ -140,6 +140,7 @@ const replyToMessage = async (req: Request, res: Response) => {
             minute: "2-digit",
             hour12: true,
         });
+        const converString = timeAndDate.toString();
         const message = await prisma.message.create({
             data: {
                 senderId: user_id as string,
@@ -150,7 +151,7 @@ const replyToMessage = async (req: Request, res: Response) => {
                 replyTo,
                 customOffer,
                 msgDate,
-                timeAndDate: timeAndDate as string,
+                timeAndDate: converString,
                 msgTime,
             },
         });
