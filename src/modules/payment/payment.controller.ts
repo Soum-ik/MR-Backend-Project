@@ -2,7 +2,7 @@ import type { Request } from "express";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/config";
 
-const stripe = new Stripe(STRIPE_SECRET_KEY);
+const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 const stripePayment = async (req: Request, res: any) => {
     const { data } = req.body; // Array of items for the checkout session
@@ -11,7 +11,7 @@ const stripePayment = async (req: Request, res: any) => {
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
-            line_items: data.items.map((item) => ({
+            line_items: data.items.map((item : any) => ({
                 price_data: {
                     currency: "usd",
                     product_data: {

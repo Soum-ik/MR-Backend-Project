@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import { TokenCredential } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
+import { number, string } from "zod";
 
 //   senderName: user?.fullName,
 
@@ -61,6 +62,9 @@ const sendMessage = async (req: Request, res: Response) => {
         //   minute: "2-digit",
         //   hour12: true,
         // });
+
+        // const converString = timeAndDate as string;
+
         const message = await prisma.message.create({
             data: {
                 senderId: user_id as string,
@@ -75,7 +79,7 @@ const sendMessage = async (req: Request, res: Response) => {
                 customOffer,
                 msgDate,
                 msgTime,
-                timeAndDate,
+                timeAndDate: timeAndDate as string,
             },
         });
 
@@ -112,6 +116,7 @@ const replyToMessage = async (req: Request, res: Response) => {
         replyTo,
         isFromAdmin,
         customOffer,
+        timeAndDate,
     } = req.body;
 
     // Validate required fields
@@ -145,6 +150,7 @@ const replyToMessage = async (req: Request, res: Response) => {
                 replyTo,
                 customOffer,
                 msgDate,
+                timeAndDate: timeAndDate as string,
                 msgTime,
             },
         });

@@ -78,7 +78,7 @@ model Message {
   customOffer    Json?
   msgDate        String?
   msgTime        String
-  timeAndDate    Int
+  timeAndDate    String
   contactForm    Json?
 
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])

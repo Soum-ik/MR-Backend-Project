@@ -89,6 +89,7 @@ const startContact = async (req: Request, res: Response) => {
             exampleDesign: validatedBody.exampleDesign,
             messageText: validatedBody.message,
           },
+          timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
           // contactForChatId,
           isFromAdmin: MSG_FROM_ADMIN_NO,
           msgDate,
