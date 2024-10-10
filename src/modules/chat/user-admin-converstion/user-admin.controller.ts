@@ -4,7 +4,7 @@ import httpStatus from "http-status";
 import { TokenCredential } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
-import { number, string } from "zod";
+
 
 //   senderName: user?.fullName,
 
@@ -82,6 +82,18 @@ const sendMessage = async (req: Request, res: Response) => {
                 timeAndDate: converString,
             },
         });
+
+        // Create a notification for the recipient
+        await prisma.notification.create({
+            data: {
+                senderLogo: user?.image,
+                type: "message",
+                senderUserName: user?.userName ?? "Unknown",
+                recipientId: recipientId as string, // Notification goes to the recipient
+                messageId: message.id, // Associate the message with the notification
+            },
+        });
+
 
         return sendResponse(res, {
             statusCode: httpStatus.CREATED,
@@ -162,14 +174,13 @@ const replyToMessage = async (req: Request, res: Response) => {
             },
         });
 
-        // Create notification for the recipient
         await prisma.notification.create({
             data: {
-                type: messageText,
-                senderUserName: user?.userName as string,
-                senderLogo: user?.image as string,
-                messageId: message.id,
-                // recipientId: recipientId,
+                senderLogo: user?.image,
+                type: "message",
+                senderUserName: user?.userName ?? "Unknown",
+                recipientId: recipientId as string, // Notification goes to the recipient
+                messageId: message.id, // Associate the message with the notification
             },
         });
 

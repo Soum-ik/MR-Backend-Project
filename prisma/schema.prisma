@@ -38,9 +38,10 @@ model User {
   book_mark        Boolean           @default(false)
 
   // Relation to Message
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  contactForChatId String?   @db.ObjectId
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  contactForChatId String?        @db.ObjectId
+  Notification     Notification[]
 
   @@map("Users")
 }
@@ -54,10 +55,10 @@ model Notification {
   createdAt      DateTime @default(now())
   updateAt       DateTime @updatedAt
 
-  // recipientId String @db.ObjectId
-  // recipient   User   @relation(fields: [recipientId], references: [id])
+  recipientId String @db.ObjectId
+  recipient   User   @relation(fields: [recipientId], references: [id])
 
-  messageId String?  @unique
+  messageId String?  @unique @db.ObjectId
   message   Message? @relation(fields: [messageId], references: [id])
 
   @@map("Notifications")
