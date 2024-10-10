@@ -36,8 +36,6 @@ const sendMessage = async (req: Request, res: Response) => {
         attachment,
         replyTo,
         customOffer,
-        msgDate,
-        msgTime,
         timeAndDate,
     } = req.body;
 
@@ -51,18 +49,6 @@ const sendMessage = async (req: Request, res: Response) => {
     }
 
     try {
-        // const date = new Date();
-        // const msgDate = date.toLocaleDateString([], {
-        //   year: "numeric",
-        //   month: "short",
-        //   day: "numeric",
-        // });
-        // const msgTime = date.toLocaleTimeString([], {
-        //   hour: "2-digit",
-        //   minute: "2-digit",
-        //   hour12: true,
-        // });
-
         const converString = timeAndDate.toString();
 
         const message = await prisma.message.create({
@@ -77,8 +63,6 @@ const sendMessage = async (req: Request, res: Response) => {
                 replyTo,
                 isFromAdmin: role as string,
                 customOffer,
-                msgDate,
-                msgTime,
                 timeAndDate: converString,
             },
         });
@@ -141,17 +125,7 @@ const replyToMessage = async (req: Request, res: Response) => {
     }
 
     try {
-        const date = new Date();
-        const msgDate = date.toLocaleDateString([], {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
-        const msgTime = date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-        });
+        
         const converString = timeAndDate.toString();
         const message = await prisma.message.create({
             data: {
@@ -162,9 +136,7 @@ const replyToMessage = async (req: Request, res: Response) => {
                 isFromAdmin: role as string,
                 replyTo,
                 customOffer,
-                msgDate,
                 timeAndDate: converString,
-                msgTime,
             },
         });
 

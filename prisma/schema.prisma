@@ -78,8 +78,6 @@ model Message {
   replyTo        String?
   isFromAdmin    String
   customOffer    Json?
-  msgDate        String?
-  msgTime        String
   timeAndDate    String
   contactForm    Json?
 
