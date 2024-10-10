@@ -35,6 +35,7 @@ model User {
   contactForChat   contactForChat[]
   totalOrder       Int?              @default(0)
   QuickResponse    QuickResponse[]
+  lastSeen         DateTime?
   book_mark        Boolean           @default(false)
 
   // Relation to Message
