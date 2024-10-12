@@ -35,12 +35,14 @@ model User {
   contactForChat   contactForChat[]
   totalOrder       Int?              @default(0)
   QuickResponse    QuickResponse[]
+  lastSeen         DateTime?
   book_mark        Boolean           @default(false)
 
   // Relation to Message
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  contactForChatId String?   @db.ObjectId
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  contactForChatId String?        @db.ObjectId
+  Notification     Notification[]
 
   @@map("Users")
 }
@@ -54,10 +56,10 @@ model Notification {
   createdAt      DateTime @default(now())
   updateAt       DateTime @updatedAt
 
-  // recipientId String @db.ObjectId
-  // recipient   User   @relation(fields: [recipientId], references: [id])
+  recipientId String @db.ObjectId
+  recipient   User   @relation(fields: [recipientId], references: [id])
 
-  messageId String?  @unique
+  messageId String?  @unique @db.ObjectId
   message   Message? @relation(fields: [messageId], references: [id])
 
   @@map("Notifications")
@@ -76,9 +78,7 @@ model Message {
   replyTo        String?
   isFromAdmin    String
   customOffer    Json?
-  msgDate        String?
-  msgTime        String
-  timeAndDate    Int
+  timeAndDate    String
   contactForm    Json?
 
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])

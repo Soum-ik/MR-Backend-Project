@@ -5,6 +5,7 @@ import { TokenCredential } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
 
+
 //   senderName: user?.fullName,
 
 // Send a message
@@ -35,8 +36,6 @@ const sendMessage = async (req: Request, res: Response) => {
         attachment,
         replyTo,
         customOffer,
-        msgDate,
-        msgTime,
         timeAndDate,
     } = req.body;
 
@@ -50,17 +49,8 @@ const sendMessage = async (req: Request, res: Response) => {
     }
 
     try {
-        // const date = new Date();
-        // const msgDate = date.toLocaleDateString([], {
-        //   year: "numeric",
-        //   month: "short",
-        //   day: "numeric",
-        // });
-        // const msgTime = date.toLocaleTimeString([], {
-        //   hour: "2-digit",
-        //   minute: "2-digit",
-        //   hour12: true,
-        // });
+        const converString = timeAndDate.toString();
+
         const message = await prisma.message.create({
             data: {
                 senderId: user_id as string,
@@ -73,11 +63,21 @@ const sendMessage = async (req: Request, res: Response) => {
                 replyTo,
                 isFromAdmin: role as string,
                 customOffer,
-                msgDate,
-                msgTime,
-                timeAndDate,
+                timeAndDate: converString,
             },
         });
+
+        // Create a notification for the recipient
+        await prisma.notification.create({
+            data: {
+                senderLogo: user?.image,
+                type: "message",
+                senderUserName: user?.userName ?? "Unknown",
+                recipientId: recipientId as string, // Notification goes to the recipient
+                messageId: message.id, // Associate the message with the notification
+            },
+        });
+
 
         return sendResponse(res, {
             statusCode: httpStatus.CREATED,
@@ -112,6 +112,7 @@ const replyToMessage = async (req: Request, res: Response) => {
         replyTo,
         isFromAdmin,
         customOffer,
+        timeAndDate,
     } = req.body;
 
     // Validate required fields
@@ -124,17 +125,8 @@ const replyToMessage = async (req: Request, res: Response) => {
     }
 
     try {
-        const date = new Date();
-        const msgDate = date.toLocaleDateString([], {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
-        const msgTime = date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-        });
+        
+        const converString = timeAndDate.toString();
         const message = await prisma.message.create({
             data: {
                 senderId: user_id as string,
@@ -144,8 +136,7 @@ const replyToMessage = async (req: Request, res: Response) => {
                 isFromAdmin: role as string,
                 replyTo,
                 customOffer,
-                msgDate,
-                msgTime,
+                timeAndDate: converString,
             },
         });
 
@@ -155,14 +146,13 @@ const replyToMessage = async (req: Request, res: Response) => {
             },
         });
 
-        // Create notification for the recipient
         await prisma.notification.create({
             data: {
-                type: messageText,
-                senderUserName: user?.userName as string,
-                senderLogo: user?.image as string,
-                messageId: message.id,
-                // recipientId: recipientId,
+                senderLogo: user?.image,
+                type: "message",
+                senderUserName: user?.userName ?? "Unknown",
+                recipientId: recipientId as string, // Notification goes to the recipient
+                messageId: message.id, // Associate the message with the notification
             },
         });
 

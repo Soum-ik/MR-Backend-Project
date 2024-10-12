@@ -22,6 +22,7 @@ import { handleRoleRoute } from "../modules/role_controller_super_admin/role_con
 import authenticateSuperAdmin from "../middleware/super_admin_auth";
 import { UserRoute } from "../modules/user/userRotue";
 import { payment } from "../modules/payment/payment.controller";
+import { handleNotificationRoute } from "../modules/chat/get_notification/get_notification.router";
 
 const router = express.Router();
 
@@ -57,7 +58,7 @@ router.use("/quickResponse", authenticateToken, quickResponseRouter);
 router.use('/message', authenticateToken, handleMessageRoute)
 router.use('/bookMark', bookMarkRoute)
 router.use('/role', authenticateSuperAdmin, handleRoleRoute)
-
+router.use('/notification', handleNotificationRoute)
 
 router.post("/upload-image", upload.any(), uploadImage);
 router.post("/contactForChat", authenticateToken, startContact);

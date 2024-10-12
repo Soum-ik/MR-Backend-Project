@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const formSchema = z.object({
+  timeAndDate: z.bigint().optional(),
   name: z
     .string().optional(),
   email: z.string().email({ message: "Invalid email address" }).optional(),
