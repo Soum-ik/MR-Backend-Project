@@ -256,7 +256,7 @@ const getAllUser = async (req: Request, res: Response) => {
             userName: true,
             number: true,
             SocialMediaLinks: true, role: true, language: true,
-            createdAt: true, updateAt: true, otp: true
+            createdAt: true, updateAt: true, otp: true, lastSeen: true,
         }
     })
     return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, data: allUser, message: 'all user successfully get', })

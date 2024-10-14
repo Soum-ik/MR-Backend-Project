@@ -63,17 +63,6 @@ const startContact = async (req: Request, res: Response) => {
     }
 
     // Select a random admin
-    const date = new Date();
-    const msgDate = date.toLocaleDateString([], {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-    const msgTime = date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
 
     // Create new message entries for all admins
     const newMessages = await Promise.all(admins.map(admin => 
@@ -92,8 +81,6 @@ const startContact = async (req: Request, res: Response) => {
           timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
           // contactForChatId,
           isFromAdmin: MSG_FROM_ADMIN_NO,
-          msgDate,
-          msgTime,
         },
       })
     ));

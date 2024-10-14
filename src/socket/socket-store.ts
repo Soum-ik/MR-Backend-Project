@@ -1,5 +1,6 @@
-import { Socket } from 'socket.io';
-import { print } from '../helper/colorConsolePrint.ts/colorizedConsole';
+import { Socket } from "socket.io";
+import { print } from "../helper/colorConsolePrint.ts/colorizedConsole";
+import { prisma } from "../libs/prismaHelper";
 
 // map instance to store connected users
 const connectedUsers = new Map();
@@ -14,26 +15,63 @@ const getSocketServerInstance = () => {
     return io;
 };
 // add new connected user
-const addNewConnectedUser = ({
+const addNewConnectedUser = async ({
     socketId,
     userId,
     role,
 }: {
     socketId: string;
-    userId: number;
+    userId: any;
     role: string;
 }) => {
-    connectedUsers.set(socketId, { userId, role, })
-    print.yellow('user connected 💥' + socketId);
+    connectedUsers.set(socketId, { userId, role });
+    print.yellow("user connected 💥" + socketId);
 
+     // Check if the user is already in connectedUsers map to update their lastSeen
+     const existingUser = [...connectedUsers.values()].find(user => user.userId === userId);
+
+     if (existingUser) {
+         // Update lastSeen to "now" or set to null
+         try {
+             await prisma.user.update({
+                 where: { id: userId },
+                 data: { lastSeen: null }, 
+             });
+             print.green(`Updated last seen for user ${userId} to "Online"`);
+         } catch (error) {
+             print.red(`Error updating last seen for user ${userId}: `, error);
+         }
+     } else {
+         // If user is new, add to connectedUsers map
+         connectedUsers.set(socketId, { userId, role });
+         print.yellow("User connected 💥" + socketId);
+     }
 };
 
 // remove connected user
 const removeConnectedUser = async (socketId: string) => {
     if (connectedUsers.has(socketId)) {
-        connectedUsers.delete(socketId);
+        const user = connectedUsers.get(socketId);
+        if (user) {
+            try {
+                // Update lastSeen in the Prisma database
+                const updatedStatus = await prisma.user.update({
+                    where: { id: user.userId },
+                    data: { lastSeen: new Date().toISOString() },
+                });
+                console.log("updatedStatus", updatedStatus);
 
-        print.yellow('user disconnected 💥' + socketId);
+                print.green(`Updated last seen for user ${user.userId}`);
+            } catch (error) {
+                print.red(
+                    `Error updating last seen for user ${user.userId}: `,
+                    error
+                );
+            }
+        }
+
+        connectedUsers.delete(socketId);
+        print.yellow("user disconnected 💥" + socketId);
     }
 };
 
@@ -56,14 +94,13 @@ const getOnlineUsers = () => {
     return onlineUsers;
 };
 
-
 // socket store
 const socketStore = {
     addNewConnectedUser,
     removeConnectedUser,
     setSocketServerInstance,
     getSocketServerInstance,
-    getOnlineUsers, 
+    getOnlineUsers,
 };
 
 export default socketStore;
