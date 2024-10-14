@@ -13,11 +13,15 @@ const getByname = async (req: Request, res: Response) => {
         // Validate the query using Zod
         const { name } = getByNameSchema.parse(req.query);
 
-        const findByName = await prisma.uploadDesign.findMany({
-            where: { subFolder: name },  orderBy: { id: 'desc' } 
+        const folderId = name as string;
+
+        const findByName = await prisma.subFolders.findMany({
+            where: { folderId: folderId },
+            orderBy: { id: 'desc' },
+            include: {
+                folder: true
+            }
         });
-
-
 
         if (findByName.length === 0) {
             return sendResponse<any>(res, {
@@ -59,7 +63,7 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.subFolders.findMany({ select: { name: true },  orderBy: { id: 'desc' }  });
+        const findAll = await prisma.subFolders.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
 
         // Send success response with retrieved data
         return sendResponse<any>(res, {

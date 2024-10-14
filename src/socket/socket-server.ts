@@ -39,6 +39,8 @@ const registerSocketServer = (server: Server) => {
   });
 
   io.on("connection", (socket: Socket) => {
+    console.log("socket connected");
+
     // add connected user to online users list
     newConnectionHandler(socket, io);
 

@@ -24,9 +24,6 @@ const getByname = async (req: Request, res: Response) => {
 
 
 
-
-
-
         if (findByName.length === 0) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.NOT_FOUND,
@@ -67,7 +64,7 @@ const getByname = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
     try {
         // Fetch all folders from the database
-        const findAll = await prisma.folders.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
+        const findAll = await prisma.folders.findMany({ select: { name: true, subFolders: true }, orderBy: { id: 'desc' } });
 
         // const extractDatas = extractNames(findAll)
         // Send success response with retrieved data

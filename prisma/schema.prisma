@@ -69,8 +69,8 @@ model Message {
   userImage      String?
   senderName     String?
   senderUserName String?
-  senderId       String
-  recipientId    String
+  senderId       String   @db.ObjectId
+  recipientId    String   @db.ObjectId
   messageText    String
   attachment     Json[]   @default([])
   createdAt      DateTime @default(now())
@@ -229,7 +229,7 @@ model FeatureAllFolder {
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name       String       @unique
+  name       String
   subFolders SubFolders[]
   createdAt  DateTime     @default(now())
   updateAt   DateTime     @updatedAt
@@ -238,7 +238,7 @@ model Folders {
 model SubFolders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name      String   @unique
+  name      String
   folderId  String   @db.ObjectId
   folder    Folders  @relation(fields: [folderId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

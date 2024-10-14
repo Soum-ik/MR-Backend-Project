@@ -2,15 +2,22 @@ import express, { type Request, type Response, type Application, type NextFuncti
 import cors from 'cors'
 import httpStatus from "http-status";
 import helmet from 'helmet';
-import { PORT } from './config/config';
+import { WEB_CACHE } from './config/config';
 import router from './routes/route';
-import ServerlessHttp from 'serverless-http';
 import socketServer from './socket/socket-server';
 import { createServer } from 'node:http'
-// 
-export const app: Application = express()
+import rateLimit from "express-rate-limit";
+import morganLogger from './middleware/morganLogger';
 
-const httpServer = createServer(app);
+
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 100, // Limit each IP to 100 requests per windowMs
+});
+
+const app: Application = express()
+export const httpServer = createServer(app);
+
 
 // init socket server
 socketServer.registerSocketServer(httpServer);
@@ -28,26 +35,17 @@ const corsOptions = {
     credentials: true,
 };
 
-
-
 // middlewares
 app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet({
-    contentSecurityPolicy: false,
-    xDownloadOptions: false,
-}),)
+app.use(helmet())
 
-
-
-// Web cache validation and conditional requests in Http
-// app.set('etag', WEB_CACHE);
-
-
+app.use(limiter);
+app.set('etag', WEB_CACHE);
 app.use('/api/v1', router)
-
+app.use(morganLogger)
 
 // Middleware to handle CORS headers for unsupported routes
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -76,14 +74,3 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 
 
-httpServer.listen(PORT, async () => {
-    try {
-        // await dbConnection();
-        console.log(`Application listening on port ${PORT}`);
-    } catch (error) {
-        console.error('Error connecting to the database', error);
-        process.exit(1);
-    }
-});
-
-export const handler = ServerlessHttp(app);

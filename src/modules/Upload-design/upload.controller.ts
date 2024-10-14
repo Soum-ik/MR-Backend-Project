@@ -28,6 +28,12 @@ export const UploadDesign = async (req: Request, res: Response) => {
             specialSerialCodeGenarator = designSerialGenerator(convertedSerialUpdateNumber);
         }
 
+        await prisma.desigserialNumberGenerator.create({
+            data: {
+                serialnumber: convertedSerialUpdateNumber + ''
+            }
+        })
+
         if (specialSerialCodeGenarator) {
 
             // Create UploadDesign in the database
@@ -50,7 +56,7 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 }
             });
 
-            await prisma.folders.create({
+            const folder = await prisma.folders.create({
                 data: {
                     name: validatedData.folder
                 },
@@ -59,15 +65,19 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 },
             })
 
+            await prisma.subFolders.create({
+                data: {
+                    name: validatedData.subFolder,
+                    folderId: folder.id
+                }
+            })
 
-            // Check or create entities
-            await findOrCreateEntity(prisma.folders, { name: validatedData.folder }, { name: validatedData.folder });
-            await findOrCreateEntity(prisma.subFolders, { name: validatedData.subFolder }, { name: validatedData.subFolder });
             await prisma.industrys.create({
                 data: {
                     name: validatedData.industries
                 }
             })
+
             await prisma.designs.create({
                 data: {
                     name: validatedData.designs
@@ -75,11 +85,6 @@ export const UploadDesign = async (req: Request, res: Response) => {
             })
 
 
-            await prisma.desigserialNumberGenerator.create({
-                data: {
-                    serialnumber: convertedSerialUpdateNumber + ''
-                }
-            })
 
             return sendResponse<any>(res, {
                 statusCode: httpStatus.OK,
