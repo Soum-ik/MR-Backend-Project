@@ -27,25 +27,25 @@ const addNewConnectedUser = async ({
     connectedUsers.set(socketId, { userId, role });
     print.yellow("user connected 💥" + socketId);
 
-     // Check if the user is already in connectedUsers map to update their lastSeen
-     const existingUser = [...connectedUsers.values()].find(user => user.userId === userId);
+    // Check if the user is already in connectedUsers map to update their lastSeen
+    const existingUser = [...connectedUsers.values()].find(user => user.userId === userId);
 
-     if (existingUser) {
-         // Update lastSeen to "now" or set to null
-         try {
-             await prisma.user.update({
-                 where: { id: userId },
-                 data: { lastSeen: null }, 
-             });
-             print.green(`Updated last seen for user ${userId} to "Online"`);
-         } catch (error) {
-             print.red(`Error updating last seen for user ${userId}: `, error);
-         }
-     } else {
-         // If user is new, add to connectedUsers map
-         connectedUsers.set(socketId, { userId, role });
-         print.yellow("User connected 💥" + socketId);
-     }
+    if (existingUser) {
+        // Update lastSeen to "now" or set to null
+        try {
+            await prisma.user.update({
+                where: { id: userId },
+                data: { lastSeen: null },
+            });
+            print.green(`Updated last seen for user ${userId} to "Online"`);
+        } catch (error) {
+            print.red(`Error updating last seen for user ${userId}: `, error);
+        }
+    } else {
+        // If user is new, add to connectedUsers map
+        connectedUsers.set(socketId, { userId, role });
+        print.yellow("User connected 💥" + socketId);
+    }
 };
 
 // remove connected user
@@ -55,13 +55,11 @@ const removeConnectedUser = async (socketId: string) => {
         if (user) {
             try {
                 // Update lastSeen in the Prisma database
-                const updatedStatus = await prisma.user.update({
+                await prisma.user.update({
                     where: { id: user.userId },
                     data: { lastSeen: new Date().toISOString() },
                 });
-                console.log("updatedStatus", updatedStatus);
 
-                print.green(`Updated last seen for user ${user.userId}`);
             } catch (error) {
                 print.red(
                     `Error updating last seen for user ${user.userId}: `,

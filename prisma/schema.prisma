@@ -38,6 +38,8 @@ model User {
   lastSeen         DateTime?
   book_mark        Boolean           @default(false)
 
+  block_for_chat Boolean @default(false)
+
   // Relation to Message
   sentMessages     Message[]      @relation("SentMessages")
   receivedMessages Message[]      @relation("ReceivedMessages")
@@ -95,8 +97,6 @@ model contactForChat {
   website       String?
   exampleDesign Json?
   messageText   String
-
-  block Boolean @default(false)
 
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])

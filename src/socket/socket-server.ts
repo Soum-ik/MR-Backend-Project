@@ -39,8 +39,7 @@ const registerSocketServer = (server: Server) => {
   });
 
   io.on("connection", (socket: Socket) => {
-    console.log("socket connected");
-
+ 
     // add connected user to online users list
     newConnectionHandler(socket, io);
 
@@ -59,13 +58,12 @@ const registerSocketServer = (server: Server) => {
       // clearInterval(interval);
     });
   });
-  // print all socket connected users in log every 8 seconds
+ 
   setInterval(() => {
     const onlineUsers = socketStore.getOnlineUsers();
     print.blue("online users: " + onlineUsers.length);
     for (let i = 0; i < onlineUsers.length; i++) {
       const user = onlineUsers[i];
-      console.log(i, user);
     }
   }, 8000);
 };

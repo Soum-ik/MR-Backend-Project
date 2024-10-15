@@ -14,6 +14,7 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 			where: {
 				contactForChat: {
 					some: {}, // This ensures the contactForChat array is not empty
+
 				},
 			},
 		});

@@ -23,6 +23,7 @@ import authenticateSuperAdmin from "../middleware/super_admin_auth";
 import { UserRoute } from "../modules/user/userRotue";
 import { payment } from "../modules/payment/payment.controller";
 import { handleNotificationRoute } from "../modules/chat/get_notification/get_notification.router";
+import { blockChatRouter } from "../modules/chat/block_chat/block_chat.route";
 
 const router = express.Router();
 
@@ -65,6 +66,7 @@ router.post("/contactForChat", authenticateToken, startContact);
 
 router.get("/avaiableforchat", chating.AvaiableForChat);
 
+router.use('/block-chat', blockChatRouter)
 
 
 //Multi-Project Route

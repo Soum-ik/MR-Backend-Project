@@ -38,6 +38,9 @@ const corsOptions = {
 // middlewares
 app.use(cors(corsOptions));
 
+// Apply morganLogger before other middlewares
+app.use(morganLogger);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet())
@@ -45,7 +48,6 @@ app.use(helmet())
 app.use(limiter);
 app.set('etag', WEB_CACHE);
 app.use('/api/v1', router)
-app.use(morganLogger)
 
 // Middleware to handle CORS headers for unsupported routes
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -71,6 +73,3 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     });
     next();
 });
-
-
-
