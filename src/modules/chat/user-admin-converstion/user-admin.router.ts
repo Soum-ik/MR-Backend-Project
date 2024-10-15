@@ -14,4 +14,6 @@ router.get('/:userId', messageControlller.getMessages);
 
 router.delete('/:id', messageControlller.deleteMessage)
 
+router.delete('/delete-conversation/:userId', messageControlller.deleteConversation)
+
 export const handleMessageRoute = router;

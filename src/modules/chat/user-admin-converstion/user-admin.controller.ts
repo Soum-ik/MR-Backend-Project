@@ -125,7 +125,7 @@ const replyToMessage = async (req: Request, res: Response) => {
     }
 
     try {
-        
+
         const converString = timeAndDate.toString();
         const message = await prisma.message.create({
             data: {
@@ -174,13 +174,13 @@ const replyToMessage = async (req: Request, res: Response) => {
 // Get messages between user and admin
 const getMessages = async (req: Request, res: Response) => {
     const { userId } = req.params;
+    const { user_id } = req.user as TokenCredential;
 
-    const { user_id, role } = req.user as TokenCredential;
     if (!user_id) {
         return sendResponse<any>(res, {
-            statusCode: httpStatus.NOT_FOUND,
+            statusCode: httpStatus.UNAUTHORIZED,
             success: false,
-            message: "Token are required!",
+            message: "Token is required!",
         });
     }
 
@@ -188,8 +188,8 @@ const getMessages = async (req: Request, res: Response) => {
         const messages = await prisma.message.findMany({
             where: {
                 OR: [
-                    { senderId: userId, recipientId: user_id as string },
-                    { senderId: user_id as string, recipientId: userId },
+                    { senderId: userId, recipientId: user_id as string, deletedForRecipient: false },
+                    { senderId: user_id as string, recipientId: userId, deletedForSender: false },
                 ],
             },
             orderBy: { createdAt: "asc" },
@@ -209,6 +209,7 @@ const getMessages = async (req: Request, res: Response) => {
         });
     }
 };
+
 
 const deleteMessage = async (req: Request, res: Response) => {
     const messageId = req.params.id;
@@ -290,9 +291,62 @@ const deleteMessage = async (req: Request, res: Response) => {
     }
 };
 
+const deleteConversation = async (req: Request, res: Response) => {
+    const { user_id, role } = req.user as TokenCredential;
+    const { userId } = req.params; // ID of the other participant in the conversation
+
+    if (!user_id) {
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.UNAUTHORIZED,
+            success: false,
+            message: "Token is required!",
+        });
+    }
+    try {
+        const isAdmin = ["ADMIN", "SUPER_ADMIN", "MODERATOR"].includes(role as string);
+        const isSenderDeleting = user_id === userId;
+
+        // Update the messages between the user and the recipient (admin or user)
+        const result = await prisma.message.updateMany({
+            where: {
+                OR: [
+                    { senderId: user_id as string, recipientId: userId },
+                    { senderId: userId, recipientId: user_id as string },
+                ],
+            },
+            data: isSenderDeleting
+                ? { deletedForSender: true }
+                : { deletedForRecipient: true },
+        });
+
+        if (result.count === 0) {
+            return sendResponse(res, {
+                statusCode: httpStatus.NOT_FOUND,
+                success: false,
+                message: "No messages found to delete.",
+            });
+        }
+
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: `Conversation deleted from ${isAdmin ? 'admin' : 'user'} side.`,
+        });
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Error deleting conversation.",
+        });
+    }
+};
+
+
 export const messageControlller = {
     getMessages,
     replyToMessage,
     sendMessage,
     deleteMessage,
+    deleteConversation
 };
