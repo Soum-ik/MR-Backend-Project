@@ -60,7 +60,7 @@ model Notification {
   recipient   User   @relation(fields: [recipientId], references: [id])
 
   messageId String?  @unique @db.ObjectId
-  message   Message? @relation(fields: [messageId], references: [id])
+  message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@map("Notifications")
 }
@@ -95,6 +95,8 @@ model contactForChat {
   website       String?
   exampleDesign Json?
   messageText   String
+
+  block Boolean @default(false)
 
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
@@ -228,7 +230,7 @@ model FeatureAllFolder {
 model Folders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name       String
+  name       String       @unique
   subFolders SubFolders[]
   createdAt  DateTime     @default(now())
   updateAt   DateTime     @updatedAt
@@ -237,7 +239,7 @@ model Folders {
 model SubFolders {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name      String
+  name      String   @unique
   folderId  String   @db.ObjectId
   folder    Folders  @relation(fields: [folderId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

@@ -56,21 +56,42 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 }
             });
 
-            const folder = await prisma.folders.create({
-                data: {
-                    name: validatedData.folder
-                },
-                include: {
-                    subFolders: true,
-                },
-            })
 
-            await prisma.subFolders.create({
-                data: {
-                    name: validatedData.subFolder,
-                    folderId: folder.id
+            const folder_check = await prisma.folders.findUnique({
+                where: {
+                    name: validatedData.folder
                 }
             })
+
+            if (!folder_check) {
+
+                const folder = await prisma.folders.create({
+                    data: {
+                        name: validatedData.folder
+                    },
+                    include: {
+                        subFolders: true,
+                    },
+                })
+
+                const subFolder_check = await prisma.subFolders.findUnique({
+                    where: {
+                        name: validatedData.subFolder
+                    }
+                })
+
+                if (!subFolder_check) {
+                    await prisma.subFolders.create({
+                        data: {
+                            name: validatedData.subFolder,
+                            folderId: folder.id
+                        }
+                    })
+                }
+
+            }
+
+
 
             await prisma.industrys.create({
                 data: {
