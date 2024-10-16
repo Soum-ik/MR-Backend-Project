@@ -63,6 +63,11 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 }
             })
 
+
+            console.log(folder_check?.id);
+
+
+
             if (!folder_check) {
 
                 const folder = await prisma.folders.create({
@@ -85,6 +90,23 @@ export const UploadDesign = async (req: Request, res: Response) => {
                         data: {
                             name: validatedData.subFolder,
                             folderId: folder.id
+                        }
+                    })
+                }
+
+            } else {
+                const subFolder_check = await prisma.subFolders.findUnique({
+                    where: {
+                        name: validatedData.subFolder
+                    }
+                })
+
+
+                if (!subFolder_check) {
+                    await prisma.subFolders.create({
+                        data: {
+                            name: validatedData.subFolder,
+                            folderId: folder_check?.id as string
                         }
                     })
                 }
