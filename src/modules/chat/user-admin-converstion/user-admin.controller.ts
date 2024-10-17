@@ -146,15 +146,25 @@ const replyToMessage = async (req: Request, res: Response) => {
             },
         });
 
-        await prisma.notification.create({
-            data: {
-                senderLogo: user?.image,
-                type: "message",
-                senderUserName: user?.userName ?? "Unknown",
-                recipientId: recipientId as string, // Notification goes to the recipient
-                messageId: message.id, // Associate the message with the notification
-            },
-        });
+        if (user?.archive) {
+            return sendResponse(res, {
+                statusCode: httpStatus.CREATED,
+                success: true,
+                data: "user are archive, so there is no notification",
+            });
+        } else {
+            await prisma.notification.create({
+                data: {
+                    senderLogo: user?.image,
+                    type: "message",
+                    senderUserName: user?.userName ?? "Unknown",
+                    recipientId: recipientId as string, // Notification goes to the recipient
+                    messageId: message.id, // Associate the message with the notification
+                },
+            });
+        }
+
+
 
         return sendResponse(res, {
             statusCode: httpStatus.CREATED,

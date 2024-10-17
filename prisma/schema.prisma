@@ -37,8 +37,8 @@ model User {
   QuickResponse    QuickResponse[]
   lastSeen         DateTime?
   book_mark        Boolean           @default(false)
-
-  block_for_chat Boolean @default(false)
+  archive         Boolean           @default(false)
+  block_for_chat   Boolean           @default(false)
 
   // Relation to Message
   sentMessages     Message[]      @relation("SentMessages")

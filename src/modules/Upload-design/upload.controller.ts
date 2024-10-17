@@ -63,11 +63,6 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 }
             })
 
-
-            console.log(folder_check?.id);
-
-
-
             if (!folder_check) {
 
                 const folder = await prisma.folders.create({
