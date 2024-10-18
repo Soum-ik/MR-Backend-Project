@@ -210,6 +210,12 @@ const verifyOtp = async (req: Request, res: Response) => {
                 success: true,
                 message: 'OTP matched successfully'
             });
+        } else {
+            return sendResponse(res, {
+                statusCode: httpStatus.NOT_ACCEPTABLE,
+                success: false,
+                message: 'Code does not match', data: null
+            });
         }
     } catch (error) {
         return sendResponse(res, {
