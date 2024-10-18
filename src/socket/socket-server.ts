@@ -39,7 +39,7 @@ const registerSocketServer = (server: Server) => {
   });
 
   io.on("connection", (socket: Socket) => {
- 
+
     // add connected user to online users list
     newConnectionHandler(socket, io);
 
@@ -47,6 +47,10 @@ const registerSocketServer = (server: Server) => {
     adminMessageHandler(socket, io)
     adminViewUsersHandler(socket, io)
     userMessageHandler(socket, io)
+
+    // order-chat
+    // orderChatHandler(socket, io)
+
 
     // get your own socket id
     getOwnSocketIdHandler(socket)
@@ -58,7 +62,7 @@ const registerSocketServer = (server: Server) => {
       // clearInterval(interval);
     });
   });
- 
+
   setInterval(() => {
     const onlineUsers = socketStore.getOnlineUsers();
     print.blue("online users: " + onlineUsers.length);

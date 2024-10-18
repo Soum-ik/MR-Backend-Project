@@ -79,6 +79,7 @@ const getOnlineUsers = () => {
         socketId: string;
         userId: number;
         role: string;
+        email: string;
     }[] = [];
 
     connectedUsers.forEach((value, key) => {
@@ -86,6 +87,7 @@ const getOnlineUsers = () => {
             socketId: key,
             userId: value.userId,
             role: value.role,
+            email: value.email,
         });
     });
 

@@ -1,17 +1,18 @@
 import type { Request } from "express";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/config";
+import { prisma } from "../../libs/prismaHelper";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 const stripePayment = async (req: Request, res: any) => {
     const { data } = req.body; // Array of items for the checkout session
-    console.log("data", data);
+
 
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
-            line_items: data.items.map((item : any) => ({
+            line_items: data.items.map((item: any) => ({
                 price_data: {
                     currency: "usd",
                     product_data: {
@@ -28,6 +29,7 @@ const stripePayment = async (req: Request, res: any) => {
             success_url: `http://localhost:5173/success`,
             cancel_url: `http://localhost:5173/cancel`,
         });
+        console.log("session", session);
         res.json({ id: session.id });
     } catch (error) {
         console.error("Error creating checkout session:", error);

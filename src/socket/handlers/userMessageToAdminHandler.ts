@@ -8,17 +8,19 @@ const userMessageHandler = (socket: Socket, io: any) => {
 
         const onlineUsers = socketStore.getOnlineUsers();
 
-        // Find the admin's socket information
-        const adminSocket = onlineUsers.find(user => user.role !== "USER");
+        // Find all admin's socket information
+        const adminSockets = onlineUsers.filter(user => user.role !== "USER");
 
-        if (adminSocket) {
-            // Emit the message to the admin's socket ID
-            io.to(adminSocket.socketId).emit("message", {
-                from: message.userId,
-                ...message
+        if (adminSockets.length > 0) {
+            // Emit the message to all admin's socket IDs
+            adminSockets.forEach(adminSocket => {
+                io.to(adminSocket.socketId).emit("message", {
+                    from: message.userId,
+                    ...message
+                });
             });
         } else {
-            console.log("Admin is not online.");
+            console.log("No admin is online.");
         }
     });
 };

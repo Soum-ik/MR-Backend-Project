@@ -6,7 +6,6 @@ import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
 
 
-//   senderName: user?.fullName,
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -19,71 +18,127 @@ const sendMessage = async (req: Request, res: Response) => {
             message: "Token are required!",
         });
     }
-
-    console.log(user_id, "user collection");
-
     const user = await prisma.user.findUnique({
         where: {
             id: user_id as string,
         },
     });
-
-    console.log(user, "get ");
-
     const {
-        recipientId,
         messageText,
         attachment,
         replyTo,
         customOffer,
         timeAndDate,
+        recipientId
     } = req.body;
 
     // Validate required fields
-    if (!recipientId) {
+    if (!messageText) {
         return sendResponse(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
-            message: "Sender, receiver, and message text are required",
+            message: "Message text is required.",
         });
     }
+    // If the role is admin, recipientId is required
+    if (["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"].includes(role as string) && !recipientId) {
+        return sendResponse(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: "Recipient ID is required for admin roles.",
+        });
+    }
+
+    const admins = await prisma.user.findMany({
+        where: {
+            role: {
+                in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"]
+            }
+        },
+        select: {
+            id: true,
+            userName: true,
+            role: true
+        }
+    })
+
+    console.log(admins, "admins");
 
     try {
         const converString = timeAndDate.toString();
 
-        const message = await prisma.message.create({
-            data: {
-                senderId: user_id as string,
-                userImage: user?.image,
-                senderName: user?.fullName,
-                senderUserName: user?.userName,
-                recipientId,
-                messageText,
-                attachment,
-                replyTo,
-                isFromAdmin: role as string,
-                customOffer,
-                timeAndDate: converString,
-            },
-        });
+        if (role === 'USER') {
+            // Send message to all admins if the role is USER
+            for (const admin of admins) {
+                const message = await prisma.message.create({
+                    data: {
+                        senderId: user_id as string,
+                        userImage: user?.image,
+                        senderName: user?.fullName,
+                        senderUserName: user?.userName,
+                        recipientId: admin.id,
+                        messageText,
+                        attachment,
+                        replyTo,
+                        isFromAdmin: role as string,
+                        customOffer,
+                        timeAndDate: converString,
+                    },
+                });
+
+                await prisma.notification.create({
+                    data: {
+                        senderLogo: user?.image,
+                        type: "message",
+                        senderUserName: user?.userName ?? "Unknown",
+                        recipientId: admin.id, // Notification goes to each admin
+                        messageId: message.id, // Associate the message with the notification
+                    },
+                });
+            }
+
+            return sendResponse(res, {
+                statusCode: httpStatus.CREATED,
+                success: true,
+                message: "Messages sent to all admins successfully.",
+            });
+        } else {
+            // For other roles, send message to the specified recipientId
+            const message = await prisma.message.create({
+                data: {
+                    senderId: user_id as string,
+                    userImage: user?.image,
+                    senderName: user?.fullName,
+                    senderUserName: user?.userName,
+                    recipientId,
+                    messageText,
+                    attachment,
+                    replyTo,
+                    isFromAdmin: role as string,
+                    customOffer,
+                    timeAndDate: converString,
+                },
+            });
+
+            await prisma.notification.create({
+                data: {
+                    senderLogo: user?.image,
+                    type: "message",
+                    senderUserName: user?.userName ?? "Unknown",
+                    recipientId: recipientId as string, // Notification goes to the recipient
+                    messageId: message.id, // Associate the message with the notification
+                },
+            });
+
+            return sendResponse(res, {
+                statusCode: httpStatus.CREATED,
+                success: true,
+                data: message,
+            });
+        }
 
         // Create a notification for the recipient
-        await prisma.notification.create({
-            data: {
-                senderLogo: user?.image,
-                type: "message",
-                senderUserName: user?.userName ?? "Unknown",
-                recipientId: recipientId as string, // Notification goes to the recipient
-                messageId: message.id, // Associate the message with the notification
-            },
-        });
 
-
-        return sendResponse(res, {
-            statusCode: httpStatus.CREATED,
-            success: true,
-            data: message,
-        });
     } catch (error) {
         console.error(error);
         return sendResponse(res, {

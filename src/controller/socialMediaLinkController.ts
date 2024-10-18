@@ -15,8 +15,7 @@ const   upsertSocialMediaLink = async (req: Request, res: Response) => {
     }
     const user = req.user
     const { email } = user
-    console.log(email);
-
+    
     if (!email) {
         return sendResponse<any>(res, {
             statusCode: httpStatus.BAD_REQUEST,
