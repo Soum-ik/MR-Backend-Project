@@ -1,7 +1,7 @@
 import express from "express";
 import UserController from "../controller/UserController";
 import SocialMediaLinkController from "../controller/socialMediaLinkController";
-import { upload } from "../libs/utlitys/multer";
+
 import authenticateToken from "../middleware/auth";
 import { CategoryRoute } from "../modules/ProjectCategory/CategoryRoute";
 import { DesignsRoute } from "../modules/Upload-design/designs/designs.route";
@@ -24,7 +24,8 @@ import { UserRoute } from "../modules/user/userRotue";
 import { payment } from "../modules/payment/payment.controller";
 import { handleNotificationRoute } from "../modules/chat/get_notification/get_notification.router";
 import { blockChatRouter } from "../modules/chat/block_chat/block_chat.route";
-
+import { uploadAttachmentToS3AndFormatBody } from "../middleware/uploadAttachmentToS3AndFormatBody";
+import upload from "../middleware/uploadFileWihtMulter";
 const router = express.Router();
 
 
@@ -39,6 +40,14 @@ router.post(
   SocialMediaLinkController.upsertSocialMediaLink
 );
 // middleware applyed
+
+router.post("/upload-attachment", upload.single('file'), uploadAttachmentToS3AndFormatBody(), (req, res) => {
+  console.log(req.body, "req.body");
+  console.log(req.file, "req.file");
+
+
+  res.send("ok");
+})
 
 router.get(
   "/get-singel-user/",

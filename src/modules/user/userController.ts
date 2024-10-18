@@ -227,7 +227,7 @@ const verifyOtp = async (req: Request, res: Response) => {
 
 };
 const setNewPass = async (req: Request, res: Response) => {
-    const { email }: any = req.user
+    const { email }: any = req.params
     if (!email) {
         return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Email are required!', })
     }

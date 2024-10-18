@@ -4,8 +4,7 @@ import socketStore from "../socket-store";
 const adminMessageHandler = (socket: Socket, io: any) => {
     // Listen for an admin message event
     socket.on("admin-message", (message) => {
-
-        console.log("message from admin",message)
+ 
 
 
         const onlineUsers = socketStore.getOnlineUsers();

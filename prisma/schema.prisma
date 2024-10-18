@@ -77,7 +77,7 @@ model Message {
   senderName     String?
   senderUserName String?
   senderId       String   @db.ObjectId
-  recipientId    String   @db.ObjectId
+  recipientId    String  @db.ObjectId
   messageText    String
   attachment     Json[]   @default([])
   createdAt      DateTime @default(now())

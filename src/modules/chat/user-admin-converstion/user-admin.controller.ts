@@ -62,8 +62,6 @@ const sendMessage = async (req: Request, res: Response) => {
         }
     })
 
-    console.log(admins, "admins");
-
     try {
         const converString = timeAndDate.toString();
 
@@ -238,8 +236,8 @@ const replyToMessage = async (req: Request, res: Response) => {
 
 // Get messages between user and admin
 const getMessages = async (req: Request, res: Response) => {
-    const { userId } = req.params;
-    const { user_id } = req.user as TokenCredential;
+    const { userId } = req.query;
+    const { user_id, role } = req.user as TokenCredential;
 
     if (!user_id) {
         return sendResponse<any>(res, {
@@ -250,21 +248,39 @@ const getMessages = async (req: Request, res: Response) => {
     }
 
     try {
-        const messages = await prisma.message.findMany({
-            where: {
-                OR: [
-                    { senderId: userId, recipientId: user_id as string, deletedForRecipient: false },
-                    { senderId: user_id as string, recipientId: userId, deletedForSender: false },
-                ],
-            },
-            orderBy: { createdAt: "asc" },
-        });
-
-        return sendResponse(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            data: messages,
-        });
+        if (role === "USER") {
+            const messages = await prisma.message.findMany({
+                where: {
+                    OR: [
+                        { recipientId: user_id as string, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } }, deletedForRecipient: false },
+                        { senderId: user_id as string, recipient: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } }, deletedForSender: false }
+                    ],
+                },
+                orderBy: { createdAt: "asc" },
+            });
+            return sendResponse(res, {
+                statusCode: httpStatus.OK,
+                success: true,
+                data: messages,
+                message: ""
+            });
+        } else {
+            const messages = await prisma.message.findMany({
+                where: {
+                    OR: [
+                        { senderId: userId as string, recipientId: user_id as string },
+                        { recipientId: userId as string, senderId: user_id as string }
+                    ],
+                },
+                orderBy: { createdAt: "asc" },
+            });
+            return sendResponse(res, {
+                statusCode: httpStatus.OK,
+                success: true,
+                data: messages,
+                message: `all message recive from user ${userId}`
+            });
+        }
     } catch (error) {
         console.error(error);
         return sendResponse(res, {

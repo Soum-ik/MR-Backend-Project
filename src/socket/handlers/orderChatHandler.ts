@@ -3,9 +3,7 @@ import socketStore from "../socket-store";
 
 const orderChatHandler = (socket: Socket, io: any) => {
     // Listen for a user message event
-    socket.on("user-message", (message) => {
-        console.log(message, "user message received");
-
+    socket.on("order:user-message", (message) => {
         const onlineUsers = socketStore.getOnlineUsers();
 
         // Find all admin's socket information
@@ -14,7 +12,7 @@ const orderChatHandler = (socket: Socket, io: any) => {
         if (adminSockets.length > 0) {
             // Emit the message to all admin's socket IDs
             adminSockets.forEach(adminSocket => {
-                io.to(adminSocket.socketId).emit("message", {
+                io.to(adminSocket.socketId).emit("order:message", {
                     from: message.userId,
                     ...message
                 });
@@ -25,17 +23,15 @@ const orderChatHandler = (socket: Socket, io: any) => {
     });
 
     // Listen for an admin message event
-    socket.on("admin-message", (message) => {
-        console.log(message, "admin message received");
-
+    socket.on("order:admin-message", (message) => {
         const onlineUsers = socketStore.getOnlineUsers();
 
         // Find the target user's socket information
-        const targetUser = onlineUsers.find(user => user.userId === message.targetUserId);
+        const targetUser = onlineUsers.find(user => user.userId === message.userId);
 
         if (targetUser) {
             // Emit the message to the target user's socket ID
-            io.to(targetUser.socketId).emit("message", {
+            io.to(targetUser.socketId).emit("order:message", {
                 from: message.adminId,
                 ...message
             });
