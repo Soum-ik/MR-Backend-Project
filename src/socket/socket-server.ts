@@ -11,6 +11,7 @@ import adminMessageHandler from "./handlers/adminMessageHandler";
 import adminViewUsersHandler from "./handlers/adminViewUsersHandler";
 import userMessageHandler from "./handlers/userMessageToAdminHandler";
 import getOwnSocketIdHandler from "./handlers/getOwnSocketIdHandler";
+import orderChatHandler from "./handlers/orderChatHandler";
 
 const registerSocketServer = (server: Server) => {
   const io = require("socket.io")(server, {
@@ -49,7 +50,7 @@ const registerSocketServer = (server: Server) => {
     userMessageHandler(socket, io)
 
     // order-chat
-    // orderChatHandler(socket, io)
+    orderChatHandler(socket, io)
 
 
     // get your own socket id

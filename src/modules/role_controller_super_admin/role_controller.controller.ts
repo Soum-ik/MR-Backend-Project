@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import httpStatus from "http-status";
 import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
+import { createToken } from "../../libs/authHelper";
 
 const manage_role = async (req: Request, res: Response) => {
   try {
@@ -28,7 +29,12 @@ const manage_role = async (req: Request, res: Response) => {
         const updatedUser = await prisma.user.update({
           where: { id: user_id },
           data: { role },
-        });
+        })
+
+
+
+        // Create the token
+        const token = createToken({ role: updatedUser.role, user_id: updatedUser.id, email: updatedUser.email });
 
         results.push({
           user_id: updatedUser.id,
@@ -36,6 +42,7 @@ const manage_role = async (req: Request, res: Response) => {
           message: `Role updated to ${updatedUser.role}`,
           fullName: updatedUser.fullName,
           email: updatedUser.email,
+          token: token
         });
       }
 
