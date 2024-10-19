@@ -13,7 +13,7 @@ import { UploadRoute } from "../modules/Upload-design/upload.route";
 import { chating } from "../modules/chat/chat.controller";
 import { startContact } from "../modules/contact/contact.controller";
 import { createProjectRoute } from "../modules/create-project-admin/createProject.route";
-import { multiProjectRoute } from "../modules/multi-project/multiProject.route.js";
+import { multiProjectRoute } from "../modules/multi-project/multiProject.route";
 import uploadImage from "../modules/uploadImage/uploadController";
 import { quickResponseRouter } from "../modules/QuickResponses/quickResponses.router";
 import { handleMessageRoute } from '../modules/chat/user-admin-converstion/user-admin.router'
@@ -25,7 +25,7 @@ import { payment } from "../modules/payment/payment.controller";
 import { handleNotificationRoute } from "../modules/chat/get_notification/get_notification.router";
 import { blockChatRouter } from "../modules/chat/block_chat/block_chat.route";
 import { uploadAttachmentToS3AndFormatBody } from "../middleware/uploadAttachmentToS3AndFormatBody";
-import upload from "../middleware/uploadFileWihtMulter";
+import { uploadFile } from "../middleware/uploadFileWihtMulter";
 const router = express.Router();
 
 
@@ -41,12 +41,15 @@ router.post(
 );
 // middleware applyed
 
-router.post("/upload-attachment", upload.single('file'), uploadAttachmentToS3AndFormatBody(), (req, res) => {
-  console.log(req.body, "req.body");
-  console.log(req.file, "req.file");
+router.post("/upload-attachment", uploadFile.any(), uploadAttachmentToS3AndFormatBody(), (req, res) => {
+  // Log the request body to check the structure and data
+  console.log(req.body, "Received request body");
 
-
-  res.send("ok");
+  // Respond with the request body to confirm what was received
+  res.status(200).send({
+    message: "Attachment uploaded and processed successfully",
+    data: req.body
+  });
 })
 
 router.get(
@@ -70,7 +73,7 @@ router.use('/bookMark', bookMarkRoute)
 router.use('/role', authenticateSuperAdmin, handleRoleRoute)
 router.use('/notification', handleNotificationRoute)
 
-router.post("/upload-image", upload.any(), uploadImage);
+router.post("/upload-image", uploadFile.any(), uploadImage);
 router.post("/contactForChat", authenticateToken, startContact);
 
 router.get("/avaiableforchat", chating.AvaiableForChat);

@@ -2,7 +2,7 @@ import express from "express";
 import {
   getAllFoldersController,
   updateFolderByOrder,
-} from "./feature/foldersControllers.js";
+} from "./feature/foldersControllers";
 import { uploaders } from "./upload.controller";
 
 const router = express.Router();

@@ -32,7 +32,7 @@ export const uploadFileToS3 = (
             Key: fileName,
             Body: fileContent,
             ContentType: contentType,
-            ACL: acl,
+            // ACL: acl,
         };
 
         const command = new PutObjectCommand(params);
@@ -76,7 +76,7 @@ export const uploadMultipleFilesToS3 = (
                     Key: fileName,
                     Body: fileContent,
                     ContentType: contentType,
-                    ACL: acl,
+                    // ACL: acl,
                 };
 
                 const command = new PutObjectCommand(params);
