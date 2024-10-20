@@ -7,16 +7,16 @@ export const uploadAttachmentToS3AndFormatBody = () => {
         try {
             const body: any = {};
             const files = req.files as Express.Multer.File[];
-            console.log('Received files:', files);
-
+ 
             const bucketName = 'mr-backend';
+
 
             if (files && files.length === 1) {
                 const file = files[0];
                 const fileName = `mr-backend-${Date.now()}-${file.originalname}`;
                 const filePath = file.path;
                 await uploadFileToS3(bucketName, filePath, fileName, 'public-read');
-                body.file = `https://${bucketName}.s3.amazonaws.com/${fileName}`;
+                body.file = { url: `https://${bucketName}.s3.amazonaws.com/${fileName}`, fileName: file.originalname, fileType: file.mimetype, fileSize: file.size };
                 console.log('File uploaded to S3:', body.file);
             } else if (files && files.length > 1) {
                 const uploadedFiles = await uploadMultipleFilesToS3(
@@ -32,12 +32,15 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                     'public-read'
                 );
 
+                console.log(uploadedFiles, "uploadedFiles");
+                
+
                 body.files = uploadedFiles.map(fileName => {
                     // This assumes uploadedFiles returns the exact names you want for the URL
                     // If not, you'll need to strip '/mr-backend/' in the name you are getting back
                     const cleanFileName = fileName.replace('mr-backend/', ''); // Ensure to remove the prefix if it's there
-                    console.log(cleanFileName, "cleanFileName");
-                    return `https://${bucketName}.s3.amazonaws.com/${cleanFileName}`;
+                   
+                    return { url: `https://${bucketName}.s3.amazonaws.com/${cleanFileName}`, fileName: files.forEach(file => file.originalname), fileType: files.forEach(file => file.mimetype), fileSize: files.forEach(file => file.size) };
                 });
                 console.log('Files uploaded to S3:', body.files);
             } else {
