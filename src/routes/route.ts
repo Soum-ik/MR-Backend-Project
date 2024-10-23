@@ -21,7 +21,7 @@ import { bookMarkRoute } from '../modules/book_mark/book_mark.router'
 import { handleRoleRoute } from "../modules/role_controller_super_admin/role_controller.router";
 import authenticateSuperAdmin from "../middleware/super_admin_auth";
 import { UserRoute } from "../modules/user/userRotue";
-import { payment } from "../modules/payment/payment.controller";
+import { handleWebhook } from "../modules/payment/payment.controller";
 import { handleNotificationRoute } from "../modules/chat/get_notification/get_notification.router";
 import { blockChatRouter } from "../modules/chat/block_chat/block_chat.route";
 import { uploadAttachmentToS3AndFormatBody } from "../middleware/uploadAttachmentToS3AndFormatBody";
@@ -85,6 +85,6 @@ router.use('/block-chat', blockChatRouter)
 router.use("/multi-project", multiProjectRoute);
 
 //payment route
-router.post('/api/checkout-session', payment.stripePayment)
+router.post('/api/checkout-session', handleWebhook)
 
 export default router;

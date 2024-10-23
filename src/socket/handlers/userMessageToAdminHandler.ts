@@ -23,6 +23,32 @@ const userMessageHandler = (socket: Socket, io: any) => {
             console.log("No admin is online.");
         }
     });
+
+    // Handle typing indication for user to admin
+    socket.on("typing", (data) => {
+        const onlineUsers = socketStore.getOnlineUsers();
+        const adminSockets = onlineUsers.filter(user => user.role !== "USER");
+
+        adminSockets.forEach(adminSocket => {
+            io.to(adminSocket.socketId).emit("displayTyping", {
+                userId: socket.id,
+                text: "User is typing...",
+                ...data
+            });
+        });
+    });
+
+    socket.on("stopTyping", (data) => {
+        const onlineUsers = socketStore.getOnlineUsers();
+        const adminSockets = onlineUsers.filter(user => user.role !== "USER");
+
+        adminSockets.forEach(adminSocket => {
+            io.to(adminSocket.socketId).emit("hideTyping", {
+                userId: socket.id,
+                ...data
+            });
+        });
+    });
 };
 
 export default userMessageHandler;

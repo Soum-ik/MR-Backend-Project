@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-
+import { v4 as uuidv4 } from 'uuid';
 import httpStatus from "http-status";
 import { TokenCredential } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
@@ -65,6 +65,8 @@ const sendMessage = async (req: Request, res: Response) => {
     try {
         const converString = timeAndDate.toString();
 
+        const commonkey = uuidv4();
+
         if (role === 'USER') {
             // Send message to all admins if the role is USER
             for (const admin of admins) {
@@ -81,6 +83,7 @@ const sendMessage = async (req: Request, res: Response) => {
                         isFromAdmin: role as string,
                         customOffer,
                         timeAndDate: converString,
+                        commonkey
                     },
                 });
 
@@ -115,6 +118,7 @@ const sendMessage = async (req: Request, res: Response) => {
                     isFromAdmin: role as string,
                     customOffer,
                     timeAndDate: converString,
+                    commonkey
                 },
             });
 
@@ -132,6 +136,7 @@ const sendMessage = async (req: Request, res: Response) => {
                 statusCode: httpStatus.CREATED,
                 success: true,
                 data: message,
+                message: `Message sent to recipient ID: ${recipientId}`
             });
         }
 
@@ -158,40 +163,43 @@ const replyToMessage = async (req: Request, res: Response) => {
         });
     }
 
-    const {
-        recipientId,
-        messageText,
-        attachment,
-        replyTo,
-        isFromAdmin,
-        customOffer,
-        timeAndDate,
-    } = req.body;
+    const { messageId, ...allData } = req.body
 
-    // Validate required fields
-    if (!recipientId || !messageText) {
+    if (!messageId) {
         return sendResponse(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
-            message: "Sender, receiver, and message text are required",
+            message: "Message ID is required! To reply to a message",
         });
     }
 
     try {
 
-        const converString = timeAndDate.toString();
-        const message = await prisma.message.create({
-            data: {
-                senderId: user_id as string,
-                recipientId,
-                messageText,
-                attachment,
-                isFromAdmin: role as string,
-                replyTo,
-                customOffer,
-                timeAndDate: converString,
+        const message = await prisma.message.findUnique({
+            where: {
+                id: messageId
             },
         });
+
+        if (!message) {
+            return sendResponse(res, {
+                statusCode: httpStatus.NOT_FOUND,
+                success: false,
+                message: "Message not found!",
+            });
+        }
+
+        const replyMessage = await prisma.message.update({
+            where: {
+                id: messageId
+            },
+            data: {
+                replyTo: allData
+            }
+        })
+
+
+
 
         const user = await prisma.user.findUnique({
             where: {
@@ -211,7 +219,7 @@ const replyToMessage = async (req: Request, res: Response) => {
                     senderLogo: user?.image,
                     type: "message",
                     senderUserName: user?.userName ?? "Unknown",
-                    recipientId: recipientId as string, // Notification goes to the recipient
+                    recipientId: message.recipientId as string, // Notification goes to the recipient
                     messageId: message.id, // Associate the message with the notification
                 },
             });
@@ -222,7 +230,8 @@ const replyToMessage = async (req: Request, res: Response) => {
         return sendResponse(res, {
             statusCode: httpStatus.CREATED,
             success: true,
-            data: message,
+            data: replyMessage,
+            message: `Message replied successfully to recipient ID: ${message.recipientId}`
         });
     } catch (error) {
         console.error(error);
@@ -258,12 +267,26 @@ const getMessages = async (req: Request, res: Response) => {
                 },
                 orderBy: { createdAt: "asc" },
             });
-            return sendResponse(res, {
-                statusCode: httpStatus.OK,
-                success: true,
-                data: messages,
-                message: ""
-            });
+
+            if (messages.length > 0) {
+                const uniqueMessages = messages.filter((message, index, self) =>
+                    index === self.findIndex((t) => t.commonkey === message.commonkey)
+                ).map(({ commonkey, ...rest }) => rest);
+
+                return sendResponse(res, {
+                    statusCode: httpStatus.OK,
+                    success: true,
+                    data: uniqueMessages,
+                    message: "all message recive from user"
+                });
+            } else {
+                return sendResponse(res, {
+                    statusCode: httpStatus.OK,
+                    success: true,
+                    data: [],
+                    message: "no message found"
+                });
+            }
         } else {
             const messages = await prisma.message.findMany({
                 where: {

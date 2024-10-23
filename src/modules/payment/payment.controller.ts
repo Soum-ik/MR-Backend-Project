@@ -1,40 +1,47 @@
-import type { Request } from "express";
+import { Request, Response } from "express";
 import Stripe from "stripe";
-import { STRIPE_SECRET_KEY } from "../../config/config";
 import { prisma } from "../../libs/prismaHelper";
+import sendResponse from "../../libs/sendResponse";
+import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from "../../config/config";
+import { TokenCredential } from "../../libs/authHelper";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
-const stripePayment = async (req: Request, res: any) => {
-    const { data } = req.body; // Array of items for the checkout session
-
+export const handleWebhook = async (req: Request, res: Response) => {
+    const { email, role, user_id } = req.user as TokenCredential;
+    const sig = req.headers['stripe-signature'];
+    let event: Stripe.Event;
 
     try {
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            line_items: data.items.map((item: any) => ({
-                price_data: {
-                    currency: "usd",
-                    product_data: {
-                        name: item?.name,
-                        images: item?.image, // Optional
-                    },
-                    unit_amount: item.isFastDelivery
-                        ? (item.baseAmount + item.fastDeliveryPrice) * 100
-                        : item.baseAmount * 100,
-                },
-                quantity: item.quantity,
-            })),
-            mode: "payment",
-            success_url: `http://localhost:5173/success`,
-            cancel_url: `http://localhost:5173/cancel`,
-        });
-        console.log("session", session);
-        res.json({ id: session.id });
-    } catch (error) {
-        console.error("Error creating checkout session:", error);
-        res.status(500).send("Internal Server Error");
+        event = stripe.webhooks.constructEvent(req.rawBody, sig as string, STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+        console.error(`⚠️ Webhook signature verification failed.`, err.message);
+        return res.sendStatus(400);
     }
-};
 
-export const payment = { stripePayment };
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as Stripe.Checkout.Session;
+
+        try {
+            // Save payment info in the database
+            await prisma.payment.create({
+                data: {
+                    stripeId: session.id,
+                    status: session.payment_status,
+                    amount: session.amount_total!,
+                    currency: session.currency as string,
+                    items: ''  ,
+                    userId: user_id as string,
+                },
+            });
+
+            console.log("Payment successfully recorded in the database.");
+        } catch (err) {
+            console.error("Failed to store payment info in the database.", err);
+            return res.status(500).send("Server Error");
+        }
+    }
+
+    // Respond with 200 to acknowledge receipt of the event
+    res.json({ received: true });
+};

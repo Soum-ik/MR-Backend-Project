@@ -6,12 +6,12 @@ import { authSocket } from "../socket/middleware/authSocket";
 import newConnectionHandler from "./handlers/newConnectionHandler";
 
 import socketStore from "./socket-store";
-import messageHandler from "./handlers/adminMessageHandler";
 import adminMessageHandler from "./handlers/adminMessageHandler";
 import adminViewUsersHandler from "./handlers/adminViewUsersHandler";
 import userMessageHandler from "./handlers/userMessageToAdminHandler";
 import getOwnSocketIdHandler from "./handlers/getOwnSocketIdHandler";
 import orderChatHandler from "./handlers/orderChatHandler";
+import adminMessageCheckerHandler from "./handlers/adminsMessageChecker";
 
 const registerSocketServer = (server: Server) => {
   const io = require("socket.io")(server, {
@@ -52,19 +52,21 @@ const registerSocketServer = (server: Server) => {
     // order-chat
     orderChatHandler(socket, io)
 
-
     // get your own socket id
     getOwnSocketIdHandler(socket)
+
+    adminMessageCheckerHandler(socket, io)
+
     // disconnect socket
     socket.on("disconnect", () => {
       // remove connected user from online users list
       disconnectHandler(socket);
       // stop emitting online users after disconnection
-      // clearInterval(interval);
+      clearInterval(onlineUsersInterval);
     });
   });
 
-  setInterval(() => {
+  const onlineUsersInterval = setInterval(() => {
     const onlineUsers = socketStore.getOnlineUsers();
     print.blue("online users: " + onlineUsers.length);
     for (let i = 0; i < onlineUsers.length; i++) {

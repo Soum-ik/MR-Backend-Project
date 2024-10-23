@@ -37,7 +37,7 @@ model User {
   QuickResponse    QuickResponse[]
   lastSeen         DateTime?
   book_mark        Boolean           @default(false)
-  archive         Boolean           @default(false)
+  archive          Boolean           @default(false)
   block_for_chat   Boolean           @default(false)
 
   // Relation to Message
@@ -45,6 +45,9 @@ model User {
   receivedMessages Message[]      @relation("ReceivedMessages")
   contactForChatId String?        @db.ObjectId
   Notification     Notification[]
+  Order            Order[]
+  Note             Note[]
+  Payment          Payment[]
 
   @@map("Users")
 }
@@ -77,15 +80,18 @@ model Message {
   senderName     String?
   senderUserName String?
   senderId       String   @db.ObjectId
-  recipientId    String  @db.ObjectId
+  recipientId    String   @db.ObjectId
   messageText    String
   attachment     Json[]   @default([])
   createdAt      DateTime @default(now())
-  replyTo        String?
   isFromAdmin    String
   customOffer    Json?
   timeAndDate    String
   contactForm    Json?
+  commonkey      String
+
+  // new added
+  replyTo Json?
 
   deletedForSender    Boolean @default(false)
   deletedForRecipient Boolean @default(false)
@@ -133,7 +139,7 @@ model SocialMediaLinks {
   yelp      String?
   tiktok    String?
   nextdoor  String?
-  userId    String  @unique
+  userId    String  @unique @db.ObjectId
   user      User    @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
@@ -283,8 +289,6 @@ model projectSerialNumberGenerator {
   updateAt     DateTime @updatedAt
 }
 
-//Start - Here You will get the schema for multi-project
-
 model MultiProject {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   projectTitle String
@@ -292,11 +296,67 @@ model MultiProject {
   requirements String[] // This will be stored as an array of strings
 }
 
-//End - Here You will get the schema for multi-project
+model Order {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String        @db.ObjectId
+  user          User          @relation(fields: [userId], references: [id])
+  projectName   String
+  projectNumber String        @unique
+  quantity      Int
+  duration      Int // Duration in days
+  totalPrice    Float
+  paymentStatus PaymentStatus @default(PENDING)
+  startDate     DateTime      @default(now())
+  deliveryDate  DateTime
+  currentStatus OrderStatus   @default(PLACED)
+  privateNotes  Note[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  Payment       Payment[]
+}
+
+model Note {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String   @db.ObjectId
+  order     Order    @relation(fields: [orderId], references: [id])
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  stripeId  String // Stripe session ID
+  status    String // Payment status (e.g., 'paid', 'unpaid')
+  amount    Int // Amount paid in cents
+  currency  String // Currency (e.g., 'usd')
+  items     Json // The items purchased (store as JSON)
+  createdAt DateTime @default(now())
+  orderId   String   @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id]) // Optional relation
+  Order     Order    @relation(fields: [orderId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
 
 enum Role {
   ADMIN
   USER
   SUPER_ADMIN
   SUB_ADMIN
+}
+
+enum OrderStatus {
+  PLACED
+  REQUIREMENTS_SUBMITTED
+  RUNNING
+  REVIEW_DELIVERY
+  COMPLETED
 }

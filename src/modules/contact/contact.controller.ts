@@ -14,7 +14,7 @@ const MSG_FROM_ADMIN_NO = "No";
 const startContact = async (req: Request, res: Response) => {
   try {
     // Validate request body
-    const validatedBody = formSchema.parse(req.body);
+    const validatedBody = req.body
 
     // Check if user information is available
     if (!req.user || !req.user.email || !req.user.user_id) {
@@ -67,7 +67,7 @@ const startContact = async (req: Request, res: Response) => {
     // Select a random admin
 
     // Create new message entries for all admins
-    const newMessages = await Promise.all(admins.map(admin => 
+    const newMessages = await Promise.all(admins.map(admin =>
       prisma.message.create({
         data: {
           senderId: user_id,
