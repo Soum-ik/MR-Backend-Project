@@ -81,7 +81,7 @@ model Message {
   senderUserName String?
   senderId       String   @db.ObjectId
   recipientId    String   @db.ObjectId
-  messageText    String
+  messageText    String?
   attachment     Json[]   @default([])
   createdAt      DateTime @default(now())
   isFromAdmin    String

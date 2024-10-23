@@ -26,8 +26,9 @@ import { handleNotificationRoute } from "../modules/chat/get_notification/get_no
 import { blockChatRouter } from "../modules/chat/block_chat/block_chat.route";
 import { uploadAttachmentToS3AndFormatBody } from "../middleware/uploadAttachmentToS3AndFormatBody";
 import { uploadFile } from "../middleware/uploadFileWihtMulter";
-const router = express.Router();
+import { archiveRoute } from "../modules/chat/archive/archive.route";
 
+const router = express.Router();
 
 router.get(
   "/social-media-link/",
@@ -70,6 +71,7 @@ router.use("/getTogether", getTogetherRoute);
 router.use("/quickResponse", authenticateToken, quickResponseRouter);
 router.use('/message', authenticateToken, handleMessageRoute)
 router.use('/bookMark', bookMarkRoute)
+router.use('/archive', archiveRoute)
 router.use('/role', authenticateSuperAdmin, handleRoleRoute)
 router.use('/notification', handleNotificationRoute)
 

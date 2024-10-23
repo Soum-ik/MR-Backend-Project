@@ -25,7 +25,8 @@ const archiveUserList = async (req: Request, res: Response, next: NextFunction) 
         return sendResponse(res, {
             statusCode: httpStatus.OK,
             success: true,
-            data: archiveUser
+            data: archiveUser,
+            message: "Archive user list retrieved successfully"
         })
     } catch (error) {
         console.error("Error retrieving available users for chat: ", error);
@@ -99,7 +100,8 @@ const archiverUser = async (req: Request, res: Response, next: NextFunction) => 
 }
 
 const archiveUser = {
-    archiveUserList
+    archiveUserList,
+    archiverUser
 }
 
 export default archiveUser;
