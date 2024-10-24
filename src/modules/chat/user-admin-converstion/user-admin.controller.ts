@@ -32,14 +32,7 @@ const sendMessage = async (req: Request, res: Response) => {
         recipientId
     } = req.body;
 
-    // Validate required fields
-    if (!messageText) {
-        return sendResponse(res, {
-            statusCode: httpStatus.BAD_REQUEST,
-            success: false,
-            message: "Message text is required.",
-        });
-    }
+
     // If the role is admin, recipientId is required
     if (["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"].includes(role as string) && !recipientId) {
         return sendResponse(res, {
