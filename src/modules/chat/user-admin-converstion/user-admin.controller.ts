@@ -261,8 +261,8 @@ const getMessages = async (req: Request, res: Response) => {
             const messages = await prisma.message.findMany({
                 where: {
                     OR: [
-                        { recipientId: user_id as string, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } }, deletedForRecipient: false },
-                        { senderId: user_id as string, recipient: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } }, deletedForSender: false }
+                        { recipientId: user_id as string, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } } },
+                        { senderId: user_id as string, recipient: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } } }
                     ],
                 },
                 orderBy: { createdAt: "asc" },
@@ -291,18 +291,28 @@ const getMessages = async (req: Request, res: Response) => {
             const messages = await prisma.message.findMany({
                 where: {
                     OR: [
-                        { senderId: userId as string, recipientId: user_id as string },
-                        { recipientId: userId as string, senderId: user_id as string }
+                        { senderId: userId as string, recipientId: user_id as string, hiddenFromAdmin: false },
+                        { recipientId: userId as string, senderId: user_id as string, hiddenFromAdmin: false }
                     ],
                 },
                 orderBy: { createdAt: "asc" },
             });
-            return sendResponse(res, {
-                statusCode: httpStatus.OK,
-                success: true,
-                data: messages,
-                message: `all message recive from user ${userId}`
-            });
+
+            if (messages.length > 0) {
+                return sendResponse(res, {
+                    statusCode: httpStatus.OK,
+                    success: true,
+                    data: messages,
+                    message: `all message recive from user ${userId}`
+                });
+            } else {
+                return sendResponse(res, {
+                    statusCode: httpStatus.OK,
+                    success: true,
+                    data: [],
+                    message: `no message found from user ${userId}`
+                });
+            }
         }
     } catch (error) {
         console.error(error);
@@ -406,10 +416,18 @@ const deleteConversation = async (req: Request, res: Response) => {
             message: "Token is required!",
         });
     }
-    try {
-        const isAdmin = ["ADMIN", "SUPER_ADMIN", "MODERATOR"].includes(role as string);
-        const isSenderDeleting = user_id === userId;
+    const isAdmin = ["ADMIN", "SUPER_ADMIN", "SUB_ADMIN"].includes(role as string);
 
+    if (!isAdmin) {
+        return sendResponse(res, {
+            statusCode: httpStatus.FORBIDDEN,
+            success: false,
+            message: "You are not authorized to delete this conversation",
+        });
+    }
+
+
+    try {
         // Update the messages between the user and the recipient (admin or user)
         const result = await prisma.message.updateMany({
             where: {
@@ -418,9 +436,9 @@ const deleteConversation = async (req: Request, res: Response) => {
                     { senderId: userId, recipientId: user_id as string },
                 ],
             },
-            data: isSenderDeleting
-                ? { deletedForSender: true }
-                : { deletedForRecipient: true },
+            data: {
+                hiddenFromAdmin: true
+            }
         });
 
         if (result.count === 0) {

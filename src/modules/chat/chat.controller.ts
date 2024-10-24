@@ -12,15 +12,11 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 				contactForChat: true
 			},
 			where: {
-				block_for_chat: false,
 				contactForChat: {
 					some: {}, // This ensures the contactForChat array is not empty
-
 				},
 			},
 		});
-
-		console.log(listOfUser, 'checking list of user');
 
 
 		// Select only the required fields

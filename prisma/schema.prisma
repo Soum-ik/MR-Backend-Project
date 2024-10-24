@@ -14,33 +14,33 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(auto()) @map("_id") @db.ObjectId
-  fullName         String?
-  userName         String            @unique
-  email            String            @unique
-  password         String?
-  country          String?
-  city             String?
-  industryName     String?
-  address          String?
-  number           String?
-  image            String?
-  description      String?
-  language         String?
-  role             Role              @default(USER) // Set a default role, if needed
-  otp              Int?              @default(0)
-  forgetPasswordToken  String?
+  id                    String            @id @default(auto()) @map("_id") @db.ObjectId
+  fullName              String?
+  userName              String            @unique
+  email                 String            @unique
+  password              String?
+  country               String?
+  city                  String?
+  industryName          String?
+  address               String?
+  number                String?
+  image                 String?
+  description           String?
+  language              String?
+  role                  Role              @default(USER) // Set a default role, if needed
+  otp                   Int?              @default(0)
+  forgetPasswordToken   String?
   forgetPasswordExpires Int?
-  createdAt        DateTime          @default(now())
-  updateAt         DateTime          @updatedAt
-  SocialMediaLinks SocialMediaLinks?
-  contactForChat   contactForChat[]
-  totalOrder       Int?              @default(0)
-  QuickResponse    QuickResponse[]
-  lastSeen         DateTime?
-  book_mark        Boolean           @default(false)
-  archive          Boolean           @default(false)
-  block_for_chat   Boolean           @default(false)
+  createdAt             DateTime          @default(now())
+  updateAt              DateTime          @updatedAt
+  SocialMediaLinks      SocialMediaLinks?
+  contactForChat        contactForChat[]
+  totalOrder            Int?              @default(0)
+  QuickResponse         QuickResponse[]
+  lastSeen              DateTime?
+  book_mark             Boolean           @default(false)
+  archive               Boolean           @default(false)
+  block_for_chat        Boolean           @default(false)
 
   // Relation to Message
   sentMessages     Message[]      @relation("SentMessages")
@@ -95,8 +95,7 @@ model Message {
   // new added
   replyTo Json?
 
-  deletedForSender    Boolean @default(false)
-  deletedForRecipient Boolean @default(false)
+  hiddenFromAdmin Boolean @default(false)
 
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])
   recipient    User          @relation("ReceivedMessages", fields: [recipientId], references: [id])

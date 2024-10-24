@@ -78,7 +78,7 @@ export const emailVerficationTemplate = (data: TemplateCredentials) => {
     <body>
         <div class="container">
             <div class="logo-box">
-                <img class="logo" src="./MR Logo White.png" alt="MR Logo" />
+                <img class="logo" src=${`https://mr-backend.s3.amazonaws.com/MR+Logo+Black.png`} alt="MR Logo" />
             </div>
             <h2 class="title">Verification Code</h2>
             <p>Please use the following One Time Password (OTP)</p>
