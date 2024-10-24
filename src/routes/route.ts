@@ -42,7 +42,7 @@ router.post(
 );
 // middleware applyed
 
-router.post("/upload-attachment", uploadFile.any(), uploadAttachmentToS3AndFormatBody(), (req, res) => {
+router.post("/upload-attachment", uploadFile.array('files'), uploadAttachmentToS3AndFormatBody(), (req, res) => {
   // Log the request body to check the structure and data
   console.log(req.body, "Received request body");
 

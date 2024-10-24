@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { uploadFileToS3, uploadMultipleFilesToS3 } from '../utils/sendFiletoS3';
 import sharp from 'sharp';
-import fs from 'fs/promises'; // Use promises for file system
+import fs from 'fs/promises';
 import path from 'path';
-import jimp from 'jimp';
 
 interface FileData {
     url: string;
@@ -17,57 +16,72 @@ export const uploadAttachmentToS3AndFormatBody = () => {
         try {
             const body: { file?: FileData; files?: FileData[] } = {};
             const files = req.files as Express.Multer.File[];
-            const bucketName = process.env.BUCKET_NAME || 'mr-backend'; // Use env variable
-            const watermarkPath = path.resolve(__dirname, './watermark.png'); // Path to watermark image
+            const bucketName = 'mr-backend-watermark-resized';
 
-            // Process a single image with watermark
+            // Updated watermark path to use current directory
+            const watermarkPath = path.join(__dirname, 'a.jpg');
+
+            // Ensure processed directory exists
+            const processedDir = path.join(process.cwd(), 'processed');
+            await fs.mkdir(processedDir, { recursive: true });
+
+            // Process a single image with watermark using Sharp
             const processImageWithWatermark = async (file: Express.Multer.File) => {
-                const filePath = path.resolve(__dirname, `./uploads/${file.filename}`);
-                const outputPath = path.resolve(__dirname, `./processed/${file.filename}`);
 
-                // Read image using Jimp
-                const image = await jimp.read(file.buffer); // Read image from buffer (Multer)
-                const watermark = await jimp.read(watermarkPath); // Read the watermark image
+                const inputPath = file.path;
+                const outputPath = path.join(processedDir, `${bucketName}processed-${file.filename}`);
 
-                // Resize watermark based on image size (optional)
-                watermark.resize(image.bitmap.width / 5, jimp.AUTO);
+                try {
+                    
+                    // Process the main image with watermark
+                    await sharp(inputPath)
+                        .composite([{
+                            input: watermarkPath,
+                            blend: 'over',
+                            gravity: 'southeast',
+                            tile: false
+                        }])
+                        .toFile(outputPath);
 
-                // Composite watermark on the bottom-right corner
-                image.composite(watermark, image.bitmap.width - watermark.bitmap.width - 10, image.bitmap.height - watermark.bitmap.height - 10, {
-                    mode: jimp.BLEND_SOURCE_OVER,
-                    opacitySource: 0.5
-                });
 
-                // Save watermarked image to a buffer
-                const watermarkedImageBuffer = await image.getBufferAsync(jimp.MIME_PNG);
+                    // Clean up the original uploaded file
+                    await fs.unlink(inputPath);
 
-                // Write processed image to file system (optional, depends on your flow)
-                await fs.writeFile(outputPath, watermarkedImageBuffer);
-
-                return { outputPath, fileName: file.filename };
+                    return {
+                        outputPath,
+                        fileName: path.basename(outputPath)
+                    };
+                } catch (error) {
+                    console.error('Detailed error processing image:', error);
+                    // Clean up files in case of error
+                    await fs.unlink(inputPath).catch(() => { });
+                    await fs.unlink(outputPath).catch(() => { });
+                    throw new Error(`Failed to process image ${file.originalname}: ${error}`);
+                }
             };
 
             if (files && files.length === 1) {
                 const file = files[0];
+                console.log('Processing single file:', file.originalname);
+
                 const { outputPath, fileName } = await processImageWithWatermark(file);
 
-                // Upload the processed image to S3
+                // Upload to S3
                 await uploadFileToS3(bucketName, outputPath, fileName, 'public-read');
                 body.file = {
                     url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
                     originalName: file.originalname,
                     fileType: file.mimetype,
-                    fileSize: (await fs.stat(outputPath)).size // Use async stat
+                    fileSize: (await fs.stat(outputPath)).size
                 };
 
-                // Clean up the local processed file
-                const fileExists = await fs.access(outputPath).then(() => true).catch(() => false);
-                if (fileExists) {
-                    await fs.unlink(outputPath);
-                } else {
-                    console.error(`File not found for unlinking: ${outputPath}`);
-                }
+                // Cleanup processed file
+                await fs.unlink(outputPath).catch(err =>
+                    console.error(`Error deleting file ${outputPath}:`, err)
+                );
+
             } else if (files && files.length > 1) {
+                console.log('Processing multiple files:', files.length);
                 const processedFiles = await Promise.all(files.map(processImageWithWatermark));
 
                 const uploadedFiles = await uploadMultipleFilesToS3(
@@ -85,19 +99,16 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                         url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
                         originalName: file.originalname,
                         fileType: file.mimetype,
-                        fileSize: (await fs.stat(processedFiles[index].outputPath)).size // Use async stat
+                        fileSize: (await fs.stat(processedFiles[index].outputPath)).size
                     };
                 }));
 
-                // Clean up the local processed files
-                await Promise.all(processedFiles.map(async ({ outputPath }) => {
-                    const fileExists = await fs.access(outputPath).then(() => true).catch(() => false);
-                    if (fileExists) {
-                        await fs.unlink(outputPath);
-                    } else {
-                        console.error(`File not found for unlinking: ${outputPath}`);
-                    }
-                }));
+                // Cleanup processed files
+                await Promise.all(processedFiles.map(({ outputPath }) =>
+                    fs.unlink(outputPath).catch(err =>
+                        console.error(`Error deleting file ${outputPath}:`, err)
+                    )
+                ));
             } else {
                 console.log('No files received');
             }
@@ -110,11 +121,14 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 });
             }
 
-            req.body = { ...body }; // Overwrite request body with updated data
-            next(); // Continue to next middleware
+            req.body = { ...body };
+            next();
         } catch (error) {
             console.error('Error in uploadAttachmentToS3AndFormatBody:', error);
-            res.status(500).json({ error: 'An error occurred while processing the file upload' });
+            res.status(500).json({
+                error: 'An error occurred while processing the file upload',
+                details: error
+            });
         }
     };
 };
