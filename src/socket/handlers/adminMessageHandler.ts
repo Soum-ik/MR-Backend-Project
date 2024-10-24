@@ -32,15 +32,35 @@ const adminMessageHandler = (socket: Socket, io: any) => {
                 });
             }
         });
+    });
 
-        // Handle typing indication
-        socket.on("typing", (isTyping) => {
-            if (isTyping) {
-                io.emit("displayTyping", { userId: message.userId, text: "Admin is typing..." });
-            } else {
-                io.emit("hideTyping", { userId: message.userId });
-            }
-        });
+    // Listen for a delete message event
+    socket.on("delete-message", (message) => {
+        const onlineUsers = socketStore.getOnlineUsers();
+
+        // Find the target user socket by userId
+        const targetUserSocket = onlineUsers.find(user => user.userId === message.userId);
+
+        
+
+        if (targetUserSocket) {
+            // Emit the delete command to the specific user
+            io.to(targetUserSocket.socketId).emit("delete-message", {
+                from: "ADMIN",
+                ...message
+            });
+        } else {
+            console.log(`User ${message.userId} is not online or message cannot be deleted.`);
+        }
+    });
+
+    // Handle typing indication
+    socket.on("typing", (isTyping, userId) => {
+        if (isTyping) {
+            io.emit("displayTyping", { userId: userId, text: "Admin is typing..." });
+        } else {
+            io.emit("hideTyping", { userId: userId });
+        }
     });
 };
 

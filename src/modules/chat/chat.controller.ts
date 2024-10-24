@@ -36,6 +36,10 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 				userName: user.userName,
 				id: user.id,
 				status: status,
+				isBlocked: user.block_for_chat,
+				isArchived: user.archive,
+				isBookMarked: user.book_mark,
+
 			};
 		});
 
