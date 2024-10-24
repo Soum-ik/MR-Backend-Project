@@ -29,6 +29,8 @@ model User {
   language         String?
   role             Role              @default(USER) // Set a default role, if needed
   otp              Int?              @default(0)
+  forgetPasswordToken  String?
+  forgetPasswordExpires Int?
   createdAt        DateTime          @default(now())
   updateAt         DateTime          @updatedAt
   SocialMediaLinks SocialMediaLinks?
