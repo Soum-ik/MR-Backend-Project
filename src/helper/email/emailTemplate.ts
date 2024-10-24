@@ -1,12 +1,9 @@
-
-
 interface TemplateCredentials {
-    name: String,
-    code: Number
+    name: String;
+    code: Number;
 }
 
 export const emailTemplate = (data: TemplateCredentials) => {
-
     return `
     <!DOCTYPE html>
 <html lang="en">
