@@ -1,9 +1,9 @@
-import type { Request, Response } from 'express';
-import sendResponse from '../libs/sendResponse';
-import httpStatus from 'http-status';
-import { prisma } from '../libs/prismaHelper';
-import { createToken } from '../libs/authHelper';
-import sendVeficationEmail from '../helper/email/emailSend';
+import type { Request, Response } from "express";
+import httpStatus from "http-status";
+import sendVeficationEmail from "../helper/email/emailSend";
+import { createToken } from "../libs/authHelper";
+import { prisma } from "../libs/prismaHelper";
+import sendResponse from "../libs/sendResponse";
 
 interface SignupRequestBody {
     country?: string;
@@ -27,8 +27,10 @@ interface AuthenticatedRequest extends Request {
     user?: User;
 }
 
-
-const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
+const SignUp = async (
+    req: Request<{}, {}, SignupRequestBody>,
+    res: Response
+) => {
     try {
         const { country, fullName, userName, email, password } = req.body;
 
@@ -38,32 +40,35 @@ const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
                 statusCode: httpStatus.BAD_REQUEST,
                 success: false,
                 data: null,
-                message: "Email and password are required"
+                message: "Email and password are required",
             });
         }
 
         // Check if the email is already used
-        const existingEmail = await prisma.user.findUnique({ where: { email } });
+        const existingEmail = await prisma.user.findUnique({
+            where: { email },
+        });
         if (existingEmail) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.CONFLICT,
                 success: false,
                 data: null,
-                message: "Email is already in use"
+                message: "Email is already in use",
             });
         }
 
         // Check if the username is already used
-        const existingUserName = await prisma.user.findUnique({ where: { userName } });
+        const existingUserName = await prisma.user.findUnique({
+            where: { userName },
+        });
         if (existingUserName) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.CONFLICT,
                 success: false,
                 data: null,
-                message: "Username is already in use"
+                message: "Username is already in use",
             });
         }
-
 
         // Create the new user
         const createUser = await prisma.user.create({
@@ -72,8 +77,8 @@ const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
                 fullName,
                 userName,
                 email,
-                password
-            }
+                password,
+            },
         });
 
         const { role, id, email: Useremail } = createUser;
@@ -87,12 +92,10 @@ const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
             statusCode: httpStatus.CREATED,
             success: true,
             data: token,
-            message: "User created successfully"
+            message: "User created successfully",
         });
-
     } catch (error: any) {
         console.error("Error creating user:", error.message);
-
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.NOT_ACCEPTABLE,
@@ -102,14 +105,17 @@ const SignUp = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
     }
 };
 
-
-const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) => {
+const SignIn = async (
+    req: Request<{}, {}, SignupRequestBody>,
+    res: Response
+) => {
     try {
         const { password, email } = req.body;
 
         // Find user by email and password
         const user = await prisma.user.findUnique({
-            where: { email, password }, select: {
+            where: { email, password },
+            select: {
                 address: true,
                 city: true,
                 country: true,
@@ -121,8 +127,10 @@ const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
                 industryName: true,
                 userName: true,
                 number: true,
-                SocialMediaLinks: true, role: true, language: true
-            }
+                SocialMediaLinks: true,
+                role: true,
+                language: true,
+            },
         });
 
         if (!user) {
@@ -140,10 +148,10 @@ const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
         const token = createToken({ role, user_id: id, email: Useremail });
 
         // Set cookie with the token
-        res.cookie('authToken', token, {
+        res.cookie("authToken", token, {
             httpOnly: true,
             maxAge: 3600000, // 1 hour
-            sameSite: 'strict', // CSRF protection
+            sameSite: "strict", // CSRF protection
         });
 
         // Return successful response with token and user data
@@ -153,7 +161,6 @@ const SignIn = async (req: Request<{}, {}, SignupRequestBody>, res: Response) =>
             data: { token, user },
             message: "User authenticated successfully",
         });
-
     } catch (error) {
         // Handle error
         return sendResponse(res, {
@@ -171,29 +178,41 @@ const forgotPass = async (req: Request, res: Response) => {
     const findByEmail = await prisma.user.findUnique({ where: { email } });
 
     if (!findByEmail) {
-        return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'This email is not register', })
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            success: false,
+            message: "This email is not register",
+        });
     } else {
-        const verfiyCode = Math.floor(1000000 + Math.random() * 9000000)
-        const { fullName } = findByEmail
-        console.log(fullName, 'check full');
+        const verfiyCode = Math.floor(1000000 + Math.random() * 9000000);
+        const { fullName } = findByEmail;
+        console.log(fullName, "check full");
         if (!fullName) {
-            return console.log('full name need');
+            return console.log("full name need");
         }
         const updateUserOtp = await prisma.user.update({
             where: { email }, // Specify the user to update
             data: { otp: verfiyCode }, // Update the OTP field
         });
         // Send verification email
-        await sendVeficationEmail({ name: fullName, receiver: email, subject: "Email Verfication", code: verfiyCode })
+        await sendVeficationEmail({
+            name: fullName,
+            receiver: email,
+            subject: "Email Verfication",
+            code: verfiyCode,
+        });
         return sendResponse<any>(res, {
-            statusCode: httpStatus.OK, success: true, data: updateUserOtp, message: "Email are matched, Check your mail & verify user code",
-        })
+            statusCode: httpStatus.OK,
+            success: true,
+            data: updateUserOtp,
+            message: "Email are matched, Check your mail & verify user code",
+        });
     }
-}
+};
 const verifyOtp = async (req: Request, res: Response) => {
     const { email } = req.params;
 
-    const { code } = req.query
+    const { code } = req.query;
 
     const findByEmail = await prisma.user.findUnique({ where: { email } });
 
@@ -201,11 +220,12 @@ const verifyOtp = async (req: Request, res: Response) => {
         return sendResponse(res, {
             statusCode: httpStatus.NOT_FOUND,
             success: false,
-            message: 'User not found', data: null
+            message: "User not found",
+            data: null,
         });
     }
 
-    const { otp } = findByEmail
+    const { otp } = findByEmail;
 
     try {
         if (code === otp?.toString()) {
@@ -216,39 +236,67 @@ const verifyOtp = async (req: Request, res: Response) => {
             return sendResponse(res, {
                 statusCode: httpStatus.OK,
                 success: true,
-                message: 'OTP matched successfully'
+                message: "OTP matched successfully",
+            });
+        } else {
+            return sendResponse(res, {
+                statusCode: httpStatus.NOT_ACCEPTABLE,
+                success: false,
+                message: "OTP does not match!",
             });
         }
     } catch (error) {
         return sendResponse(res, {
             statusCode: httpStatus.NOT_ACCEPTABLE,
             success: false,
-            message: 'Something want wrong', data: null
+            message: "Something want wrong",
+            data: null,
         });
     }
-
 };
 const setNewPass = async (req: Request, res: Response) => {
-    const { email }: any = req.user
+    const { email }: any = req.user;
     if (!email) {
-        return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Email are required!', })
+        return sendResponse<any>(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            success: false,
+            message: "Email are required!",
+        });
     }
     const { password, currentPassword } = req.body;
 
     try {
-        const findByEmail = await prisma.user.findUnique({ where: { email: email, password: currentPassword } })
+        const findByEmail = await prisma.user.findUnique({
+            where: { email: email, password: currentPassword },
+        });
         if (!findByEmail) {
-            return sendResponse<any>(res, { statusCode: httpStatus.NOT_FOUND, success: false, message: 'Your current password is wrong!', })
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.NOT_FOUND,
+                success: false,
+                message: "Your current password is wrong!",
+            });
         } else {
-            const updateNewPass = await prisma.user.update({ where: { email }, data: { password } })
+            const updateNewPass = await prisma.user.update({
+                where: { email },
+                data: { password },
+            });
             console.log(updateNewPass, "update new password");
-            return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, message: 'Your new password set successfully', })
+            return sendResponse<any>(res, {
+                statusCode: httpStatus.OK,
+                success: true,
+                message: "Your new password set successfully",
+            });
         }
     } catch (error) {
         console.log(error);
-        return sendResponse<any>(res, { data: error, statusCode: httpStatus.OK, success: false, message: 'Some thing want wrong!', })
+        return sendResponse<any>(res, {
+            data: error,
+            statusCode: httpStatus.OK,
+            success: false,
+            message: "Some thing want wrong!",
+        });
     }
-}
+};
 const getAllUser = async (req: Request, res: Response) => {
     const allUser = await prisma.user.findMany({
         select: {
@@ -263,13 +311,21 @@ const getAllUser = async (req: Request, res: Response) => {
             industryName: true,
             userName: true,
             number: true,
-            SocialMediaLinks: true, role: true, language: true,
-            createdAt : true, updateAt : true, otp : true
-        }
-    })
-    return sendResponse<any>(res, { statusCode: httpStatus.OK, success: true, data: allUser, message: 'all user successfully get', })
-
-}
+            SocialMediaLinks: true,
+            role: true,
+            language: true,
+            createdAt: true,
+            updateAt: true,
+            otp: true,
+        },
+    });
+    return sendResponse<any>(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: allUser,
+        message: "all user successfully get",
+    });
+};
 const updateUser = async (req: Request, res: Response) => {
     const { email } = req.body;
 
@@ -277,12 +333,22 @@ const updateUser = async (req: Request, res: Response) => {
         return sendResponse<any>(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
-            message: 'Email is required',
+            message: "Email is required",
         });
     }
 
     try {
-        const { fullName, country, city, industryName, address, number, language, image, description } = req.body;
+        const {
+            fullName,
+            country,
+            city,
+            industryName,
+            address,
+            number,
+            language,
+            image,
+            description,
+        } = req.body;
 
         const updatedUser = await prisma.user.update({
             where: { email },
@@ -294,7 +360,8 @@ const updateUser = async (req: Request, res: Response) => {
                 address,
                 number,
                 language,
-                image, description
+                image,
+                description,
             },
             select: {
                 address: true,
@@ -308,63 +375,71 @@ const updateUser = async (req: Request, res: Response) => {
                 industryName: true,
                 userName: true,
                 number: true,
-                SocialMediaLinks: true, role: true, language: true
-            }
+                SocialMediaLinks: true,
+                role: true,
+                language: true,
+            },
         });
 
-        console.log('User updated:', updatedUser);
+        console.log("User updated:", updatedUser);
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
             success: true,
             data: updatedUser,
-            message: 'User updated successfully',
+            message: "User updated successfully",
         });
     } catch (error) {
-        console.error('Error updating user:', error);
+        console.error("Error updating user:", error);
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.INTERNAL_SERVER_ERROR,
             success: false,
-            message: 'An error occurred while updating the user',
+            message: "An error occurred while updating the user",
         });
     }
 };
 
-const getSingelUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const getSingelUser = async (
+    req: AuthenticatedRequest,
+    res: Response
+): Promise<void> => {
     if (!req.user || !req.user.email) {
         return sendResponse<any>(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
-            message: 'User information is missing or email is required',
+            message: "User information is missing or email is required",
         });
     }
-    const user = req.user
-    const { email,  } = user
+    const user = req.user;
+    const { email } = user;
 
     if (!email) {
         return sendResponse<any>(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
-            message: 'Email is required',
+            message: "Email is required",
         });
     }
 
     try {
-        const findByEmail = await prisma.user.findUnique({ where: { email }, include: { SocialMediaLinks: true } })
+        const findByEmail = await prisma.user.findUnique({
+            where: { email },
+            include: { SocialMediaLinks: true },
+        });
         if (findByEmail) {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.OK,
                 success: true,
                 data: findByEmail,
-                message: 'User found',
+                message: "User found",
             });
         } else {
             return sendResponse<any>(res, {
                 statusCode: httpStatus.NOT_FOUND,
                 success: false,
                 data: null,
-                message: 'User not found',
+                message: "User not found",
             });
         }
     } catch (error) {
@@ -372,10 +447,18 @@ const getSingelUser = async (req: AuthenticatedRequest, res: Response): Promise<
             statusCode: httpStatus.NOT_ACCEPTABLE,
             success: false,
             data: null,
-            message: 'Some want wrong',
+            message: "Some want wrong",
         });
     }
+};
 
-}
-
-export default { SignUp, SignIn, forgotPass, verifyOtp, setNewPass, getAllUser, updateUser, getSingelUser }
+export default {
+    SignUp,
+    SignIn,
+    forgotPass,
+    verifyOtp,
+    setNewPass,
+    getAllUser,
+    updateUser,
+    getSingelUser,
+};
