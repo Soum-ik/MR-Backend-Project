@@ -2,9 +2,10 @@ import crypto from "crypto";
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import sendVeficationEmail from "../../helper/email/emailSend";
-import { createToken } from "../../libs/authHelper";
+import { createToken, TokenCredential } from "../../libs/authHelper";
 import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
+import type { JwtPayload } from "jsonwebtoken";
 
 import { SignupRequestBody } from "./user.interface";
 
@@ -325,7 +326,7 @@ const setForgetNewPass = async (req: Request, res: Response) => {
 };
 
 const setNewPass = async (req: Request, res: Response) => {
-    const { email }: any = req.params;
+    const { email } = req.user as TokenCredential;
     if (!email) {
         return sendResponse<any>(res, {
             statusCode: httpStatus.NOT_FOUND,
@@ -337,7 +338,7 @@ const setNewPass = async (req: Request, res: Response) => {
 
     try {
         const findByEmail = await prisma.user.findUnique({
-            where: { email: email, password: currentPassword },
+            where: { email: email as string, password: currentPassword },
         });
         if (!findByEmail) {
             return sendResponse<any>(res, {
@@ -347,7 +348,7 @@ const setNewPass = async (req: Request, res: Response) => {
             });
         } else {
             const updateNewPass = await prisma.user.update({
-                where: { email },
+                where: { email: email as string },
                 data: { password },
             });
             console.log(updateNewPass, "update new password");

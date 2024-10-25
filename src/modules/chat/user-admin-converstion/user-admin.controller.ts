@@ -284,8 +284,8 @@ const getMessages = async (req: Request, res: Response) => {
             const messages = await prisma.message.findMany({
                 where: {
                     OR: [
-                        { senderId: userId as string, recipientId: user_id as string, hiddenFromAdmin: false },
-                        { recipientId: userId as string, senderId: user_id as string, hiddenFromAdmin: false }
+                        { senderId: userId as string, recipientId: user_id as string, hiddenFromAdmin: false, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN", "USER"] } } },
+                        { recipientId: userId as string, senderId: user_id as string, hiddenFromAdmin: false, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN", "USER"] } } },
                     ],
                 },
                 orderBy: { createdAt: "asc" },
