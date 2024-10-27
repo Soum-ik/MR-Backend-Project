@@ -92,6 +92,6 @@ router.use("/multi-project", multiProjectRoute);
 
 //payment route
 router.post("/api/checkout-session", payment.stripePayment);
-router.post("/webhook", express.raw({ type: "application/json" }), payment.stripeWebhook);
+// router.post("/webhook", express.raw({ type: "application/json" }), payment.stripeWebhook);
 
 export default router;
