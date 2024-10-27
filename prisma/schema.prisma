@@ -240,6 +240,19 @@ model FeatureAllFolder {
   order  Int
 }
 
+model AllSubFolder {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  slug   String @unique
+  subFolder String
+  order  Int
+}
+
+model AllDesigns {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  slug String @unique
+  order  Int
+}
+
 //End - Here You will get the schema for home page feature category reordering
 
 model Folders {
