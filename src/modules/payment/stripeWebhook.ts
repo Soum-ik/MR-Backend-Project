@@ -33,36 +33,37 @@ const stripeWebhook = async (req: Request, res: Response) => {
 
     if (event.type === "checkout.session.completed") {
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log('session',session);
-        
+        console.log("session", session);
 
         try {
-            const lineItems = await stripe.checkout.sessions.listLineItems(
-                session.id
-            );
-            const items = lineItems.data.map((item) => ({
-                name: item.description, // Get the product name
-                quantity: item.quantity,
-                amount: item.amount_total / 100, // Amount in dollars
-                currency: item.currency,
-            }));
+            // const lineItems = await stripe.checkout.sessions.listLineItems(
+            //     session.id
+            // );
+            // const items = lineItems.data.map((item) => ({
+            //     name: item.description, // Get the product name
+            //     quantity: item.quantity,
+            //     amount: item.amount_total / 100, // Amount in dollars
+            //     currency: item.currency,
+            // }));
             // Save payment info in the database
-            const payment = await prisma.payment.create({
-                data: {
-                    stripeId: session.id,
-                    status: session.payment_status,
-                    amount: session.amount_total! / 100,
-                    currency: session.currency as string,
-                    items: items, // Adjust based on actual items
-                    userId: "671bc9cf33725a2b3bc22b5a" as string,
-                },
+
+            await prisma.payment.update({
+                where: { stripeId: session.id.split('_').join("") },
+                data: { status: session.payment_status },
             });
 
-            console.log("payment", payment);
+            // console.log("payment", payment);
 
             console.log("Payment successfully recorded in the database.");
 
             // Create an order linked to the payment and user
+            const order = await prisma.order.update({
+                where: { stripeId : session.id.split('_').join("") },
+                data: {
+                    currentStatus: "PROJECT_PLACED",
+                    paymentStatus: "COMPLETED",
+                },
+            });
             // const order = await prisma.order.create({
             //     data: {
             //         userId: "user_id" as string,

@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import type { Request } from "express";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/config";
@@ -5,6 +6,19 @@ import { prisma } from "../../libs/prismaHelper";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
+// Utility function to generate a unique project number (example)
+const generateUniqueProjectNumber = (): string => {
+    return `PROJ-${Math.floor(100000 + Math.random() * 900000)}`;
+};
+
+// Utility function to calculate delivery date
+const calculateDeliveryDate = (duration: number): Date => {
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + duration);
+    return deliveryDate;
+};
+
+const orderId = new ObjectId();
 
 const stripePayment = async (req: Request, res: any) => {
     const { data } = req.body;
@@ -30,6 +44,41 @@ const stripePayment = async (req: Request, res: any) => {
             success_url: "http://localhost:5173",
             cancel_url: "http://localhost:5173/cancel",
         });
+
+        // Save payment info in the database
+        const payment = await prisma.payment.create({
+            data: {
+                userId: data?.userId,
+                stripeId: session.id.split("_").join(""),
+                status: "PENDING",
+                amount: data?.totalAmount.toString(),
+                currency: session.currency as string,
+                orderId: orderId.toString(),
+            },
+        });
+
+        console.log("Payment successfully recorded in the database.");
+
+        // Create an order linked to the payment and user
+        const order = await prisma.order.create({
+            data: {
+                id: orderId.toString(),
+                stripeId: session.id.split("_").join(""),
+                userId: data?.userId,
+                projectName: data?.title,
+                projectNumber: generateUniqueProjectNumber(),
+                items: data?.items,
+                duration: data?.deliveryDuration.toString(),
+                totalPrice: data?.totalAmount.toString(),
+                paymentStatus: "PENDING",
+                startDate: new Date(),
+                deliveryDate: calculateDeliveryDate(data?.deliveryDuration),
+                currentStatus: "PENDING",
+                requirements: data?.requirements,
+                bulletPoints: data?.bulletPoints,
+            },
+        });
+        console.log("Order successfully created with status 'PLACED'.");
 
         res.json({ id: session.id });
     } catch (error) {
