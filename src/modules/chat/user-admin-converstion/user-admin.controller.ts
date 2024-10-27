@@ -261,6 +261,7 @@ const getMessages = async (req: Request, res: Response) => {
                 orderBy: { createdAt: "asc" },
             });
 
+
             if (messages.length > 0) {
                 const uniqueMessages = messages.filter((message, index, self) =>
                     index === self.findIndex((t) => t.commonkey === message.commonkey)

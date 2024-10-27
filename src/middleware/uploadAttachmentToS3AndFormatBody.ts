@@ -19,7 +19,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
             const bucketName = 'mr-backend-watermark-resized';
 
             // Updated watermark path to use current directory
-            const watermarkPath = path.join(__dirname, 'a.jpg');
+            const watermarkPath = path.join(__dirname, 'watermark.png');
 
             // Ensure processed directory exists
             const processedDir = path.join(process.cwd(), 'processed');
@@ -27,25 +27,52 @@ export const uploadAttachmentToS3AndFormatBody = () => {
 
             // Process a single image with watermark using Sharp
             const processImageWithWatermark = async (file: Express.Multer.File) => {
-
                 const inputPath = file.path;
                 const outputPath = path.join(processedDir, `${bucketName}processed-${file.filename}`);
 
+
+                const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+                const safeUnlink = async (filePath: string) => {
+                    try {
+                        await delay(300);  // Adjust delay as needed (e.g., 100ms)
+                        await fs.unlink(filePath);
+                    } catch (error) {
+                        console.error('Error during unlink:', error);
+                    }
+                };
+
+
                 try {
-                    
-                    // Process the main image with watermark
-                    await sharp(inputPath)
+
+                    // Read dimensions of the main image with type safety
+                    const mainImage = sharp(inputPath);
+                    const metadata = await mainImage.metadata();
+
+                    if (!metadata.width || !metadata.height) {
+                        throw new Error('Failed to retrieve image dimensions');
+                    }
+
+                    const { width, height } = metadata;
+
+                    // Resize watermark to match the main image dimensions
+                    const watermark = await sharp(watermarkPath)
+                        .resize(width, height, { fit: 'cover' })
+                        .toBuffer();
+
+                    // Process the main image with the resized watermark
+                    await mainImage
                         .composite([{
-                            input: watermarkPath,
-                            blend: 'over',
-                            gravity: 'southeast',
-                            tile: false
+                            input: watermark,
+                            blend: 'over'
                         }])
                         .toFile(outputPath);
 
+                    // Close the sharp instance after processing
+                    mainImage.destroy();
 
                     // Clean up the original uploaded file
-                    await fs.unlink(inputPath);
+                    await safeUnlink(inputPath);
 
                     return {
                         outputPath,
@@ -53,9 +80,11 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                     };
                 } catch (error) {
                     console.error('Detailed error processing image:', error);
-                    // Clean up files in case of error
-                    await fs.unlink(inputPath).catch(() => { });
-                    await fs.unlink(outputPath).catch(() => { });
+
+                    // Clean up with safe unlink
+                    await safeUnlink(inputPath);
+                    await safeUnlink(outputPath);
+
                     throw new Error(`Failed to process image ${file.originalname}: ${error}`);
                 }
             };

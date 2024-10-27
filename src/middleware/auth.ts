@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from "express"
 import type { JwtPayload } from "jsonwebtoken"
 import { verifyToken } from "../libs/authHelper"
 import sendResponse from "../libs/sendResponse"
-
+ 
 const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (typeof authHeader === 'string') {
@@ -17,6 +17,8 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
             });
         }
         const decoded = verifyToken(token);
+        // console.log(decoded, "testing decoded");
+
         if (!decoded) {
             return sendResponse(res, {
                 statusCode: httpStatus.FORBIDDEN,
@@ -24,6 +26,19 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
                 message: 'Token is invalid',
             });
         }
+
+        // const find = await prisma.user.findUnique({
+        //     where: {
+        //         email: decoded.email,
+        //         id: decoded.user_id
+        //     }, select: {
+        //         role: true,
+        //         email: true,
+        //     }
+        // })
+
+
+
         req.user = decoded as JwtPayload
         next()
     } else {

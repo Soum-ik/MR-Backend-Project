@@ -57,7 +57,7 @@ const registerSocketServer = (server: Server) => {
 
     adminMessageCheckerHandler(socket, io)
 
-    // disconnect socket
+    // disconnect 
     socket.on("disconnect", () => {
       // remove connected user from online users list
       disconnectHandler(socket);
@@ -68,7 +68,7 @@ const registerSocketServer = (server: Server) => {
 
   const onlineUsersInterval = setInterval(() => {
     const onlineUsers = socketStore.getOnlineUsers();
-    print.blue("online users: " + onlineUsers.length);
+    // print.blue("online users: " + onlineUsers.length);
     for (let i = 0; i < onlineUsers.length; i++) {
       const user = onlineUsers[i];
     }
