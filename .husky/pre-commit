@@ -1,0 +1,17 @@
+if npx lint-staged; then
+  echo "Lint-staged passed. Running build..."
+  # Check if yarn.lock or bun.lockb exists and run the appropriate package manager
+  if [ -f yarn.lock ]; then
+    echo "yarn.lock found. Running 'yarn install'."
+    yarn build
+  elif [ -f bun.lockb ]; then
+    echo "bun.lockb found. Running 'bun install'."
+    npx prisma generate && tsc
+  else
+    echo "No lock file found. Running 'npm install'."
+    npm run build
+  fi
+else
+  echo "Lint-staged failed. Skipping build."
+  exit 1
+fi

@@ -1,0 +1,17 @@
+# Check if there are any merge conflicts
+if git diff --check | grep -q 'conflict'; then
+  echo "Merge conflicts detected. Skipping script execution."
+  exit 0
+fi
+
+# Check if yarn.lock exists and run the appropriate package manager
+if [ -f yarn.lock ]; then
+  echo "yarn.lock found. Running 'yarn install'."
+  yarn install
+elif [ -f bun.lockb ]; then
+  echo "bun.lockb found. Running 'bun install'."
+  bun install
+else
+  echo "No lock file found. Running 'npm install'."
+  npm install
+fi

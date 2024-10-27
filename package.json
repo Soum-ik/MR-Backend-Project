@@ -10,20 +10,29 @@
     "dev": "bun --watch run ./src/server.ts",
     "build": "tsc",
     "start:dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
-    "start": " bun --watch run ./src/server.ts"
+    "start": " bun --watch run ./src/server.ts",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.13.0",
     "@types/bun": "latest",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.12",
     "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.11.0",
+    "@typescript-eslint/parser": "^8.11.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.6",
+    "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typedoc": "^0.26.7",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.665.0",
@@ -51,8 +60,15 @@
     "sharp": "^0.33.5",
     "socket.io": "^4.7.5",
     "stripe": "^17.1.0",
-    "tsc": "^2.0.4",
+    
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
+  },
+  "lint-staged": {
+    "*.{js,ts,json}": [
+      "eslint --fix --quiet",
+      "prettier --write --loglevel silent"
+    ],
+    "*.prisma": "npx prisma format"
   }
 }
