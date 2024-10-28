@@ -52,51 +52,51 @@ const stripeWebhook = async (req: Request, res: Response) => {
         }
     
         // Handle other event types here
-        case "checkout.session.async_payment_failed": {
-            const session = event.data.object as Stripe.Checkout.Session;
-            console.log("session", session);
+        // case "checkout.session.async_payment_failed": {
+        //     const session = event.data.object as Stripe.Checkout.Session;
+        //     console.log("session", session);
     
-            try {
-                await prisma.payment.delete({
-                    where: { stripeId: session.id.split('_').join("") },
-                });
+        //     try {
+        //         await prisma.payment.delete({
+        //             where: { stripeId: session.id.split('_').join("") },
+        //         });
     
-                console.log("Payment deleted cause payment failed!");
-    
-    
-                await prisma.order.delete({
-                    where: { stripeId: session.id.split('_').join("") },
-                });
-    
-                console.log("Order deleted cause payment failed!");
-            } catch (error) {
-                console.error("Error updating status:", error);
-            }
-            break;
-        }
-    
-        case "payment_intent.canceled": {
-            const session = event.data.object as Stripe.Checkout.Session;
-            console.log("session", session);
-    
-            try {
-                await prisma.payment.delete({
-                    where: { stripeId: session.id.split('_').join("") },
-                });
-    
-                console.log("Payment deleted cause payment failed!");
+        //         console.log("Payment deleted cause payment failed!");
     
     
-                await prisma.order.delete({
-                    where: { stripeId: session.id.split('_').join("") },
-                });
+        //         await prisma.order.delete({
+        //             where: { stripeId: session.id.split('_').join("") },
+        //         });
     
-                console.log("Order deleted cause payment failed!");
-            } catch (error) {
-                console.error("Error updating status:", error);
-            }
-            break;
-        }
+        //         console.log("Order deleted cause payment failed!");
+        //     } catch (error) {
+        //         console.error("Error updating status:", error);
+        //     }
+        //     break;
+        // }
+    
+        // case "payment_intent.canceled": {
+        //     const session = event.data.object as Stripe.Checkout.Session;
+        //     console.log("session", session);
+    
+        //     try {
+        //         await prisma.payment.delete({
+        //             where: { stripeId: session.id.split('_').join("") },
+        //         });
+    
+        //         console.log("Payment deleted cause payment failed!");
+    
+    
+        //         await prisma.order.delete({
+        //             where: { stripeId: session.id.split('_').join("") },
+        //         });
+    
+        //         console.log("Order deleted cause payment failed!");
+        //     } catch (error) {
+        //         console.error("Error updating status:", error);
+        //     }
+        //     break;
+        // }
     
         // case "payment_intent.payment_failed": {
         //     const session = event.data.object as Stripe.Checkout.Session;
