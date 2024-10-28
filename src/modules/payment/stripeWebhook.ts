@@ -5,20 +5,10 @@ import { prisma } from "../../libs/prismaHelper";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
-// Utility function to generate a unique project number (example)
-const generateUniqueProjectNumber = (): string => {
-    return `PROJ-${Math.floor(100000 + Math.random() * 900000)}`;
-};
-
-// Utility function to calculate delivery date
-const calculateDeliveryDate = (duration: number): Date => {
-    const deliveryDate = new Date();
-    deliveryDate.setDate(deliveryDate.getDate() + duration);
-    return deliveryDate;
-};
-
 const stripeWebhook = async (req: Request, res: Response) => {
-    let event = req.body;
+    const event = req.body;
+    console.log('all event',event);
+    
     // try {
     //     event = stripe.webhooks.constructEvent(
     //         req.body,
@@ -30,60 +20,108 @@ const stripeWebhook = async (req: Request, res: Response) => {
     //     console.error("Webhook signature verification failed:", error.message);
     //     return res.status(400).send(`Webhook Error: ${error.message}`);
     // }
-
-    if (event.type === "checkout.session.completed") {
-        const session = event.data.object as Stripe.Checkout.Session;
-        console.log("session", session);
-
-        try {
-            // const lineItems = await stripe.checkout.sessions.listLineItems(
-            //     session.id
-            // );
-            // const items = lineItems.data.map((item) => ({
-            //     name: item.description, // Get the product name
-            //     quantity: item.quantity,
-            //     amount: item.amount_total / 100, // Amount in dollars
-            //     currency: item.currency,
-            // }));
-            // Save payment info in the database
-
-            await prisma.payment.update({
-                where: { stripeId: session.id.split('_').join("") },
-                data: { status: session.payment_status },
-            });
-
-            // console.log("payment", payment);
-
-            console.log("Payment successfully recorded in the database.");
-
-            // Create an order linked to the payment and user
-            const order = await prisma.order.update({
-                where: { stripeId : session.id.split('_').join("") },
-                data: {
-                    currentStatus: "PROJECT_PLACED",
-                    paymentStatus: "COMPLETED",
-                },
-            });
-            // const order = await prisma.order.create({
-            //     data: {
-            //         userId: "user_id" as string,
-            //         projectName: "Sample Project", // Replace with actual project name
-            //         projectNumber: generateUniqueProjectNumber(), // Utility function to generate a unique number
-            //         quantity: "1", // Modify based on your context
-            //         duration: "30", // Modify based on your context
-            //         totalPrice: (session.amount_total! / 100).toString(), // Example assuming amount_total is in cents
-            //         paymentStatus: "COMPLETED",
-            //         startDate: new Date(),
-            //         deliveryDate: calculateDeliveryDate(30), // Utility function to set delivery date based on duration
-            //         currentStatus: "PLACED",
-            //     },
-            // });
-            // console.log("order", order);
-            // console.log("Order successfully created with status 'PLACED'.");
-        } catch (error) {
-            console.error("Error updating status:", error);
+    switch (event.type) {
+        case "checkout.session.completed": {
+            const session = event.data.object as Stripe.Checkout.Session;
+            console.log("session", session);
+    
+            try {
+                // Save payment info in the database
+                await prisma.payment.update({
+                    where: { stripeId: session.id.split('_').join("") },
+                    data: { status: session.payment_status },
+                });
+    
+                console.log("Payment successfully updated in the database.");
+    
+                // Create an order linked to the payment and user
+                const order = await prisma.order.update({
+                    where: { stripeId: session.id.split('_').join("") },
+                    data: {
+                        currentStatus: "PROJECT_PLACED",
+                        paymentStatus: "COMPLETED",
+                    },
+                });
+    
+                console.log("order", order);
+                console.log("Order successfully updated with status 'PLACED'.");
+            } catch (error) {
+                console.error("Error updating status:", error);
+            }
+            break;
         }
+    
+        // Handle other event types here
+        case "checkout.session.async_payment_failed": {
+            const session = event.data.object as Stripe.Checkout.Session;
+            console.log("session", session);
+    
+            try {
+                await prisma.payment.delete({
+                    where: { stripeId: session.id.split('_').join("") },
+                });
+    
+                console.log("Payment deleted cause payment failed!");
+    
+    
+                await prisma.order.delete({
+                    where: { stripeId: session.id.split('_').join("") },
+                });
+    
+                console.log("Order deleted cause payment failed!");
+            } catch (error) {
+                console.error("Error updating status:", error);
+            }
+            break;
+        }
+    
+        case "payment_intent.canceled": {
+            const session = event.data.object as Stripe.Checkout.Session;
+            console.log("session", session);
+    
+            try {
+                await prisma.payment.delete({
+                    where: { stripeId: session.id.split('_').join("") },
+                });
+    
+                console.log("Payment deleted cause payment failed!");
+    
+    
+                await prisma.order.delete({
+                    where: { stripeId: session.id.split('_').join("") },
+                });
+    
+                console.log("Order deleted cause payment failed!");
+            } catch (error) {
+                console.error("Error updating status:", error);
+            }
+            break;
+        }
+    
+        // case "payment_intent.payment_failed": {
+        //     const session = event.data.object as Stripe.Checkout.Session;
+        //     console.log("session", session);
+    
+        //     try {
+        //         await prisma.payment.delete({
+        //             where: { stripeId: session.id.split('_').join("") },
+        //         });
+    
+        //         console.log("Payment deleted cause payment failed!");
+    
+    
+        //         await prisma.order.delete({
+        //             where: { stripeId: session.id.split('_').join("") },
+        //         });
+    
+        //         console.log("Order deleted cause payment failed!");
+        //     } catch (error) {
+        //         console.error("Error updating status:", error);
+        //     }
+        //     break;
+        // }
     }
+    
 
     res.json({ received: true });
 };
