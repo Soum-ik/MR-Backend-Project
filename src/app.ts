@@ -14,7 +14,7 @@ import morganLogger from './middleware/morganLogger';
 import { payment } from './modules/payment/payment.controller';
 import router from './routes/route';
 import socketServer from './socket/socket-server';
-// import { stripeWebhook } from "./modules/payment/stripeWebhook";
+// import { stripeWebhook } from './modules/payment/stripeWebhook';
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
@@ -53,7 +53,7 @@ app.use(limiter);
 app.set('etag', WEB_CACHE);
 app.use('/api/v1', router);
 
-// app.post("/webhook", express.raw({ type: "application/json" }), stripeWebhook);
+// app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
 // Middleware to handle CORS headers for unsupported routes
 app.use((req: Request, res: Response, next: NextFunction) => {

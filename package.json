@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "bun --watch run ./src/server.ts",
-    "build": "tsc",
+    "build": "npx prisma generate && tsc",
     "start:dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
     "start": " bun --watch run ./src/server.ts",
     "prepare": "husky"
@@ -60,15 +60,7 @@
     "sharp": "^0.33.5",
     "socket.io": "^4.7.5",
     "stripe": "^17.1.0",
-    
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
-  },
-  "lint-staged": {
-    "*.{js,ts,json}": [
-      "eslint --fix --quiet",
-      "prettier --write --loglevel silent"
-    ],
-    "*.prisma": "npx prisma format"
   }
 }
