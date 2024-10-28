@@ -322,18 +322,21 @@ model Note {
 }
 
 model Order {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  id            String        @id @map("_id") @db.ObjectId
   userId        String        @db.ObjectId
+  stripeId      String   @unique
   user          User          @relation(fields: [userId], references: [id])
   projectName   String
   projectNumber String        @unique
-  quantity      String
   duration      String // Duration in days
   totalPrice    String
   paymentStatus PaymentStatus @default(PENDING)
   startDate     DateTime      @default(now())
   deliveryDate  DateTime
-  currentStatus OrderStatus   @default(PLACED)
+  currentStatus OrderStatus   @default(PENDING)
+  items     Json[]     @default([])
+  requirements Json[]  @default([])
+  bulletPoints Json[]  @default([])
   privateNotes  Note[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -342,13 +345,12 @@ model Order {
 
 model Payment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  stripeId  String
+  stripeId  String  @unique
   status    String
-  amount    Int
+  amount    String
   currency  String
-  items     Json
   createdAt DateTime @default(now())
-  orderId   String   @db.ObjectId
+  orderId   String @db.ObjectId
   userId    String   @db.ObjectId
   
   user      User?    @relation(fields: [userId], references: [id])
@@ -370,9 +372,10 @@ enum Role {
 }
 
 enum OrderStatus {
-  PLACED
+  PROJECT_PLACED
   REQUIREMENTS_SUBMITTED
-  RUNNING
+  PROJECT_RUNNING
   REVIEW_DELIVERY
-  COMPLETED
+  COMPLETE_PROJECT
+  PENDING
 }
