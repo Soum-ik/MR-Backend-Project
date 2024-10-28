@@ -50,14 +50,14 @@ export const getAllSubFoldersController = async (
     });
 
     // Determine folders to delete
-    const subFoldersToDelete = existingSubFolders.filter(
-      (subfolder) => !uniqueSubFolders.has(subfolder.slug)
-    );
-    const deletePromises = subFoldersToDelete.map((subFolder) =>
-      prisma.allSubFolder.delete({
-        where: { id: subFolder.id },
-      })
-    );
+    // const subFoldersToDelete = existingSubFolders.filter(
+    //   (subfolder) => !uniqueSubFolders.has(subfolder.slug)
+    // );
+    // const deletePromises = subFoldersToDelete.map((subFolder) =>
+    //   prisma.allSubFolder.delete({
+    //     where: { id: subFolder.id },
+    //   })
+    // );
 
     // Process subfolder creation/updating
     const subFolderPromises = Array.from(uniqueSubFolders.keys()).map(
@@ -96,7 +96,7 @@ export const getAllSubFoldersController = async (
     );
 
     // Execute delete and create/update operations
-    await Promise.all(deletePromises);
+    // await Promise.all(deletePromises);
     const subFolders = await Promise.all(subFolderPromises);
 
     return sendResponse(res, {
