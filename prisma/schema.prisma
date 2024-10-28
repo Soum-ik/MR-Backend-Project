@@ -241,16 +241,16 @@ model FeatureAllFolder {
 }
 
 model AllSubFolder {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  slug   String @unique
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String @unique
   subFolder String
-  order  Int
+  order     Int
 }
 
 model AllDesigns {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  slug String @unique
-  order  Int
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  slug  String @unique
+  order Int
 }
 
 //End - Here You will get the schema for home page feature category reordering
@@ -322,39 +322,50 @@ model Note {
 }
 
 model Order {
-  id            String        @id @map("_id") @db.ObjectId
-  userId        String        @db.ObjectId
-  stripeId      String   @unique
-  user          User          @relation(fields: [userId], references: [id])
-  projectName   String
-  projectNumber String        @unique
-  duration      String // Duration in days
-  totalPrice    String
-  paymentStatus PaymentStatus @default(PENDING)
-  startDate     DateTime      @default(now())
-  deliveryDate  DateTime
-  currentStatus OrderStatus   @default(PENDING)
-  items     Json[]     @default([])
-  requirements Json[]  @default([])
-  bulletPoints Json[]  @default([])
-  privateNotes  Note[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  Payment       Payment[]
+  id                String              @id @map("_id") @db.ObjectId
+  userId            String              @db.ObjectId
+  stripeId          String              @unique
+  user              User                @relation(fields: [userId], references: [id])
+  projectName       String
+  projectNumber     String              @unique
+  duration          String // Duration in days
+  totalPrice        String
+  paymentStatus     PaymentStatus       @default(PENDING)
+  startDate         DateTime            @default(now())
+  deliveryDate      DateTime
+  currentStatus     OrderStatus         @default(PENDING)
+  items             Json[]              @default([])
+  requirements      Json[]              @default([])
+  bulletPoints      Json[]              @default([])
+  privateNotes      Note[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  Payment           Payment[]
+  RequirementAnswer RequirementAnswer[]
+}
+
+model RequirementAnswer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String   @db.ObjectId
+  order     Order    @relation(fields: [orderId], references: [id])
+  question  String // Store the requirement question here
+  answer    String // Store the user's response here
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Payment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  stripeId  String  @unique
+  stripeId  String   @unique
   status    String
   amount    String
   currency  String
   createdAt DateTime @default(now())
-  orderId   String @db.ObjectId
+  orderId   String   @db.ObjectId
   userId    String   @db.ObjectId
-  
-  user      User?    @relation(fields: [userId], references: [id])
-  Order     Order    @relation(fields: [orderId], references: [id])
+
+  user  User? @relation(fields: [userId], references: [id])
+  Order Order @relation(fields: [orderId], references: [id])
 }
 
 enum PaymentStatus {

@@ -3,13 +3,9 @@ import type { Request } from "express";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/config";
 import { prisma } from "../../libs/prismaHelper";
+import projectNumberCreator from "../Order_page/projectNumberGenarator.ts/projectNumberCreator";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
-
-// Utility function to generate a unique project number (example)
-const generateUniqueProjectNumber = (): string => {
-    return `PROJ-${Math.floor(100000 + Math.random() * 900000)}`;
-};
 
 // Utility function to calculate delivery date
 const calculateDeliveryDate = (duration: number): Date => {
@@ -21,6 +17,8 @@ const calculateDeliveryDate = (duration: number): Date => {
 const orderId = new ObjectId();
 
 const stripePayment = async (req: Request, res: any) => {
+    const projectNumber = await projectNumberCreator()
+
     const { data } = req.body;
     console.log("data showing:", data);
 
@@ -66,7 +64,7 @@ const stripePayment = async (req: Request, res: any) => {
                 stripeId: session.id.split("_").join(""),
                 userId: data?.userId,
                 projectName: data?.title,
-                projectNumber: generateUniqueProjectNumber(),
+                projectNumber: projectNumber || "",
                 items: data?.items,
                 duration: data?.deliveryDuration.toString(),
                 totalPrice: data?.totalAmount.toString(),
@@ -78,6 +76,8 @@ const stripePayment = async (req: Request, res: any) => {
                 bulletPoints: data?.bulletPoints,
             },
         });
+
+
         console.log("Order successfully created with status 'PLACED'.");
 
         res.json({ id: session.id });

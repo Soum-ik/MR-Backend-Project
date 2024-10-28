@@ -1,23 +1,31 @@
-// import { getLastSerialNumber } from "../../../libs/utlitys/projectNumber";
+import { projectSerialGenerator } from "../../../helper/SerialCodeGenerator/serialGenerator";
+import { prisma } from "../../../libs/prismaHelper";
+import { getLastSerialNumber } from "../../../libs/utlitys/projectNumber";
 
-// export const projectNumberCreator = async () => {
 
-//     // Get the last serial number from the server
-//     const { serialnumber } = await getLastSerialNumber();
+const projectNumberCreator = async () => {
 
-//     const convertStringIntoNumber = serialnumber && parseInt(serialnumber);
+    // Get the last serial number from the server
+    const { serialnumber } = await getLastSerialNumber();
 
-//     let specialSerialCodeGenarator;
-//     let convertedSerialUpdateNumber;
+    const convertStringIntoNumber = serialnumber && parseInt(serialnumber);
 
-//     if (convertStringIntoNumber) {
-//         convertedSerialUpdateNumber = convertStringIntoNumber + 1;
-//         specialSerialCodeGenarator = designSerialGenerator(convertedSerialUpdateNumber);
-//     }
+    let specialSerialCodeGenarator;
+    let convertedSerialUpdateNumber;
 
-//     await prisma.desigserialNumberGenerator.create({
-//         data: {
-//             serialnumber: convertedSerialUpdateNumber + ''
-//         }
-//     })
-// }
+    if (convertStringIntoNumber) {
+        convertedSerialUpdateNumber = convertStringIntoNumber + 1;
+        specialSerialCodeGenarator = projectSerialGenerator(convertedSerialUpdateNumber);
+    }
+
+    await prisma.projectSerialNumberGenerator.create({
+        data: {
+            serialnumber: convertedSerialUpdateNumber + ''
+        }
+    })
+
+    return specialSerialCodeGenarator
+}
+
+
+export default projectNumberCreator
