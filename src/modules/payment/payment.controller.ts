@@ -57,10 +57,7 @@ const stripePayment = async (req: Request, res: any) => {
 
         console.log("Payment successfully recorded in the database.");
 
-        if (!payment) {
-            return new Error("Payment not successfull")
-        }
-
+        
         // Create an order linked to the payment and user
         const order = await prisma.order.create({
             data: {
