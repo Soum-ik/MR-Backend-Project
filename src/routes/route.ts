@@ -27,6 +27,9 @@ import { payment } from '../modules/payment/payment.controller';
 import { handleRoleRoute } from '../modules/role_controller_super_admin/role_controller.router';
 import uploadImage from '../modules/uploadImage/uploadController';
 import { UserRoute } from '../modules/user/userRotue';
+import { startProject } from '../modules/Order_page/Start_project/start_project.controller';
+import { Start_Project_Controller } from '../modules/Order_page/Start_project/Start_project.route';
+
 
 const router = express.Router();
 
@@ -83,6 +86,8 @@ router.use('/notification', handleNotificationRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 // router.post("/contactForChat", authenticateToken, startContact);
 
+
+router.use('/inbox', Start_Project_Controller)
 router.get('/avaiableforchat', chating.AvaiableForChat);
 
 router.use('/block-chat', blockChatRouter);
