@@ -333,6 +333,7 @@ model Order {
   paymentStatus     PaymentStatus       @default(PENDING)
   startDate         DateTime            @default(now())
   deliveryDate      DateTime
+  projectStartDate  DateTime?
   currentStatus     OrderStatus         @default(PENDING)
   items             Json[]              @default([])
   requirements      Json[]              @default([])
@@ -356,15 +357,15 @@ model RequirementAnswer {
 
 model Payment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
   stripeId  String   @unique
   status    String
   amount    String
   currency  String
   createdAt DateTime @default(now())
   orderId   String   @db.ObjectId
-  userId    String   @db.ObjectId
 
-  user  User? @relation(fields: [userId], references: [id])
+  user  User @relation(fields: [userId], references: [id])
   Order Order @relation(fields: [orderId], references: [id])
 }
 

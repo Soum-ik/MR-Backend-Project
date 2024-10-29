@@ -27,10 +27,9 @@ const authenticate_for_startProject = async (req: Request, res: Response, next: 
             });
         }
         const user = decoded as JwtPayload;
-
         const userData = await prisma.payment.findUnique({
             where: {
-                id: user.id
+                id: user?.id
             }
         })
 

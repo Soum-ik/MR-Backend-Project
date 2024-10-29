@@ -11,7 +11,8 @@
     "build": "npx prisma generate && tsc",
     "start:dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
     "start": " bun --watch run ./src/server.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "migrate": "npx prisma db push"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
@@ -69,6 +70,6 @@
       "eslint --fix --quiet",
       "prettier --write --loglevel silent"
     ],
-    ".prisma": "npx prisma format"
+    ".prisma": "npx prisma db push"
   }
 }
