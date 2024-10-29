@@ -243,8 +243,8 @@ model FeatureAllFolder {
 model AllSubFolder {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   slug      String @unique
-  subFolder String
-  order     Int
+  folder String
+  subFolders Json[] @default([])
 }
 
 model AllDesigns {
