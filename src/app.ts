@@ -14,6 +14,7 @@ import morganLogger from './middleware/morganLogger';
 import { stripeWebhook } from './modules/payment/stripeWebhook';
 import router from './routes/route';
 import socketServer from './socket/socket-server';
+import globalError from './middleware/globalError';
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
@@ -21,7 +22,8 @@ const limiter = rateLimit({
 });
 
 const app: Application = express();
-export const httpServer = createServer(app);
+
+const httpServer = createServer(app);
 
 // init socket server
 socketServer.registerSocketServer(httpServer);
@@ -78,3 +80,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   });
   next();
 });
+
+app.use(globalError);
+
+export default httpServer;

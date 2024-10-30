@@ -29,18 +29,18 @@ import uploadImage from '../modules/uploadImage/uploadController';
 import { UserRoute } from '../modules/user/userRotue';
 import { startProject } from '../modules/Order_page/Start_project/start_project.controller';
 import { Start_Project_Controller } from '../modules/Order_page/Start_project/Start_project.route';
-
+import { USER_ROLE } from '../modules/user/user.constant'
 
 const router = express.Router();
 
 router.get(
   '/social-media-link/',
-  authenticateToken,
+  authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER),
   SocialMediaLinkController.getSocialMediaLinks,
 );
 router.post(
   '/social-media-link/',
-  authenticateToken,
+  authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER),
   SocialMediaLinkController.upsertSocialMediaLink,
 );
 // middleware applyed
@@ -50,10 +50,6 @@ router.post(
   uploadFile.array('files'),
   uploadAttachmentToS3AndFormatBody(),
   (req, res) => {
-    // Log the request body to check the structure and data
-    console.log(req.body, 'Received request body');
-
-    // Respond with the request body to confirm what was received
     res.status(200).send({
       message: 'Attachment uploaded and processed successfully',
       data: req.body,
@@ -63,7 +59,7 @@ router.post(
 
 router.get(
   '/get-singel-user/',
-  authenticateToken,
+  authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER),
   UserController.getSingelUser,
 );
 
@@ -76,8 +72,8 @@ router.use('/industrys', IndustrysRoute);
 router.use('/designs', DesignsRoute);
 router.use('/create-offer-project', createProjectRoute);
 router.use('/getTogether', getTogetherRoute);
-router.use('/quickResponse', authenticateToken, quickResponseRouter);
-router.use('/message', authenticateToken, handleMessageRoute);
+router.use('/quickResponse', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER), quickResponseRouter);
+router.use('/message', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER), handleMessageRoute);
 router.use('/bookMark', bookMarkRoute);
 router.use('/archive', archiveRoute);
 router.use('/role', authenticateSuperAdmin, handleRoleRoute);
@@ -97,6 +93,6 @@ router.use('/multi-project', multiProjectRoute);
 
 //payment route
 router.post('/api/checkout-session', payment.stripePayment);
-// router.post("/webhook", express.raw({ type: "application/json" }), payment.stripeWebhook);
+router.post("/webhook", express.raw({ type: "application/json" }), payment.stripePayment);
 
 export default router;

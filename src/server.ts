@@ -1,5 +1,5 @@
 import { Server } from 'http';
-import { httpServer } from './app';
+import httpServer from './app';
 import { PORT, NODE_ENV } from './config/config';
 import { print } from './helper/colorConsolePrint.ts/colorizedConsole';
 

@@ -36,9 +36,11 @@ const authenticate_for_startProject = async (req: Request, res: Response, next: 
 
     const order_status = await prisma.order.findUnique({
         where: {
-            id: user?.user_id
+            id: user?.id
         }
     });
+
+
 
     if (!order_status) {
         return sendResponse(res, {

@@ -7,7 +7,7 @@ import sendResponse from "../libs/sendResponse"
 const authenticateSuperAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (typeof authHeader === 'string') {
-        const token = authHeader.split(' ')[1] || authHeader
+        const token = authHeader?.split(' ')[1] || authHeader
 
         if (!token) {
             return sendResponse(res, {

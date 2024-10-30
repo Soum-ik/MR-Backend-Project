@@ -241,9 +241,9 @@ model FeatureAllFolder {
 }
 
 model AllSubFolder {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  slug      String @unique
-  folder String
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  slug       String @unique
+  folder     String
   subFolders Json[] @default([])
 }
 
@@ -328,7 +328,7 @@ model Order {
   user              User                @relation(fields: [userId], references: [id])
   projectName       String
   projectNumber     String              @unique
-  duration          String // Duration in days
+  duration          String
   totalPrice        String
   paymentStatus     PaymentStatus       @default(PENDING)
   startDate         DateTime            @default(now())
@@ -343,6 +343,8 @@ model Order {
   updatedAt         DateTime            @updatedAt
   Payment           Payment[]
   RequirementAnswer RequirementAnswer[]
+
+  OrderToken String?
 }
 
 model RequirementAnswer {
@@ -365,7 +367,7 @@ model Payment {
   createdAt DateTime @default(now())
   orderId   String   @db.ObjectId
 
-  user  User @relation(fields: [userId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
   Order Order @relation(fields: [orderId], references: [id])
 }
 

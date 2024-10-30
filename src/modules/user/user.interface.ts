@@ -1,12 +1,6 @@
-export const USER_ROLE = {
-    owner: 'owner',
-    admin: 'admin',
-    user: 'user',
-    customer: 'customer',
-    employee: 'employee',
-    valet: 'valet',
-} as const;
+import { USER_ROLE } from "./user.constant";
 
+export type TUserRole = keyof typeof USER_ROLE;
 
 export interface SignupRequestBody {
     country?: string;
