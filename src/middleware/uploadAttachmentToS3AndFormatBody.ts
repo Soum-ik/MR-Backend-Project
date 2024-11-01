@@ -16,8 +16,8 @@ export const uploadAttachmentToS3AndFormatBody = () => {
         try {
             const body: { file?: FileData; files?: FileData[] } = {};
             const files = req.files as Express.Multer.File[];
-            const bucketNameWatermark = 'mr-backend-watermark-resized';
-            const bucketName = 'mr-backend';
+            const bucketName = 'mr-backend-watermark-resized';
+
             // Updated watermark path to use current directory
             const watermarkPath = path.join(__dirname, 'watermark.png');
 
@@ -28,7 +28,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
             // Process a single image with watermark using Sharp
             const processImageWithWatermark = async (file: Express.Multer.File) => {
                 const inputPath = file.path;
-                const outputPath = path.join(processedDir, `${bucketNameWatermark}-${file.filename}`);
+                const outputPath = path.join(processedDir, `${bucketName}processed-${file.filename}`);
 
 
                 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -74,11 +74,9 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                     // Clean up the original uploaded file
                     await safeUnlink(inputPath);
 
-                    console.log(outputPath, path.basename(outputPath));
                     return {
                         outputPath,
                         fileName: path.basename(outputPath)
-
                     };
                 } catch (error) {
                     console.error('Detailed error processing image:', error);
@@ -95,39 +93,28 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 const file = files[0];
                 console.log('Processing single file:', file.originalname);
 
-                await uploadFileToS3(bucketName, file.path, file.originalname, 'public-read');
-                let outputPath, fileName;
-
-
-                // Check if the file type is png, jpg, or jpeg to decide on watermarking
-                if (['image/png', 'image/jpeg', 'image/jpg'].includes(file.mimetype)) {
-                    ({ outputPath, fileName } = await processImageWithWatermark(file));
-                } else {
-                    // Directly move the file without watermarking
-                    outputPath = file.path;
-                    fileName = file.originalname;
-                }
+                const { outputPath, fileName } = await processImageWithWatermark(file);
 
                 // Upload to S3
-                await uploadFileToS3(bucketNameWatermark, outputPath, fileName, 'public-read');
+                await uploadFileToS3(bucketName, outputPath, fileName, 'public-read');
                 body.file = {
-                    url: `https://${bucketNameWatermark}.s3.amazonaws.com/${fileName}`,
+                    url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
                     originalName: file.originalname,
                     fileType: file.mimetype,
                     fileSize: (await fs.stat(outputPath)).size
                 };
 
                 // Cleanup processed file
-                // await fs.unlink(outputPath).catch(err =>
-                //     console.error(`Error deleting file ${outputPath}:`, err)
-                // );
+                await fs.unlink(outputPath).catch(err =>
+                    console.error(`Error deleting file ${outputPath}:`, err)
+                );
 
             } else if (files && files.length > 1) {
                 console.log('Processing multiple files:', files.length);
                 const processedFiles = await Promise.all(files.map(processImageWithWatermark));
 
                 const uploadedFiles = await uploadMultipleFilesToS3(
-                    bucketNameWatermark,
+                    bucketName,
                     processedFiles.map(({ outputPath, fileName }) => ({
                         filePath: outputPath,
                         fileName: fileName
@@ -138,7 +125,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 body.files = await Promise.all(uploadedFiles.map(async (fileName, index) => {
                     const file = files[index];
                     return {
-                        url: `https://${bucketNameWatermark}.s3.amazonaws.com/${fileName}`,
+                        url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
                         originalName: file.originalname,
                         fileType: file.mimetype,
                         fileSize: (await fs.stat(processedFiles[index].outputPath)).size
