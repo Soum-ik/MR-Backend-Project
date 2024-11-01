@@ -35,7 +35,7 @@ const sendMessageForChat = async (req: Request, res: Response, next: NextFunctio
             statusCode: 500,
             success: false,
             data: error,
-            message: "Something went wrong!"
+            message: "Something went wrong! with sendMessageForChat"
         })
     }
 

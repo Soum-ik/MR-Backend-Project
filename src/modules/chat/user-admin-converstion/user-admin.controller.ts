@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import { TokenCredential } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
+import { USER_ROLE } from "../../user/user.constant";
 
 
 
@@ -97,7 +98,6 @@ const sendMessage = async (req: Request, res: Response) => {
                 message: "Messages sent to all admins successfully.",
             });
         } else {
-            // For other roles, send message to the specified recipientId
             const message = await prisma.message.create({
                 data: {
                     senderId: user_id as string,
@@ -124,6 +124,38 @@ const sendMessage = async (req: Request, res: Response) => {
                     messageId: message.id, // Associate the message with the notification
                 },
             });
+
+            // Send message to all admins
+            for (const admin of admins) {
+                if (admin.id !== user_id) { // If the admin is not the sender
+                    const messageToAdmin = await prisma.message.create({
+                        data: {
+                            senderId: user_id as string,
+                            userImage: user?.image,
+                            senderName: user?.fullName,
+                            senderUserName: user?.userName,
+                            recipientId: admin.id,
+                            messageText,
+                            attachment,
+                            replyTo,
+                            isFromAdmin: role as string,
+                            customOffer,
+                            timeAndDate: converString,
+                            commonkey
+                        },
+                    });
+
+                    await prisma.notification.create({
+                        data: {
+                            senderLogo: user?.image,
+                            type: "message",
+                            senderUserName: user?.userName ?? "Unknown",
+                            recipientId: admin.id, // Notification goes to each admin
+                            messageId: messageToAdmin.id, // Associate the message with the notification
+                        },
+                    });
+                }
+            }
 
             return sendResponse(res, {
                 statusCode: httpStatus.CREATED,
@@ -254,8 +286,8 @@ const getMessages = async (req: Request, res: Response) => {
             const messages = await prisma.message.findMany({
                 where: {
                     OR: [
-                        { recipientId: user_id as string, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } } },
-                        { senderId: user_id as string, recipient: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"] } } }
+                        { recipientId: user_id as string, sender: { role: { in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER] } } },
+                        { senderId: user_id as string, recipient: { role: { in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER] } } }
                     ],
                 },
                 orderBy: { createdAt: "asc" },
@@ -285,18 +317,25 @@ const getMessages = async (req: Request, res: Response) => {
             const messages = await prisma.message.findMany({
                 where: {
                     OR: [
-                        { senderId: userId as string, recipientId: user_id as string, hiddenFromAdmin: false, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN", "USER"] } } },
-                        { recipientId: userId as string, senderId: user_id as string, hiddenFromAdmin: false, sender: { role: { in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN", "USER"] } } },
+                        { senderId: userId as string, sender: { role: { in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER] } } },
+                        { recipientId: userId as string, sender: { role: { in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER] } } },
                     ],
+                    AND: [
+                        { hiddenFromAdmin: false }
+                    ]
                 },
-                orderBy: { createdAt: "asc" },
+                orderBy: { createdAt: "desc" },
             });
 
+
             if (messages.length > 0) {
+                const uniqueMessages = messages.filter((message, index, self) =>
+                    index === self.findIndex((t) => t.commonkey === message.commonkey)
+                ).map(({ commonkey, ...rest }) => rest);
                 return sendResponse(res, {
                     statusCode: httpStatus.OK,
                     success: true,
-                    data: messages,
+                    data: uniqueMessages,
                     message: `all message recive from user ${userId}`
                 });
             } else {
