@@ -30,6 +30,7 @@ import { UserRoute } from '../modules/user/userRotue';
 import { startProject } from '../modules/Order_page/Start_project/start_project.controller';
 import { Start_Project_Controller } from '../modules/Order_page/Start_project/Start_project.route';
 import { USER_ROLE } from '../modules/user/user.constant'
+import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessage.controller';
 
 const router = express.Router();
 
@@ -82,8 +83,13 @@ router.use('/notification', handleNotificationRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 router.post("/contactForChat", authenticateToken(USER_ROLE.USER), startContact);
 
+router.post(
+  "/sendMessageForChat/:user_id",
+  authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.SUPER_ADMIN),
+  sendMessageForChat
+)
 
-router.use('/inbox', Start_Project_Controller)
+router.use('/inbox', Start_Project_Controller);
 router.get('/avaiableforchat', chating.AvaiableForChat);
 
 router.use('/block-chat', blockChatRouter);

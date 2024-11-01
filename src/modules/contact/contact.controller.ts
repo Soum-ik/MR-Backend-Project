@@ -27,71 +27,62 @@ const startContact = async (req: Request, res: Response) => {
     }
 
     // Create a new contact entry
-    try {
-        const contactEntry = await prisma.contactForChat.create({
-            data: {
-                email: validatedBody.email ?? '',
-                messageText: validatedBody.message,
-                exampleDesign: validatedBody.exampleDesign ?? '',
-                name: validatedBody.name ?? '',
-                website: validatedBody.websiteOrFacebook ?? '',
-                userId: user_id,
-            },
-        });
 
-        const { id: contactForChatId } = contactEntry;
+    const contactEntry = await prisma.contactForChat.create({
+        data: {
+            email: validatedBody.email ?? '',
+            messageText: validatedBody.message,
+            exampleDesign: validatedBody.exampleDesign ?? '',
+            name: validatedBody.name ?? '',
+            website: validatedBody.websiteOrFacebook ?? '',
+            userId: user_id,
+        },
+    });
 
-        // Fetch admin users
-        const admins = await prisma.user.findMany({
-            where: { role: { in: [ADMIN_ROLE, SUB_ADMIN_ROLE, SUPER_ADMIN_ROLE] } },
-            select: { id: true },
-        });
+    const { id: contactForChatId } = contactEntry;
 
-        // Ensure admins exist
-        if (!admins.length) {
-            return new AppError(httpStatus.NOT_FOUND, 'No admin found')
-        }
-        
-        const commonkey = uuidv4()
+    // Fetch admin users
+    const admins = await prisma.user.findMany({
+        where: { role: { in: [ADMIN_ROLE, SUB_ADMIN_ROLE, SUPER_ADMIN_ROLE] } },
+        select: { id: true },
+    });
 
-        // Create message entries for each admin
-        const newMessages = await Promise.all(admins.map(admin =>
-            prisma.message.create({
-                data: {
-                    senderId: user_id,
-                    recipientId: admin.id,
-                    messageText: "",
-                    contactForm: {
-                        name: validatedBody.name,
-                        email: validatedBody.email,
-                        website: validatedBody.websiteOrFacebook,
-                        exampleDesign: validatedBody.exampleDesign,
-                        messageText: validatedBody.message,
-                    },
-                    timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
-                    isFromAdmin: MSG_FROM_ADMIN_NO,
-                    commonkey
-                },
-            })
-        ));
-
-        console.log("Messages created:", newMessages);
-
-        return sendResponse(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            message: "Contact created successfully",
-            data: contactEntry,
-        });
-
-    } catch (error) {
-        console.error("Error creating contact:", error);
-        return sendResponse(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            message: "An error occurred while creating the contact",
-        });
+    // Ensure admins exist
+    if (!admins.length) {
+        return new AppError(httpStatus.NOT_FOUND, 'No admin found')
     }
+
+    const commonkey = uuidv4()
+
+    // Create message entries for each admin
+    const newMessages = await Promise.all(admins.map(admin =>
+        prisma.message.create({
+            data: {
+                senderId: user_id,
+                recipientId: admin.id,
+                messageText: "",
+                contactForm: {
+                    name: validatedBody.name,
+                    email: validatedBody.email,
+                    website: validatedBody.websiteOrFacebook,
+                    exampleDesign: validatedBody.exampleDesign,
+                    messageText: validatedBody.message,
+                },
+                timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
+                isFromAdmin: MSG_FROM_ADMIN_NO,
+                commonkey
+            },
+        })
+    ));
+
+    console.log("Messages created:", newMessages);
+
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Contact created successfully",
+        data: contactEntry,
+    })
 };
 
 export { startContact };
