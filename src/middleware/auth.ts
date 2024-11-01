@@ -32,7 +32,7 @@ const authenticateToken = (...requiredRole: TUserRole[]) => {
             })
 
             if (!user) {
-                throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized Access');
+                throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized Access... User not found!');
             }
 
             if (requiredRole.length > 0 && !requiredRole.includes(role)) {

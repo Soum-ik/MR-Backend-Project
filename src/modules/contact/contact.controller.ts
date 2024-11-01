@@ -1,120 +1,97 @@
-// import type { Request, Response } from "express";
-// import httpStatus from "http-status";
-// import { z } from "zod";
-// import { prisma } from "../../libs/prismaHelper";
-// import sendResponse from "../../libs/sendResponse";
-// import { formSchema } from "./contact.validation";
+import { Request, Response } from "express";
+import httpStatus from "http-status";
+import { prisma } from "../../libs/prismaHelper";
+import sendResponse from "../../libs/sendResponse";
+import { v4 as uuidv4 } from 'uuid';
+import AppError from "../../errors/AppError";
 
-// // Define constants
-// const ADMIN_ROLE = "ADMIN";
-// const SUB_ADMIN_ROLE = "SUB_ADMIN";
-// const SUPER_ADMIN_ROLE = "SUPER_ADMIN";
-// const MSG_FROM_ADMIN_NO = "No";
+// Define constants
+const ADMIN_ROLE = "ADMIN";
+const SUB_ADMIN_ROLE = "SUB_ADMIN";
+const SUPER_ADMIN_ROLE = "SUPER_ADMIN";
+const MSG_FROM_ADMIN_NO = "No";
 
-// const startContact = async (req: Request, res: Response) => {
-//   try {
-//     // Validate request body
-//     const validatedBody = req.body
+const startContact = async (req: Request, res: Response) => {
+    const validatedBody = req.body;
 
-//     // Check if user information is available
-//     if (!req.user || !req.user.email || !req.user.user_id) {
-//       return sendResponse(res, {
-//         statusCode: httpStatus.BAD_REQUEST,
-//         success: false,
-//         message: "User information is missing or userId is required",
-//       });
-//     }
+    // Ensure user information is available
+    if (!req.user || !req.user.email || !req.user.user_id) {
+        return new AppError(httpStatus.BAD_REQUEST, 'User information is missing or userId is required')
+    }
 
-//     const { user_id, role } = req.user;
-//     // Prevent ADMIN from sending messages
-//     if (role === ADMIN_ROLE) {
-//       return sendResponse(res, {
-//         statusCode: httpStatus.FORBIDDEN,
-//         success: false,
-//         message: "Admins are not allowed to send messages",
-//       });
-//     }
+    const { user_id, role } = req.user;
 
-//     // Create a new contact entry
-//     const contactEntry = await prisma.contactForChat.create({
-//       data: {
-//         email: validatedBody.email ?? '',
-//         messageText: validatedBody.message,
-//         exampleDesign: validatedBody.exampleDesign ?? '',
-//         name: validatedBody.name ?? '',
-//         website: validatedBody.websiteOrFacebook ?? '',
-//         userId: user_id,
-//       },
-//     });
+    // Restrict ADMIN from sending messages
+    if (role === ADMIN_ROLE) {
+        return new AppError(httpStatus.FORBIDDEN, 'Admin are not allowed to send message')
+    }
 
-//     const { id: contactForChatId } = contactEntry;
+    // Create a new contact entry
+    try {
+        const contactEntry = await prisma.contactForChat.create({
+            data: {
+                email: validatedBody.email ?? '',
+                messageText: validatedBody.message,
+                exampleDesign: validatedBody.exampleDesign ?? '',
+                name: validatedBody.name ?? '',
+                website: validatedBody.websiteOrFacebook ?? '',
+                userId: user_id,
+            },
+        });
 
-//     // Fetch admin users
-//     const admins = await prisma.user.findMany({
-//       where: { role: { in: [ADMIN_ROLE, SUB_ADMIN_ROLE, SUPER_ADMIN_ROLE] } },
-//       select: { id: true },
-//     });
+        const { id: contactForChatId } = contactEntry;
 
-//     // Check if any admins are available
-//     if (admins.length === 0) {
-//       return sendResponse(res, {
-//         statusCode: httpStatus.NOT_FOUND,
-//         success: false,
-//         message: "No admin users found",
-//       });
-//     }
+        // Fetch admin users
+        const admins = await prisma.user.findMany({
+            where: { role: { in: [ADMIN_ROLE, SUB_ADMIN_ROLE, SUPER_ADMIN_ROLE] } },
+            select: { id: true },
+        });
 
-//     // Select a random admin
+        // Ensure admins exist
+        if (!admins.length) {
+            return new AppError(httpStatus.NOT_FOUND, 'No admin found')
+        }
+        
+        const commonkey = uuidv4()
 
-//     // Create new message entries for all admins
-//     const newMessages = await Promise.all(admins.map(admin =>
-//       prisma.message.create({
-//         data: {
-//           senderId: user_id,
-//           recipientId: admin.id,
-//           messageText: "",
-//           contactForm: {
-//             name: validatedBody.name,
-//             email: validatedBody.email,
-//             website: validatedBody.websiteOrFacebook,
-//             exampleDesign: validatedBody.exampleDesign,
-//             messageText: validatedBody.message,
-//           },
-//           timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
-//           // contactForChatId,
-//           isFromAdmin: MSG_FROM_ADMIN_NO,
-//         },
-//       })
-//     ));
+        // Create message entries for each admin
+        const newMessages = await Promise.all(admins.map(admin =>
+            prisma.message.create({
+                data: {
+                    senderId: user_id,
+                    recipientId: admin.id,
+                    messageText: "",
+                    contactForm: {
+                        name: validatedBody.name,
+                        email: validatedBody.email,
+                        website: validatedBody.websiteOrFacebook,
+                        exampleDesign: validatedBody.exampleDesign,
+                        messageText: validatedBody.message,
+                    },
+                    timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
+                    isFromAdmin: MSG_FROM_ADMIN_NO,
+                    commonkey
+                },
+            })
+        ));
 
-//     console.log("Message created:", newMessages);
+        console.log("Messages created:", newMessages);
 
-//     return sendResponse(res, {
-//       statusCode: httpStatus.OK,
-//       success: true,
-//       message: "Contact created successfully",
-//       data: contactEntry,
-//     });
-//   } catch (error) {
-//     // Handle validation errors from Zod
-//     if (error instanceof z.ZodError) {
-//       return sendResponse(res, {
-//         statusCode: httpStatus.BAD_REQUEST,
-//         success: false,
-//         message: "Validation failed",
-//         data: error.errors,
-//       });
-//     }
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "Contact created successfully",
+            data: contactEntry,
+        });
 
-//     // Log unexpected errors for debugging
-//     console.error("Internal Server Error:", error);
+    } catch (error) {
+        console.error("Error creating contact:", error);
+        return sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "An error occurred while creating the contact",
+        });
+    }
+};
 
-//     return sendResponse(res, {
-//       statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-//       success: false,
-//       message: "Internal server error",
-//     });
-//   }
-// };
-
-// export { startContact };
+export { startContact };

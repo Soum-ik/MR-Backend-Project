@@ -20,7 +20,7 @@ import { blockChatRouter } from '../modules/chat/block_chat/block_chat.route';
 import { chating } from '../modules/chat/chat.controller';
 import { handleNotificationRoute } from '../modules/chat/get_notification/get_notification.router';
 import { handleMessageRoute } from '../modules/chat/user-admin-converstion/user-admin.router';
-// import { startContact } from "../modules/contact/contact.controller";
+import { startContact } from "../modules/contact/contact.controller";
 import { createProjectRoute } from '../modules/create-project-admin/createProject.route';
 import { multiProjectRoute } from '../modules/multi-project/multiProject.route';
 import { payment } from '../modules/payment/payment.controller';
@@ -80,7 +80,7 @@ router.use('/role', authenticateSuperAdmin, handleRoleRoute);
 router.use('/notification', handleNotificationRoute);
 
 router.post('/upload-image', uploadFile.any(), uploadImage);
-// router.post("/contactForChat", authenticateToken, startContact);
+router.post("/contactForChat", authenticateToken(USER_ROLE.USER), startContact);
 
 
 router.use('/inbox', Start_Project_Controller)

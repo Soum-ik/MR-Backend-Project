@@ -4,64 +4,48 @@ import type { JwtPayload } from "jsonwebtoken"
 import sendResponse from "../../../libs/sendResponse";
 import { verifyToken } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
+import { IncomingHttpHeaders } from 'http'
+import AppError from "../../../errors/AppError";
 
 const authenticate_for_startProject = async (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
+    const { authorization: authHeader, ordertoken } = req.headers;
+
+    console.log(req.headers);
+
+
     if (!authHeader) {
-        return sendResponse(res, {
-            statusCode: httpStatus.FORBIDDEN,
-            success: false,
-            message: 'Authorization header is missing',
-        });
+        return new AppError(httpStatus.FORBIDDEN, 'authorization header is missing')
     }
 
     const token = authHeader.split(' ')[1] || authHeader;
     if (!token) {
-        return sendResponse(res, {
-            statusCode: httpStatus.NOT_FOUND,
-            success: false,
-            message: 'Token not found'
-        });
+        return new AppError(httpStatus.NOT_FOUND, 'Token not foumd',)
     }
 
     const decoded = verifyToken(token);
     if (!decoded) {
-        return sendResponse(res, {
-            statusCode: httpStatus.FORBIDDEN,
-            success: false,
-            message: 'Token is invalid',
-        });
+        return new AppError(httpStatus.FORBIDDEN, 'Token invalidate')
     }
     const user = decoded as JwtPayload;
 
-    const order_status = await prisma.order.findUnique({
-        where: {
-            id: user?.id
-        }
-    });
-
-
-
-    if (!order_status) {
-        return sendResponse(res, {
-            statusCode: httpStatus.NOT_FOUND,
-            success: false,
-            message: "Order not found",
-        });
-    }
-
-
     if (user?.role === "USER") {
+        const order_status = await prisma.order.findUnique({
+            where: {
+                OrderToken: ordertoken as string,
+                userId: user.user_id
+            }
+        });
+        if (!order_status) {
+            return new AppError(httpStatus.NOT_FOUND, 'Order are not found',)
+        }
         if (order_status?.paymentStatus === "COMPLETED") {
+            req.body = { user }
             next();
         } else {
-            return sendResponse(res, {
-                statusCode: httpStatus.FORBIDDEN,
-                success: false,
-                message: "Payment not completed. You're not able to start the project",
-            });
+            throw new AppError(httpStatus.UNAUTHORIZED, "you're not authorized for the next step")
         }
     } else {
+        req.body = user
         next();
     }
 }

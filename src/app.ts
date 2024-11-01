@@ -54,6 +54,8 @@ app.use(limiter);
 app.set('etag', WEB_CACHE);
 app.use('/api/v1', router);
 
+app.get('/', () => new Date().toLocaleDateString())
+
 app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
 // Middleware to handle CORS headers for unsupported routes

@@ -343,8 +343,7 @@ model Order {
   updatedAt         DateTime            @updatedAt
   Payment           Payment[]
   RequirementAnswer RequirementAnswer[]
-
-  OrderToken String?
+  OrderToken String @unique
 }
 
 model RequirementAnswer {
