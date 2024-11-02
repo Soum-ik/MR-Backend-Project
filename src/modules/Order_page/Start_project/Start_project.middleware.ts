@@ -6,6 +6,7 @@ import { verifyToken } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
 import { IncomingHttpHeaders } from 'http'
 import AppError from "../../../errors/AppError";
+import { PaymentStatus } from "../../payment/payment.constant";
 
 const authenticate_for_startProject = async (req: Request, res: Response, next: NextFunction) => {
     const { authorization: authHeader, ordertoken } = req.headers;
@@ -36,16 +37,25 @@ const authenticate_for_startProject = async (req: Request, res: Response, next: 
             }
         });
         if (!order_status) {
-            return new AppError(httpStatus.NOT_FOUND, 'Order are not found',)
+            console.log(order_status);
+            return sendResponse(res, {
+                statusCode: httpStatus.NOT_FOUND,
+                success: false,
+                message: 'Order are not found',
+            });
         }
-        if (order_status?.paymentStatus === "COMPLETED") {
-            req.body = { user }
+        if (order_status?.paymentStatus === PaymentStatus.COMPLETED) {
+            req.body = { user, ...order_status }
             next();
         } else {
-            throw new AppError(httpStatus.UNAUTHORIZED, "you're not authorized for the next step")
+            return sendResponse(res, {
+                statusCode: httpStatus.UNAUTHORIZED,
+                success: false,
+                message: "you're not authorized for the next step",
+            });
         }
     } else {
-        req.body = user
+        req.body = { user }
         next();
     }
 }

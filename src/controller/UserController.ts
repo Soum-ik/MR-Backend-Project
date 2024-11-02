@@ -28,7 +28,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 const SignUp = async (
-    req: Request<{}, {}, SignupRequestBody>,
+    req: Request<object, object, SignupRequestBody>,
     res: Response
 ) => {
     try {
@@ -106,7 +106,7 @@ const SignUp = async (
 };
 
 const SignIn = async (
-    req: Request<{}, {}, SignupRequestBody>,
+    req: Request<object, object, SignupRequestBody>,
     res: Response
 ) => {
     try {

@@ -27,10 +27,10 @@ import { payment } from '../modules/payment/payment.controller';
 import { handleRoleRoute } from '../modules/role_controller_super_admin/role_controller.router';
 import uploadImage from '../modules/uploadImage/uploadController';
 import { UserRoute } from '../modules/user/userRotue';
-import { startProject } from '../modules/Order_page/Start_project/start_project.controller';
 import { Start_Project_Controller } from '../modules/Order_page/Start_project/Start_project.route';
 import { USER_ROLE } from '../modules/user/user.constant'
 import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessage.controller';
+import { AWS_SES } from '../helper/smtp/AWS_SES';
 
 const router = express.Router();
 
@@ -51,10 +51,18 @@ router.post(
   uploadFile.array('files'),
   uploadAttachmentToS3AndFormatBody(),
   (req, res) => {
-    res.status(200).send({
-      message: 'Attachment uploaded and processed successfully',
-      data: req.body,
-    });
+    try {
+      res.status(200).send({
+        message: 'Attachment uploaded and processed successfully',
+        data: req.body,
+      });
+    } catch (error) {
+      console.log('Error sending response:', error);
+      res.status(500).send({
+        message: 'An error occurred while sending the response',
+        error: error,
+      });
+    }
   },
 );
 
@@ -101,4 +109,41 @@ router.use('/multi-project', multiProjectRoute);
 router.post('/api/checkout-session', payment.stripePayment);
 router.post("/webhook", express.raw({ type: "application/json" }), payment.stripePayment);
 
+router.post('/verify-email', async (req, res) => {
+  try {
+    const response = await AWS_SES.verifyEmailIdentity(req.body.email);
+    res.status(200).json({ message: "Email verification initiated", response });
+  } catch (error) {
+    console.error("Error in /verify-email:", error);
+    res.status(500).json({
+      message: "Failed to verify email",
+      error: error || "Unknown error",
+      details: error,
+    });
+  }
+});
+
+router.post('/send-email', async (req, res) => {
+  const { email, subject, body } = req.body;
+
+  try {
+    // Attempt email verification (it won't throw an error if email is already verified)
+    await AWS_SES.verifyEmailIdentity(email);
+
+    // Send the email
+    const response = await AWS_SES.sendEmail(email, subject, body);
+    console.log(response, 'response');
+    res.status(200).json({ message: "Email sent successfully", response });
+  } catch (error) {
+    console.error("Error in /send-email:", error);
+    res.status(500).json({
+      message: "Failed to send email",
+      error: error || "Unknown error",
+      details: error,
+    });
+  }
+});
 export default router;
+
+
+

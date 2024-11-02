@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/config";
 import { prisma } from "../../libs/prismaHelper";
+import { OrderStatus } from "../Order_page/Order_page.constant";
+import { PaymentStatus } from "./payment.constant";
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -38,8 +40,8 @@ const stripeWebhook = async (req: Request, res: Response) => {
                 const order = await prisma.order.update({
                     where: { stripeId: session.id.split('_').join("") },
                     data: {
-                        currentStatus: "PROJECT_PLACED",
-                        paymentStatus: "COMPLETED",
+                        currentStatus: OrderStatus.PROJECT_PLACED,
+                        paymentStatus: PaymentStatus.COMPLETED,
                     },
                 });
     

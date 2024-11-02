@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.665.0",
+    "@aws-sdk/client-ses": "^3.682.0",
     "@prisma/client": "^5.18.0",
     "@types/cors": "^2.8.17",
     "@types/nodemailer": "^6.4.15",

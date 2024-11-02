@@ -7,6 +7,7 @@ import projectNumberCreator from '../Order_page/projectNumberGenarator.ts/projec
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid'
+import { PaymentStatus } from './payment.constant';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -50,7 +51,7 @@ const stripePayment = async (req: Request, res: any) => {
     data: {
       userId: data?.userId,
       stripeId: session.id.split('_').join(''),
-      status: 'PENDING',
+      status: PaymentStatus.PENDING,
       amount: data?.totalAmount.toString(),
       currency: session.currency as string,
       orderId: new ObjectId().toString(),
