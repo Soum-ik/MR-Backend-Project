@@ -37,8 +37,6 @@ const sendEmail = async (email: string, subject: string, body: string) => {
         },
     });
 
-    console.log(command, 'command');
-
     try {
         const response = await sesClient.send(command);
         return response;
