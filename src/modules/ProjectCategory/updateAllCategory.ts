@@ -13,7 +13,7 @@ const UpdateAllCategorySchema = z.object({
   ),
 });
 
-type UpdateAllCategoryRequest = Request<{}, {}, z.infer<typeof UpdateAllCategorySchema>>;
+type UpdateAllCategoryRequest = Request<object, object, z.infer<typeof UpdateAllCategorySchema>>;
 
 export default async function updateAllCategory(req: UpdateAllCategoryRequest, res: Response) {
   if (req.method === "POST") {

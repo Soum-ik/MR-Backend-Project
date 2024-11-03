@@ -17,7 +17,7 @@ export const startProject = async (req: Request, res: Response) => {
             }
         })
 
-        sendResponse(res, {
+        return sendResponse(res, {
             statusCode: httpStatus.OK,
             success: true,
             message: 'Project started successfully',
@@ -25,7 +25,7 @@ export const startProject = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Error in startProject:', error);
-        sendResponse(res, {
+        return sendResponse(res, {
             statusCode: httpStatus.INTERNAL_SERVER_ERROR,
             success: false,
             message: 'An error occurred while processing your request',

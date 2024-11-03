@@ -40,16 +40,10 @@ export const uploadFileToS3 = (
         s3Client
             .send(command)
             .then(() => {
-                // console.log(`File uploaded successfully to ${bucketName}/${fileName}`);
-
+                console.log(
+                    `File uploaded successfully to ${bucketName}/${fileName}`,
+                );
                 // Delete the file asynchronously
-                fs.unlink(filePath, (err) => {
-                    if (err) {
-                        console.error('Error deleting file:', err);
-                    } else {
-                        console.log('File is deleted.');
-                    }
-                });
 
                 resolve(`${bucketName}/${fileName}`);
             })
@@ -89,13 +83,13 @@ export const uploadMultipleFilesToS3 = (
                         );
 
                         // Delete the file asynchronously
-                        fs.unlink(filePath, (err) => {
-                            if (err) {
-                                console.error('Error deleting file:', err);
-                            } else {
-                                console.log('File is deleted.');
-                            }
-                        });
+                        // fs.unlink(filePath, (err) => {
+                        //     if (err) {
+                        //         console.error('Error deleting file:', err);
+                        //     } else {
+                        //         console.log('File is deleted.');
+                        //     }
+                        // });
 
                         resolve(`${bucketName}/${fileName}`);
                     })

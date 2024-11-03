@@ -16,32 +16,25 @@ export const uploadAttachmentToS3AndFormatBody = () => {
         try {
             const body: { file?: FileData; files?: FileData[] } = {};
             const files = req.files as Express.Multer.File[];
-            const bucketName = 'mr-backend-watermark-resized';
+            const bucketNameWatermark = 'mr-backend-watermark-resized';
+            const bucketName = 'mr-backend';
+
 
             // Updated watermark path to use current directory
             const watermarkPath = path.join(__dirname, 'watermark.png');
 
             // Ensure processed directory exists
             const processedDir = path.join(process.cwd(), 'processed');
+
+
             await fs.mkdir(processedDir, { recursive: true });
 
             // Process a single image with watermark using Sharp
             const processImageWithWatermark = async (file: Express.Multer.File) => {
                 const inputPath = file.path;
-                const outputPath = path.join(processedDir, `${bucketName}processed-${file.filename}`);
-
-
-                const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-                const safeUnlink = async (filePath: string) => {
-                    try {
-                        await delay(300);  // Adjust delay as needed (e.g., 100ms)
-                        await fs.unlink(filePath);
-                    } catch (error) {
-                        console.error('Error during unlink:', error);
-                    }
-                };
-
+                const outputPath = path.join(processedDir, `${bucketNameWatermark}-${file.filename}`);
+                const fileName = `${bucketNameWatermark}-${file.filename}`;
+                console.log('fileName checking 1', fileName);
 
                 try {
 
@@ -72,72 +65,89 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                     mainImage.destroy();
 
                     // Clean up the original uploaded file
-                    await safeUnlink(inputPath);
 
                     return {
                         outputPath,
-                        fileName: path.basename(outputPath)
+                        fileName: fileName
                     };
                 } catch (error) {
-                    console.error('Detailed error processing image:', error);
-
-                    // Clean up with safe unlink
-                    await safeUnlink(inputPath);
-                    await safeUnlink(outputPath);
-
                     throw new Error(`Failed to process image ${file.originalname}: ${error}`);
                 }
             };
 
             if (files && files.length === 1) {
                 const file = files[0];
-                console.log('Processing single file:', file.originalname);
+                const originalFileName = `${bucketName}-${file.filename}`;
 
-                const { outputPath, fileName } = await processImageWithWatermark(file);
 
-                // Upload to S3
-                await uploadFileToS3(bucketName, outputPath, fileName, 'public-read');
-                body.file = {
-                    url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
-                    originalName: file.originalname,
-                    fileType: file.mimetype,
-                    fileSize: (await fs.stat(outputPath)).size
-                };
 
-                // Cleanup processed file
-                await fs.unlink(outputPath).catch(err =>
-                    console.error(`Error deleting file ${outputPath}:`, err)
-                );
 
-            } else if (files && files.length > 1) {
-                console.log('Processing multiple files:', files.length);
-                const processedFiles = await Promise.all(files.map(processImageWithWatermark));
+                await uploadFileToS3(bucketName, file.path, originalFileName, 'public-read');
 
-                const uploadedFiles = await uploadMultipleFilesToS3(
-                    bucketName,
-                    processedFiles.map(({ outputPath, fileName }) => ({
-                        filePath: outputPath,
-                        fileName: fileName
-                    })),
-                    'public-read'
-                );
-
-                body.files = await Promise.all(uploadedFiles.map(async (fileName, index) => {
-                    const file = files[index];
-                    return {
-                        url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
+                if (file.mimetype.includes('image')) {
+                    const { outputPath, fileName } = await processImageWithWatermark(file);
+                    await uploadFileToS3(bucketNameWatermark, outputPath, fileName, 'public-read');
+                    body.file = {
+                        url: `https://${bucketNameWatermark}.s3.amazonaws.com/${fileName}`,
                         originalName: file.originalname,
                         fileType: file.mimetype,
-                        fileSize: (await fs.stat(processedFiles[index].outputPath)).size
+                        fileSize: (await fs.stat(outputPath)).size
                     };
-                }));
+                } else {
+                    body.file = {
+                        url: `https://${bucketName}.s3.amazonaws.com/${originalFileName}`,
+                        originalName: file.originalname,
+                        fileType: file.mimetype,
+                        fileSize: (await fs.stat(file.path)).size
+                    };
+                }
 
-                // Cleanup processed files
-                await Promise.all(processedFiles.map(({ outputPath }) =>
-                    fs.unlink(outputPath).catch(err =>
-                        console.error(`Error deleting file ${outputPath}:`, err)
-                    )
-                ));
+            } else if (files && files.length > 1) {
+
+
+
+                if (files.every(file => file.mimetype.includes('image'))) {
+                    const processedFiles = await Promise.all(files.map(processImageWithWatermark));
+                    const uploadedFiles = await uploadMultipleFilesToS3(bucketNameWatermark,
+                        processedFiles.map(({ outputPath, fileName }) => ({
+                            filePath: outputPath,
+                            fileName: fileName
+                        })),
+                        'public-read'
+                    );
+
+                    body.files = await Promise.all(uploadedFiles.map(async (fileName, index) => {
+                        const file = files[index];
+                        return {
+                            url: `https://${bucketNameWatermark}.s3.amazonaws.com/${fileName}`,
+                            originalName: file.originalname,
+                            fileType: file.mimetype,
+                            fileSize: (await fs.stat(processedFiles[index].outputPath)).size
+                        };
+                    }));
+                } else {
+                    const uploadedFiles = await uploadMultipleFilesToS3(
+                        bucketName,
+                        files.map((file) => ({
+                            filePath: file.path,
+                            fileName: `${bucketName}-${file.filename}`
+                        })),
+                        'public-read'
+                    );
+
+                    body.files = await Promise.all(uploadedFiles.map(async (fileName, index) => {
+                        const file = files[index];
+                        return {
+                            url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
+                            originalName: file.originalname,
+                            fileType: file.mimetype,
+                            fileSize: (await fs.stat(file.path)).size
+                        };
+                    }));
+                }
+
+
+
             } else {
                 console.log('No files received');
             }
@@ -149,6 +159,18 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                     body[key as keyof typeof body] = payload[key];
                 });
             }
+
+            const filesToDelete = files.map(file => {
+                fs.unlink(file.path);
+            })
+            const processedFiles = await fs.readdir(processedDir);
+
+            if (processedFiles.length > 0) {
+                await Promise.all(processedFiles.map(file => {
+                    fs.unlink(path.join(processedDir, file));
+                }));
+            }
+            await Promise.all(filesToDelete);
 
             req.body = { ...body };
             next();

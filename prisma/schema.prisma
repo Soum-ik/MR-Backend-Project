@@ -50,7 +50,38 @@ model User {
   Note             Note[]
   Payment          Payment[]
 
+  OrderMessageSent     OrderMessage[] @relation("OrderMessageSent")
+  OrderMessageReceived OrderMessage[] @relation("OrderMessageReceived")
+
   @@map("Users")
+}
+
+model OrderMessage {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userImage       String?
+  senderName      String?
+  senderUserName  String?
+  projectNumber   String
+  senderId        String   @db.ObjectId
+  recipientId     String   @db.ObjectId
+  messageText     String?
+  attachment      Json[]   @default([])
+  createdAt       DateTime @default(now())
+  isFromAdmin     String
+  customOffer     Json?
+  timeAndDate     DateTime @default(now())
+  contactForm     Json?
+  read            Boolean  @default(false) // To track if the message has been read
+  hiddenFromAdmin Boolean  @default(false)
+  replyTo         Json?
+  commonKey       String?
+
+  // Relationships
+  sender    User  @relation("OrderMessageSent", fields: [senderId], references: [id])
+  recipient User  @relation("OrderMessageReceived", fields: [recipientId], references: [id])
+  order     Order @relation(fields: [projectNumber], references: [projectNumber])
+
+  @@map("OrderMessages")
 }
 
 model Notification {
@@ -343,7 +374,8 @@ model Order {
   updatedAt         DateTime            @updatedAt
   Payment           Payment[]
   RequirementAnswer RequirementAnswer[]
-  OrderToken String @unique
+  OrderToken        String              @unique
+  OrderMessage      OrderMessage[]
 }
 
 model RequirementAnswer {
@@ -391,4 +423,5 @@ enum OrderStatus {
   REVIEW_DELIVERY
   COMPLETE_PROJECT
   PENDING
+  CANCELLED
 }
