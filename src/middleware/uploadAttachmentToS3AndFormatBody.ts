@@ -3,6 +3,8 @@ import { uploadFileToS3, uploadMultipleFilesToS3 } from '../utils/sendFiletoS3';
 import sharp from 'sharp';
 import fs from 'fs/promises';
 import path from 'path';
+import AppError from '../errors/AppError';
+import httpStatus from 'http-status';
 
 interface FileData {
     url: string;
@@ -25,9 +27,9 @@ export const uploadAttachmentToS3AndFormatBody = () => {
 
             // Ensure processed directory exists
             const processedDir = path.join(process.cwd(), 'processed');
-
-
             await fs.mkdir(processedDir, { recursive: true });
+
+
 
             // Process a single image with watermark using Sharp
             const processImageWithWatermark = async (file: Express.Multer.File) => {
@@ -75,6 +77,10 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 }
             };
 
+            if (files && files.length === 0) {
+                throw new AppError(httpStatus.NOT_FOUND, 'No files recived');
+            }
+
             if (files && files.length === 1) {
                 const file = files[0];
                 const originalFileName = `${bucketName}-${file.filename}`;
@@ -104,7 +110,14 @@ export const uploadAttachmentToS3AndFormatBody = () => {
 
             } else if (files && files.length > 1) {
 
-
+                await uploadMultipleFilesToS3(
+                    bucketName,
+                    files.map((file) => ({
+                        filePath: file.path,
+                        fileName: `${bucketName}-${file.filename}`
+                    })),
+                    'public-read'
+                );
 
                 if (files.every(file => file.mimetype.includes('image'))) {
                     const processedFiles = await Promise.all(files.map(processImageWithWatermark));
@@ -148,8 +161,6 @@ export const uploadAttachmentToS3AndFormatBody = () => {
 
 
 
-            } else {
-                console.log('No files received');
             }
 
             // Parse and merge additional form data
@@ -163,7 +174,25 @@ export const uploadAttachmentToS3AndFormatBody = () => {
             const filesToDelete = files.map(file => {
                 fs.unlink(file.path);
             })
+
+            const uploads = path.join(process.cwd(), 'uploads');
+            const uploadsFiles = await fs.readdir(uploads);
+            console.log(uploadsFiles, 'uploadsfiles');
+
             const processedFiles = await fs.readdir(processedDir);
+
+
+            if (uploadsFiles.length > 0) {
+                await Promise.all(uploadsFiles.map(async file => {
+                    const filePath = path.join(uploads, file);
+                    if (await fs.stat(filePath).then(() => true).catch(() => false)) {
+                        console.log(file, 'file exists and is being removed');
+                        await fs.unlink(filePath);
+                    } else {
+                        console.log(file, 'file does not exist');
+                    }
+                }));
+            }
 
             if (processedFiles.length > 0) {
                 await Promise.all(processedFiles.map(file => {
