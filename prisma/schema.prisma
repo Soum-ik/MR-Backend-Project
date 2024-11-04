@@ -248,18 +248,13 @@ model UploadDesign {
   updateAt       DateTime @updatedAt
 
   folder String?
-  // folders Folders? @relation(fields: [folder], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
   subFolder String?
-  // SubFolders SubFolders? @relation(fields: [subFolder], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
   industrys String[]
-  // Industrys Industrys? @relation(fields: [industrys], references: [name], onUpdate: Cascade, onDelete: Restrict)
 
-  designs String[]
-  // Designs Designs? @relation(fields: [designs], references: [name], onUpdate: Cascade, onDelete: Restrict)
-
-  designId String @unique
+  designs  String[]
+  designId String   @unique
 }
 
 //Start - Here You will get the schema for home page feature category reordering
@@ -353,30 +348,48 @@ model Note {
 }
 
 model Order {
-  id                String              @id @map("_id") @db.ObjectId
-  userId            String              @db.ObjectId
-  stripeId          String              @unique
-  user              User                @relation(fields: [userId], references: [id])
-  projectName       String
-  projectNumber     String              @unique
-  duration          String
-  totalPrice        String
-  paymentStatus     PaymentStatus       @default(PENDING)
-  startDate         DateTime            @default(now())
-  deliveryDate      DateTime
-  projectStartDate  DateTime?
-  currentStatus     OrderStatus         @default(PENDING)
-  items             Json[]              @default([])
-  requirements      Json[]              @default([])
-  bulletPoints      Json[]              @default([])
-  privateNotes      Note[]
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  Payment           Payment[]
-  RequirementAnswer RequirementAnswer[]
-  OrderToken        String              @unique
-  OrderMessage      OrderMessage[]
+  id                    String                  @id @map("_id") @db.ObjectId
+  userId                String                  @db.ObjectId
+  stripeId              String                  @unique
+  user                  User                    @relation(fields: [userId], references: [id])
+  projectName           String
+  projectNumber         String                  @unique
+  duration              String
+  totalPrice            String
+  paymentStatus         PaymentStatus           @default(PENDING)
+  startDate             DateTime                @default(now())
+  deliveryDate          DateTime
+  projectStartDate      DateTime?
+  currentStatus         OrderStatus             @default(PENDING)
+  items                 Json[]                  @default([])
+  requirements          Json[]                  @default([])
+  bulletPoints          Json[]                  @default([])
+  privateNotes          Note[]
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  Payment               Payment[]
+  RequirementAnswer     RequirementAnswer[]
+  OrderToken            String                  @unique
+  OrderMessage          OrderMessage[]
+  OrderExtensionRequest OrderExtensionRequest[]
 }
+
+model OrderExtensionRequest {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  orderId        String      @db.ObjectId
+  requestedByClient Boolean
+  days           Int
+  amount         String
+  reason         String?
+  paymentStatus  PaymentStatus @default(PENDING)
+  adminApproved  Boolean?
+  userApproved   Boolean?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  order          Order       @relation(fields: [orderId], references: [id])
+}
+
 
 model RequirementAnswer {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
