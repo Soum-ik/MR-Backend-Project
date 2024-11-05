@@ -360,7 +360,11 @@ model Order {
   startDate             DateTime                @default(now())
   deliveryDate          DateTime
   projectStartDate      DateTime?
-  currentStatus         OrderStatus             @default(PENDING)
+  projectStatus         ProjectStatus           @default(Waiting)
+  trackProjectStatus    trackProjectStatus      @default(PENDING)
+  clientApproval        Boolean?                @default(false)
+  adminDeliveryRequest  Boolean?                @default(false)
+  submittedData         Json?                   @default("{}")
   items                 Json[]                  @default([])
   requirements          Json[]                  @default([])
   bulletPoints          Json[]                  @default([])
@@ -375,21 +379,20 @@ model Order {
 }
 
 model OrderExtensionRequest {
-  id             String      @id @default(auto()) @map("_id") @db.ObjectId
-  orderId        String      @db.ObjectId
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  orderId           String        @db.ObjectId
   requestedByClient Boolean
-  days           Int
-  amount         String
-  reason         String?
-  paymentStatus  PaymentStatus @default(PENDING)
-  adminApproved  Boolean?
-  userApproved   Boolean?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  days              Int
+  amount            String
+  reason            String?
+  paymentStatus     PaymentStatus @default(PENDING)
+  adminApproved     Boolean?
+  userApproved      Boolean?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
-  order          Order       @relation(fields: [orderId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
 }
-
 
 model RequirementAnswer {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -429,7 +432,7 @@ enum Role {
   SUB_ADMIN
 }
 
-enum OrderStatus {
+enum trackProjectStatus {
   PROJECT_PLACED
   REQUIREMENTS_SUBMITTED
   PROJECT_RUNNING
@@ -437,4 +440,14 @@ enum OrderStatus {
   COMPLETE_PROJECT
   PENDING
   CANCELLED
+}
+
+enum ProjectStatus {
+  Waiting
+  Ongoing
+  Revision
+  Dispute
+  Delivered
+  Canceled
+  Completed
 }

@@ -9,6 +9,67 @@ import { ExtendDeliveryMessage } from "./ExtendDelivary.constant";
 import { TokenCredential } from "../../../libs/authHelper";
 import { PaymentStatus } from "@prisma/client";
 
+/*
+test postman request
+
+1. Extend Delivery (Client Request)
+POST http://localhost:5000/api/v1/extend-delivery
+Headers:
+  Authorization: Bearer <your_jwt_token>
+  Content-Type: application/json
+Body:
+{
+  "orderId": "order123",
+  "days": "5",
+  "amount": "25",
+  "requestedByClient": true,
+  "reason": "Need more time for revisions"
+}
+
+2. Extend Delivery (Admin Request)
+POST http://localhost:5000/api/v1/extend-delivery
+Headers:
+  Authorization: Bearer <your_jwt_token>
+  Content-Type: application/json
+Body:
+{
+  "orderId": "order123",
+  "days": "3",
+  "amount": "0",
+  "requestedByClient": false,
+  "reason": "Additional time needed for complex changes"
+}
+
+3. Approve Extension Request
+POST http://localhost:5000/api/v1/extend-delivery/approve
+Headers:
+  Authorization: Bearer <your_jwt_token>
+  Content-Type: application/json
+Body:
+{
+  "extensionRequestId": "ext123",
+  "approvedByAdmin": true
+}
+
+Response Format:
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Delivery date extended successfully",
+  "data": {
+    "id": "ext123",
+    "orderId": "order123",
+    "requestedByClient": true,
+    "days": 5,
+    "amount": "25",
+    "reason": "Need more time for revisions",
+    "paymentStatus": "COMPLETED",
+    "adminApproved": null,
+    "userApproved": true
+  }
+}
+*/
+
 const extendDelivery = async (req: Request, res: Response) => {
     try {
         const validatedBody = req.body as ExtendDeliveryParams;

@@ -33,8 +33,9 @@ import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessa
 import { AWS_SES } from '../helper/smtp/AWS_SES';
 import { handleOrderMessageRoute } from '../modules/Order_page/Order-message/Order-message.route';
 import getOrderStatusRoute from '../modules/Order_page/Order-status/order-status.route';
-const router = express.Router();
+import { uploadAttachmentToS3AndFormatBodyOptimized } from '../middleware/uploadAttachmentToS3AndFormatBodyOptimized';
 
+const router = express.Router();
 router.get(
   '/social-media-link/',
   authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER),
@@ -51,6 +52,25 @@ router.post(
   '/upload-attachment',
   uploadFile.array('files'),
   uploadAttachmentToS3AndFormatBody(),
+  (req, res) => {
+    try {
+      res.status(200).send({
+        message: 'Attachment uploaded and processed successfully',
+        data: req.body,
+      });
+    } catch (error) {
+      console.log('Error sending response:', error);
+      res.status(500).send({
+        message: 'An error occurred while sending the response',
+        error: error,
+      });
+    }
+  },
+);
+router.post(
+  '/upload-attachment-optimized',
+  uploadFile.array('files'),
+  uploadAttachmentToS3AndFormatBodyOptimized(),
   (req, res) => {
     try {
       res.status(200).send({

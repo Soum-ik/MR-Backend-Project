@@ -4,6 +4,51 @@ import { z } from "zod";
 import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
 
+/*
+Example Postman Request for answerRequirements:
+
+POST http://localhost:5000/api/v1/requirements/answer
+Headers:
+  Authorization: Bearer <your_jwt_token>
+  Content-Type: application/json
+Body:
+{
+  "orderId": "order123",
+  "answers": [
+    {
+      "question": "What is your brand color?",
+      "answer": "Blue and white"
+    },
+    {
+      "question": "What is your target audience?", 
+      "answer": "Young professionals aged 25-35"
+    }
+  ]
+}
+
+Example Postman Request for getRequirementsAnswers:
+
+GET http://localhost:5000/api/v1/requirements/order123
+Headers:
+  Authorization: Bearer <your_jwt_token>
+
+Response:
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Requirement answers fetched successfully",
+  "data": [
+    {
+      "question": "What is your brand color?",
+      "answer": "Blue and white"
+    },
+    {
+      "question": "What is your target audience?",
+      "answer": "Young professionals aged 25-35" 
+    }
+  ]
+}
+*/
 
 // Create answers to the requirements questions
 const answerRequirements = async (req: Request, res: Response) => {
@@ -45,7 +90,8 @@ const answerRequirements = async (req: Request, res: Response) => {
                     id: orderId
                 },
                 data: {
-                    currentStatus: "REQUIREMENTS_SUBMITTED"
+                    trackProjectStatus: "REQUIREMENTS_SUBMITTED",
+                    projectStatus: "Ongoing"
                 }
             })
             return sendResponse<any>(res, {
