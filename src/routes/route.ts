@@ -32,7 +32,7 @@ import { USER_ROLE } from '../modules/user/user.constant'
 import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessage.controller';
 import { AWS_SES } from '../helper/smtp/AWS_SES';
 import { handleOrderMessageRoute } from '../modules/Order_page/Order-message/Order-message.route';
-
+import getOrderStatusRoute from '../modules/Order_page/Order-status/order-status.route';
 const router = express.Router();
 
 router.get(
@@ -91,6 +91,7 @@ router.use('/notification', handleNotificationRoute);
 router.use('/order-message', handleOrderMessageRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 router.post("/contactForChat", authenticateToken(USER_ROLE.USER), startContact);
+router.use('/order-status', getOrderStatusRoute);
 
 router.post(
   "/sendMessageForChat/:user_id",
