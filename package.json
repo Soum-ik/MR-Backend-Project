@@ -40,6 +40,7 @@
     "@aws-sdk/client-ses": "^3.682.0",
     "@prisma/client": "^5.18.0",
     "@types/cors": "^2.8.17",
+    "@types/node": "^22.9.0",
     "@types/nodemailer": "^6.4.15",
     "aws-sdk": "^2.1691.0",
     "bcrypt": "^5.1.1",
