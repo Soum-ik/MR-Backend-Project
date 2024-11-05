@@ -31,6 +31,7 @@ import { Start_Project_Controller } from '../modules/Order_page/Start_project/St
 import { USER_ROLE } from '../modules/user/user.constant'
 import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessage.controller';
 import { AWS_SES } from '../helper/smtp/AWS_SES';
+import { handleOrderMessageRoute } from '../modules/Order_page/Order-message/Order-message.route';
 
 const router = express.Router();
 
@@ -87,7 +88,7 @@ router.use('/bookMark', bookMarkRoute);
 router.use('/archive', archiveRoute);
 router.use('/role', authenticateSuperAdmin, handleRoleRoute);
 router.use('/notification', handleNotificationRoute);
-
+router.use('/order-message', handleOrderMessageRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 router.post("/contactForChat", authenticateToken(USER_ROLE.USER), startContact);
 

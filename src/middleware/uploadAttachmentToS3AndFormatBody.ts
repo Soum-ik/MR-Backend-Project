@@ -185,11 +185,16 @@ export const uploadAttachmentToS3AndFormatBody = () => {
             if (uploadsFiles.length > 0) {
                 await Promise.all(uploadsFiles.map(async file => {
                     const filePath = path.join(uploads, file);
-                    if (await fs.stat(filePath).then(() => true).catch(() => false)) {
-                        console.log(file, 'file exists and is being removed');
-                        await fs.unlink(filePath);
-                    } else {
-                        console.log(file, 'file does not exist');
+                    try {
+                        if (await fs.stat(filePath).then(() => true).catch(() => false)) {
+                            console.log(file, 'file exists and is being removed');
+                            await fs.unlink(filePath);
+                        } else {
+                            console.log(file, 'file does not exist');
+                        }
+                    } catch (error) {
+                        console.log(`Error checking or deleting file ${file}:`, error);
+                        // Do not throw an error to avoid sending it in the response
                     }
                 }));
             }
