@@ -5,7 +5,8 @@ import { z } from "zod";
 import { type Request, type Response } from "express";
 import AppError from "../../../errors/AppError";
 import { TokenCredential } from "../../../libs/authHelper";
-import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { PaymentStatus } from "@prisma/client";
+import { OrderStatus } from "../Order_page.constant";
 
 
 const getOrderStatus = async (req: Request, res: Response) => {
@@ -17,7 +18,7 @@ const getOrderStatus = async (req: Request, res: Response) => {
 
         const order = await prisma.order.findMany({
             where: {
-                currentStatus: status as OrderStatus
+                trackProjectStatus: status as OrderStatus
             }
         });
 

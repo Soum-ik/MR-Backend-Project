@@ -8,6 +8,8 @@ import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid'
 import { PaymentStatus } from './payment.constant';
+import { ProjectStatus } from '../Order_page/Order_page.constant';
+import { OrderStatus } from '../Order_page/Order_page.constant';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -82,7 +84,8 @@ const stripePayment = async (req: Request, res: any) => {
       paymentStatus: 'PENDING',
       startDate: new Date(),
       deliveryDate: calculateDeliveryDate(data?.deliveryDuration),
-      currentStatus: 'PENDING',
+      trackProjectStatus: OrderStatus.PROJECT_PLACED,
+      projectStatus: ProjectStatus.WAITING,
       requirements: data?.requirements,
       bulletPoints: data?.bulletPoints,
       OrderToken: orderToken

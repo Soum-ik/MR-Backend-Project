@@ -4,6 +4,8 @@ import { prisma } from '../../../libs/prismaHelper';
 import { z } from 'zod';
 import httpStatus from 'http-status';
 import sendResponse from '../../../libs/sendResponse';
+import { ProjectStatus } from '../Order_page.constant';
+import { OrderStatus } from '../Order_page.constant';
 
 const DeliveredOrders = async (req: Request, res: Response) => {
     try {
@@ -33,8 +35,8 @@ const DeliveredOrders = async (req: Request, res: Response) => {
             },
             data: {
                 adminDeliveryRequest: true,
-                projectStatus: "Delivered",
-                trackProjectStatus: "REVIEW_DELIVERY",
+                projectStatus: ProjectStatus.DELIVERED,
+                trackProjectStatus: OrderStatus.REVIEW_DELIVERY,
                 submittedData: requestBody
             }
         });
@@ -89,14 +91,14 @@ const handleDeliveryResponse = async (req: Request, res: Response) => {
         let updateData;
         if (status === 'accept') {
             updateData = {
-                projectStatus: "Completed",
-                trackProjectStatus: "COMPLETE_PROJECT",
+                projectStatus: ProjectStatus.COMPLETED,
+                trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
                 clientApproval: true
             };
         } else if (status === 'reject') {
             updateData = {
-                projectStatus: "Revision",
-                trackProjectStatus: "PROJECT_RUNNING",
+                projectStatus: ProjectStatus.REVISION,
+                trackProjectStatus: OrderStatus.PROJECT_RUNNING,
                 adminDeliveryRequest: false
             };
         } else {
@@ -114,8 +116,8 @@ const handleDeliveryResponse = async (req: Request, res: Response) => {
                 id: orderId
             },
             data: {
-                projectStatus: status === 'accept' ? 'Completed' : 'Revision',
-                trackProjectStatus: status === 'accept' ? 'COMPLETE_PROJECT' : 'PROJECT_RUNNING',
+                projectStatus: status === 'accept' ? ProjectStatus.COMPLETED : ProjectStatus.REVISION,
+                trackProjectStatus: status === 'accept' ? OrderStatus.COMPLETE_PROJECT : OrderStatus.PROJECT_RUNNING,
                 clientApproval: status === 'accept' ? true : undefined,
                 adminDeliveryRequest: status === 'reject' ? false : undefined
             }

@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import sendResponse from '../../../libs/sendResponse';
 import { prisma } from '../../../libs/prismaHelper';
 import httpStatus from 'http-status';
-import { OrderStatus } from '../Order_page.constant';
+import { OrderStatus, ProjectStatus } from '../Order_page.constant';
 
 export const startProject = async (req: Request, res: Response) => {
     try {
@@ -13,7 +13,8 @@ export const startProject = async (req: Request, res: Response) => {
                 id: reqBody.id
             },
             data: {
-                currentStatus: OrderStatus.PROJECT_RUNNING,
+                trackProjectStatus: OrderStatus.PROJECT_RUNNING,
+                projectStatus: ProjectStatus.WAITING
             }
         })
 
