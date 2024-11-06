@@ -290,7 +290,7 @@ const getMessages = async (req: Request, res: Response) => {
                         { senderId: user_id as string, recipient: { role: { in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER] } } }
                     ],
                 },
-                orderBy: { createdAt: "asc" },
+                orderBy: { createdAt: "desc" },
             });
 
 

@@ -51,7 +51,7 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
             },
             message: "Return buyers retrieved successfully"
         });
-        
+
     } catch (error) {
         console.error(error);
 
@@ -72,5 +72,5 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
         });
     }
 }
-    
+
 export default ReturnBuyesController;

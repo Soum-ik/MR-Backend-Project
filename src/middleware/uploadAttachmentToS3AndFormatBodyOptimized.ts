@@ -87,7 +87,7 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                 try {
                     // Process and compress the image
                     await sharp(inputPath)
-                        .resize(800, 593, {
+                        .resize(1000, 741, {
                             fit: 'inside',
                             withoutEnlargement: true
                         })
