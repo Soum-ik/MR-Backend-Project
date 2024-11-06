@@ -70,7 +70,7 @@ const stripePayment = async (req: Request, res: any) => {
 
   // Generate a session token
   const orderToken = uuidv4();
-  await prisma.order.create({
+  const order = await prisma.order.create({
     data: {
       id: payment.orderId,
       stripeId: session.id.split('_').join(''),
@@ -92,6 +92,10 @@ const stripePayment = async (req: Request, res: any) => {
       OrderToken: orderToken,
     },
   });
+
+  if (!order) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull');
+  }
 
   console.log("Order successfully created with status 'PENDING'.");
   res.json({ id: session.id, orderToken: orderToken });
