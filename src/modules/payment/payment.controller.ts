@@ -79,6 +79,7 @@ const stripePayment = async (req: Request, res: any) => {
       projectNumber: projectNumber || '',
       items: data?.originalItems,
       projectType: data?.projectType || '',
+      projectImage: data?.projectImage || '',
       duration: data?.deliveryDuration.toString(),
       totalPrice: data?.totalAmount.toString(),
       paymentStatus: 'PENDING',
