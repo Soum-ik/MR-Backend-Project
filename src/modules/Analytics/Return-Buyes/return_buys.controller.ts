@@ -72,5 +72,5 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
         });
     }
 }
-
+    
 export default ReturnBuyesController;

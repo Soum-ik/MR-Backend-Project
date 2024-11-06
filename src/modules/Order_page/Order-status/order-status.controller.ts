@@ -11,14 +11,15 @@ import { OrderStatus } from "../Order_page.constant";
 
 const getOrderStatus = async (req: Request, res: Response) => {
     try {
-        const user = req.user as TokenCredential;
-        const { status } = req.query;
-
-
-
+        const { status, user_id } = req.query;
         const order = await prisma.order.findMany({
             where: {
-                trackProjectStatus: status as OrderStatus
+                trackProjectStatus: status as OrderStatus,
+                OR: [
+                    {
+                        userId: user_id as string
+                    },
+                ]
             }
         });
 

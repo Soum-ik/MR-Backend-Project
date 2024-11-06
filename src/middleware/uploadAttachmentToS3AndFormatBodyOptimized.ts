@@ -20,7 +20,6 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
             const body: { file?: FileData; files?: FileData[] } = {};
             const files = req.files as Express.Multer.File[];
             const bucketNameWatermark = 'mr-backend-watermark-resized';
-            const bucketName = 'mr-backend';
 
 
             // Updated watermark path to use current directory
@@ -68,8 +67,8 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                     // Clean up the original uploaded file
 
                     return {
-                        optimizedPath: outputPath,
-                        optimizedfileName: fileName
+                        watermarkPath: outputPath,
+                        watermarkfileName: fileName
                     };
                 } catch (error) {
                     throw new Error(`Failed to process image ${file.originalname}: ${error}`);
@@ -79,7 +78,7 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
 
 
             // Process a single image with watermark using Sharp
-            const processImageWithWatermarkOptimized = async (file: Express.Multer.File) => {
+            const processImageWithOptimized = async (file: Express.Multer.File) => {
                 const inputPath = file.path;
                 const outputPath = path.join(processedDir, `${bucketNameWatermark}-${file.filename}`);
                 const fileName = `${bucketNameWatermark}-resized-${file.filename}`;
@@ -88,16 +87,17 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                 try {
                     // Process and compress the image
                     await sharp(inputPath)
-                        .resize(1000, 741, {
+                        .resize(800, 593, {
                             fit: 'inside',
                             withoutEnlargement: true
                         })
-                        .jpeg({ quality: 80 })
-                        .toFile(outputPath);
+                        .jpeg({ quality: 20 })
+                        .toFile(outputPath)
+
 
                     return {
-                        outputPath,
-                        fileName: fileName
+                        optimizedPath: outputPath,
+                        optimizedfileName: fileName
                     };
                 } catch (error) {
                     throw new Error(`Failed to process image ${file.originalname}: ${error}`);
@@ -112,16 +112,17 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                 const file = files[0];
 
                 if (file.mimetype.includes('image')) {
-                    const { outputPath, fileName } = await processImageWithWatermarkOptimized(file);
-                    const { optimizedPath, optimizedfileName } = await processImageWithWatermark(file);
-                    await uploadFileToS3(bucketNameWatermark, outputPath, fileName, 'public-read');
+                    const { optimizedPath, optimizedfileName } = await processImageWithOptimized(file);
+                    const { watermarkPath, watermarkfileName } = await processImageWithWatermark(file);
+
                     await uploadFileToS3(bucketNameWatermark, optimizedPath, optimizedfileName, 'public-read');
+                    await uploadFileToS3(bucketNameWatermark, watermarkPath, watermarkfileName, 'public-read');
                     body.file = {
-                        url: `https://${bucketNameWatermark}.s3.amazonaws.com/${fileName}`,
-                        optimizedUrl: `https://${bucketNameWatermark}.s3.amazonaws.com/${optimizedfileName}`,
+                        url: `https://${bucketNameWatermark}.s3.amazonaws.com/${optimizedfileName}`,
+                        optimizedUrl: `https://${bucketNameWatermark}.s3.amazonaws.com/${watermarkfileName}`,
                         originalName: file.originalname,
                         fileType: file.mimetype,
-                        fileSize: (await fs.stat(outputPath)).size
+                        fileSize: (await fs.stat(optimizedPath)).size
                     };
                 } else {
                     throw new AppError(httpStatus.BAD_REQUEST, 'File is not an image');
@@ -132,33 +133,33 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
 
                 if (files.every(file => file.mimetype.includes('image'))) {
                     const processedFiles = await Promise.all(files.map(processImageWithWatermark));
-                    const processedFilesOptimized = await Promise.all(files.map(processImageWithWatermarkOptimized));
-                    
+                    const processedFilesOptimized = await Promise.all(files.map(processImageWithOptimized));
+
                     // Upload original files
                     await uploadMultipleFilesToS3(bucketNameWatermark,
-                        processedFiles.map(({ optimizedPath, optimizedfileName }) => ({
-                            filePath: optimizedPath,
-                            fileName: optimizedfileName
+                        processedFiles.map(({ watermarkPath, watermarkfileName }) => ({
+                            filePath: watermarkPath,
+                            fileName: watermarkfileName
                         })),
                         'public-read'
                     );
 
                     // Upload optimized files
                     await uploadMultipleFilesToS3(bucketNameWatermark,
-                        processedFilesOptimized.map(({ outputPath, fileName }) => ({
-                            filePath: outputPath,
-                            fileName: fileName
+                        processedFilesOptimized.map(({ optimizedPath, optimizedfileName }) => ({
+                            filePath: optimizedPath,
+                            fileName: optimizedfileName
                         })),
                         'public-read'
                     );
 
                     body.files = await Promise.all(files.map(async (file, index) => {
                         return {
-                            url: `https://${bucketNameWatermark}.s3.amazonaws.com/${processedFiles[index].optimizedfileName}`,
-                            optimizedUrl: `https://${bucketNameWatermark}.s3.amazonaws.com/${processedFilesOptimized[index].fileName}`,
+                            url: `https://${bucketNameWatermark}.s3.amazonaws.com/${processedFiles[index].watermarkfileName}`,
+                            optimizedUrl: `https://${bucketNameWatermark}.s3.amazonaws.com/${processedFilesOptimized[index].optimizedfileName}`,
                             originalName: file.originalname,
                             fileType: file.mimetype,
-                            fileSize: (await fs.stat(processedFilesOptimized[index].outputPath)).size
+                            fileSize: (await fs.stat(processedFilesOptimized[index].optimizedPath)).size
                         };
                     }));
                 } else {
