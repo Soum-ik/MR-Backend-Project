@@ -1,15 +1,14 @@
 import { ObjectId } from 'bson';
 import type { Request } from 'express';
-import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '../../config/config';
-import { prisma } from '../../libs/prismaHelper';
-import projectNumberCreator from '../Order_page/projectNumberGenarator.ts/projectNumberCreator';
-import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
-import { v4 as uuidv4 } from 'uuid'
+import Stripe from 'stripe';
+import { v4 as uuidv4 } from 'uuid';
+import { STRIPE_SECRET_KEY } from '../../config/config';
+import AppError from '../../errors/AppError';
+import { prisma } from '../../libs/prismaHelper';
+import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
+import projectNumberCreator from '../Order_page/projectNumberGenarator.ts/projectNumberCreator';
 import { PaymentStatus } from './payment.constant';
-import { ProjectStatus } from '../Order_page/Order_page.constant';
-import { OrderStatus } from '../Order_page/Order_page.constant';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -66,19 +65,21 @@ const stripePayment = async (req: Request, res: any) => {
 
   // Create an order linked to the payment and user
   if (!payment) {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull',);
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull');
   }
 
   // Generate a session token
-  const orderToken = uuidv4()
-  await prisma.order.create({
+  const orderToken = uuidv4();
+  const order = await prisma.order.create({
     data: {
       id: payment.orderId,
       stripeId: session.id.split('_').join(''),
       userId: data?.userId,
       projectName: data?.title,
       projectNumber: projectNumber || '',
-      items: data?.items,
+      items: data?.originalItems,
+      projectType: data?.projectType || '',
+      projectImage: data?.projectImage || '',
       duration: data?.deliveryDuration.toString(),
       totalPrice: data?.totalAmount.toString(),
       paymentStatus: 'PENDING',
@@ -88,13 +89,16 @@ const stripePayment = async (req: Request, res: any) => {
       projectStatus: ProjectStatus.WAITING,
       requirements: data?.requirements,
       bulletPoints: data?.bulletPoints,
-      OrderToken: orderToken
+      OrderToken: orderToken,
     },
   });
 
+  if (!order) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull');
+  }
+
   console.log("Order successfully created with status 'PENDING'.");
   res.json({ id: session.id, orderToken: orderToken });
-
 };
 
 export const payment = { stripePayment };

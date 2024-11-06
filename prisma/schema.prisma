@@ -361,6 +361,8 @@ model Order {
   deliveryDate          DateTime
   projectStartDate      DateTime?
   projectStatus         ProjectStatus           @default(Waiting)
+  projectType           String?
+  projectImage          String?
   trackProjectStatus    trackProjectStatus      @default(PENDING)
   clientApproval        Boolean?                @default(false)
   adminDeliveryRequest  Boolean?                @default(false)
