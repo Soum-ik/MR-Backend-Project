@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const CreateOrderNote = async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
-    const { note, orderId } = req.body;
+    const { content, orderId } = req.body;
 
     if (!user_id) {
         return sendResponse<any>(res, {
@@ -17,22 +17,13 @@ const CreateOrderNote = async (req: Request, res: Response) => {
         });
     }
 
-    const noteSchema = z.object({
-        content: z.object({
-            title: z.string(),
-            note: z.string(),
-        })
-    });
-
     try {
-        // Validate the note input against the schema
-        const validatedNote = noteSchema.parse(note);
 
         const createOrderNote = await prisma.note.create({
             data: {
                 userId: user_id as string,
                 orderId: orderId,
-                content: validatedNote.content,
+                content: content,
             }
         });
 

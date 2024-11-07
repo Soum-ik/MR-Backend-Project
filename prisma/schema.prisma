@@ -378,6 +378,7 @@ model Order {
   OrderToken            String                  @unique
   OrderMessage          OrderMessage[]
   OrderExtensionRequest OrderExtensionRequest[]
+  designerName          String?                 @default("")
 }
 
 model OrderExtensionRequest {

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
 
-export const findOrder = async (req: Request, res: Response) => {
+const findOrder = async (req: Request, res: Response) => {
     try {
         const { projectNumber } = req.params;
 
@@ -14,7 +14,7 @@ export const findOrder = async (req: Request, res: Response) => {
                 projectNumber: projectNumber as string
             },
             include: {
-                OrderExtensionRequest : true,
+                OrderExtensionRequest: true,
                 OrderMessage: true,
                 RequirementAnswer: true,
                 Payment: true,
@@ -41,29 +41,41 @@ export const findOrder = async (req: Request, res: Response) => {
     }
 };
 
-// // Fetch answers for a specific order
-// export const getRequirementsAnswers = async (req: Request, res: Response) => {
-//   try {
-//     const { orderId } = req.params;
+const updateDesignerName = async (req: Request, res: Response) => {
+    try {
+        const { designerName } = req.body;
+        const { orderId } = req.params;
 
-//     // Check if order exists
-//     const order = await prisma.order.findUnique({ where: { id: orderId } });
-//     if (!order) {
-//       return res.status(404).json({ error: 'Order not found' });
-//     }
+        if (!orderId) {
+            return sendResponse(res, {
+                statusCode: httpStatus.BAD_REQUEST,
+                success: false,
+                message: 'Order ID is required',
+            });
+        }
 
-//     // Fetch answers related to the order
-//     const answers = await prisma.requirementAnswer.findMany({
-//       where: { orderId },
-//       select: { question: true, answer: true },
-//     });
+        const updateDesignerName = await prisma.order.update({
+            where: { id: orderId },
+            data: { designerName: designerName }
+        })
 
-//     res.status(200).json({
-//       message: 'Requirements answers fetched successfully',
-//       answers,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Failed to fetch answers' });
-//   }
-// };
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: 'Designer name updated successfully',
+            data: updateDesignerName
+        })
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: 'Failed to update designer name',
+        });
+    }
+}
+
+export const OrderController = {
+    findOrder,
+    updateDesignerName
+}

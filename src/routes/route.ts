@@ -35,6 +35,7 @@ import { handleOrderMessageRoute } from '../modules/Order_page/Order-message/Ord
 import getOrderStatusRoute from '../modules/Order_page/Order-status/order-status.route';
 import { uploadAttachmentToS3AndFormatBodyOptimized } from '../middleware/uploadAttachmentToS3AndFormatBodyOptimized';
 import findOrderRouter from '../modules/Order_page/Order_page.Route';
+import OrderNoteRouter from '../modules/Order_page/Note/OrderNote.rotue';
 
 const router = express.Router();
 router.get(
@@ -112,7 +113,9 @@ router.use('/notification', handleNotificationRoute);
 router.use('/order-message', handleOrderMessageRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 router.post("/contactForChat", authenticateToken(USER_ROLE.USER), startContact);
+
 router.use('/order-status', getOrderStatusRoute);
+router.use('/order', OrderNoteRouter)
 
 router.use('/find-order', findOrderRouter)
 

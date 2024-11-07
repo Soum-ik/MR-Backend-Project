@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { OrderNoteController } from "./OrderNote.contorller";
+import { USER_ROLE } from "../../user/user.constant";
+import authenticateToken from "../../../middleware/auth";
+const OrderNoteRouter = Router();
 
-const router = Router();
+OrderNoteRouter.post("/create-order-note", authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER), OrderNoteController.CreateOrderNote);
+OrderNoteRouter.patch("/update-order-note", OrderNoteController.UpdateOrderNote);
+OrderNoteRouter.delete("/delete-order-note", OrderNoteController.DeleteOrderNote);
+OrderNoteRouter.get("/find-order-note", OrderNoteController.findOrderNote);
 
-router.post("/create-order-note", OrderNoteController.CreateOrderNote);
-router.patch("/update-order-note", OrderNoteController.UpdateOrderNote);
-router.delete("/delete-order-note", OrderNoteController.DeleteOrderNote);
-router.get("/find-order-note", OrderNoteController.findOrderNote);
-
-export default router;
+export default OrderNoteRouter;

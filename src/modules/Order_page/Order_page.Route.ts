@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { findOrder } from "./Order_page.Controller";
+import { OrderController } from "./Order_page.Controller";
 
 const findOrderRouter = Router();
 
-findOrderRouter.get("/:projectNumber", findOrder);
+findOrderRouter.get("/:projectNumber", OrderController.findOrder);
+findOrderRouter.patch("/update-designer-name/:orderId", OrderController.updateDesignerName);
 
 export default findOrderRouter;
