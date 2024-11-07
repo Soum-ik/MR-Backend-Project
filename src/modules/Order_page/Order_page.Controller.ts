@@ -1,42 +1,45 @@
-// import type { Request, Response } from "express";
-// import httpStatus from "http-status";
-// import { z } from "zod";
-// import { prisma } from "../../libs/prismaHelper";
-// import sendResponse from "../../libs/sendResponse";
+import type { Request, Response } from "express";
+import httpStatus from "http-status";
+import { z } from "zod";
+import { prisma } from "../../libs/prismaHelper";
+import sendResponse from "../../libs/sendResponse";
 
-// export const answerRequirements = async (req: Request, res: Response) => {
-//   try {
-//     const { orderId, answers } = req.body;
+export const findOrder = async (req: Request, res: Response) => {
+    try {
+        const { projectNumber } = req.params;
 
-//     // Check if order exists
-//     const order = await prisma.order.findUnique({ where: { id: orderId } });
-//     if (!order) {
-//       return sendResponse
-//     }
+        // Check if order exists
+        const order = await prisma.order.findUnique({
+            where: {
+                projectNumber: projectNumber as string
+            },
+            include: {
+                OrderExtensionRequest : true,
+                OrderMessage: true,
+                RequirementAnswer: true,
+                Payment: true,
 
-//     // Validate answers structure
-//     if (!Array.isArray(answers) || answers.some(answer => !answer.question || !answer.answer)) {
-//       return res.status(400).json({ error: 'Invalid answers format. Each answer must contain a question and an answer.' });
-//     }
+            }
+        });
+        if (!order) {
+            return sendResponse
+        }
 
-//     // Create RequirementAnswer entries
-//     const createdAnswers = await prisma.requirementAnswer.createMany({
-//       data: answers.map(answer => ({
-//         orderId,
-//         question: answer.question,
-//         answer: answer.answer,
-//       })),
-//     });
-
-//     res.status(201).json({
-//       message: 'Answers successfully saved',
-//       createdAnswers,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Failed to save answers' });
-//   }
-// };
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: 'Order fetched successfully',
+            data: order
+        });
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: 'Failed to fetch order',
+        });
+    }
+};
 
 // // Fetch answers for a specific order
 // export const getRequirementsAnswers = async (req: Request, res: Response) => {

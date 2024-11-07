@@ -28,6 +28,7 @@ const adminMessageHandler = (socket: Socket, io: any) => {
                 io.to(adminSocket.socketId).emit("admin-notification", {
                     text: `Message sent to user ${message.userId}: ${message.text}`,
                     from: "ADMIN",
+                    targetUser: targetUserSocket, // Include target user socket info
                     ...message
                 });
             }

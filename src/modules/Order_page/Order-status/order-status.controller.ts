@@ -4,8 +4,6 @@ import sendResponse from "../../../libs/sendResponse";
 import { z } from "zod";
 import { type Request, type Response } from "express";
 import AppError from "../../../errors/AppError";
-import { TokenCredential } from "../../../libs/authHelper";
-import { PaymentStatus } from "@prisma/client";
 import { OrderStatus } from "../Order_page.constant";
 
 
@@ -14,12 +12,8 @@ const getOrderStatus = async (req: Request, res: Response) => {
         const { status, user_id } = req.query;
         const order = await prisma.order.findMany({
             where: {
-                trackProjectStatus: status as OrderStatus,
-                OR: [
-                    {
-                        userId: user_id as string
-                    },
-                ]
+                ...(status && { trackProjectStatus: status as OrderStatus }),
+                ...(user_id && { userId: user_id as string })
             }
         });
 
