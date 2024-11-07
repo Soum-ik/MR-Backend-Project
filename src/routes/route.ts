@@ -37,6 +37,9 @@ import { uploadAttachmentToS3AndFormatBodyOptimized } from '../middleware/upload
 import findOrderRouter from '../modules/Order_page/Order_page.Route';
 import OrderNoteRouter from '../modules/Order_page/Note/OrderNote.rotue';
 import { RequirementSubmitRoute } from '../modules/Order_page/Requirement/Requirement.route';
+import catchAsync from '../libs/utlitys/catchSynch';
+import httpStatus from 'http-status';
+import sendResponse from '../libs/sendResponse';
 
 const router = express.Router();
 router.get(
@@ -55,39 +58,32 @@ router.post(
   '/upload-attachment',
   uploadFile.array('files'),
   uploadAttachmentToS3AndFormatBody(),
-  (req, res) => {
-    try {
-      res.status(200).send({
-        message: 'Attachment uploaded and processed successfully',
-        data: req.body,
-      });
-    } catch (error) {
-      console.log('Error sending response:', error);
-      res.status(500).send({
-        message: 'An error occurred while sending the response',
-        error: error,
-      });
-    }
-  },
+  catchAsync((req, res) => {
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Attachment uploaded and processed successfully',
+      data: req.body,
+    });
+
+  }),
 );
+
 router.post(
   '/upload-attachment-optimized',
   uploadFile.array('files'),
   uploadAttachmentToS3AndFormatBodyOptimized(),
-  (req, res) => {
-    try {
-      res.status(200).send({
-        message: 'Attachment uploaded and processed successfully',
-        data: req.body,
-      });
-    } catch (error) {
-      console.log('Error sending response:', error);
-      res.status(500).send({
-        message: 'An error occurred while sending the response',
-        error: error,
-      });
-    }
-  },
+  catchAsync((req, res) => {
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Attachment uploaded and processed successfully',
+      data: req.body,
+    });
+
+  }),
 );
 
 router.get(

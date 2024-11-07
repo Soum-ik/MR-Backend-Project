@@ -9,7 +9,8 @@ import { prisma } from '../../libs/prismaHelper';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
 import projectNumberCreator from '../Order_page/projectNumberGenarator.ts/projectNumberCreator';
 import { PaymentStatus } from './payment.constant';
-
+import catchAsync from '../../libs/utlitys/catchSynch'
+import sendResponse from '../../libs/sendResponse';
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 // Utility function to calculate delivery date
@@ -21,7 +22,7 @@ const calculateDeliveryDate = (duration: number): Date => {
 
 const orderId = new ObjectId();
 
-const stripePayment = async (req: Request, res: any) => {
+const stripePayment = catchAsync(async (req: Request, res: any) => {
   const projectNumber = await projectNumberCreator();
 
   const { data } = req.body;
@@ -98,7 +99,13 @@ const stripePayment = async (req: Request, res: any) => {
   }
 
   console.log("Order successfully created with status 'PENDING'.");
-  res.json({ id: session.id, orderToken: orderToken });
-};
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Order successfully created with status 'PENDING'",
+    data: { id: session.id, orderToken: orderToken },
+  });
+});
 
 export const payment = { stripePayment };

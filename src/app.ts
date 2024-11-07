@@ -15,6 +15,8 @@ import { stripeWebhook } from './modules/payment/stripeWebhook';
 import router from './routes/route';
 import socketServer from './socket/socket-server';
 import globalError from './middleware/globalError';
+import moment from 'moment';
+import sendResponse from './libs/sendResponse';
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
@@ -54,7 +56,6 @@ app.use(limiter);
 app.set('etag', WEB_CACHE);
 app.use('/api/v1', router);
 
-app.get('/', () => new Date().toLocaleDateString())
 
 app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
@@ -67,22 +68,27 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+app.get('/', async (req: Request, res: Response) => {
+  try {
+    const formattedDate = moment().format('DD MMMM YYYY hh.mm A');
+    res.send(formattedDate);
+  } catch (error) {
+    res.send(error);
+  }
+});
 
-
-// Middleware to handle 404 (Not Found) errors
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(httpStatus.NOT_FOUND).json({
+app.all('*', (req, res) => {
+  sendResponse(res, {
+    statusCode: httpStatus.NOT_FOUND,
     success: false,
-    message: 'Not Found',
-    errorMessages: [
+    message: 'Address not found',
+    error: [
       {
         path: req.originalUrl,
         message: 'API Not Found',
       },
     ],
-    statusCode: httpStatus.NOT_FOUND,
   });
-  next();
 });
 
 app.use(globalError);

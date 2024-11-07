@@ -5,7 +5,7 @@ import { prisma } from "../../libs/prismaHelper";
 
 
 
-  const upsertMultiProject = async (req: Request, res: Response) => {
+const upsertMultiProject = async (req: Request, res: Response) => {
   const { id, projectTitle, projectImage, requirements } = req.body;
 
   try {
@@ -48,7 +48,7 @@ import { prisma } from "../../libs/prismaHelper";
   }
 };
 
-  const getMultiProject = async (req: Request, res: Response) => {
+const getMultiProject = async (req: Request, res: Response) => {
   try {
     const projects = await prisma.multiProject.findMany();
     return sendResponse(res, {

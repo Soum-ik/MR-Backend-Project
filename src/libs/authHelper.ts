@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET, JWT_EXPIRATION_TIME } from '../config/config';
 
 export interface TokenCredential {
-    user_id: String
-    role: String
-    email: String
+    user_id: string
+    role: string
+    email: string
 }
 
 export const createToken = ({ user_id, role, email }: TokenCredential) => {
