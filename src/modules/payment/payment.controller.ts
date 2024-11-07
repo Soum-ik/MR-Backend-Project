@@ -43,8 +43,8 @@ const stripePayment = async (req: Request, res: any) => {
       quantity: item.quantity,
     })),
     mode: 'payment',
-    success_url: 'http://localhost:5173',
-    cancel_url: 'http://localhost:5173',
+    success_url: `http://localhost:5173/project-requirements/${projectNumber}`,
+    cancel_url: 'http://localhost:5173/payment-failed',
   });
 
   // Save payment info in the database
