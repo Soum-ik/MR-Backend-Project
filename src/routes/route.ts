@@ -36,6 +36,7 @@ import getOrderStatusRoute from '../modules/Order_page/Order-status/order-status
 import { uploadAttachmentToS3AndFormatBodyOptimized } from '../middleware/uploadAttachmentToS3AndFormatBodyOptimized';
 import findOrderRouter from '../modules/Order_page/Order_page.Route';
 import OrderNoteRouter from '../modules/Order_page/Note/OrderNote.rotue';
+import { RequirementSubmitRoute } from '../modules/Order_page/Requirement/Requirement.route';
 
 const router = express.Router();
 router.get(
@@ -118,6 +119,8 @@ router.use('/order-status', getOrderStatusRoute);
 router.use('/order', OrderNoteRouter)
 
 router.use('/find-order', findOrderRouter)
+
+router.use('/requirement', RequirementSubmitRoute)
 
 router.post(
   "/sendMessageForChat/:user_id",

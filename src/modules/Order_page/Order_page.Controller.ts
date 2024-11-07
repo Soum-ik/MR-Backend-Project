@@ -16,7 +16,6 @@ const findOrder = async (req: Request, res: Response) => {
             include: {
                 OrderExtensionRequest: true,
                 OrderMessage: true,
-                RequirementAnswer: true,
                 Payment: true,
 
             }

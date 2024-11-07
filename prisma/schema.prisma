@@ -348,37 +348,37 @@ model Note {
 }
 
 model Order {
-  id                    String                  @id @map("_id") @db.ObjectId
-  userId                String                  @db.ObjectId
-  stripeId              String                  @unique
-  user                  User                    @relation(fields: [userId], references: [id])
-  projectName           String
-  projectNumber         String                  @unique
-  duration              String
-  totalPrice            String
-  paymentStatus         PaymentStatus           @default(PENDING)
-  startDate             DateTime                @default(now())
-  deliveryDate          DateTime
-  projectStartDate      DateTime?
-  projectStatus         ProjectStatus           @default(Waiting)
-  projectType           String?
-  projectImage          String?
-  trackProjectStatus    trackProjectStatus      @default(PENDING)
-  clientApproval        Boolean?                @default(false)
-  adminDeliveryRequest  Boolean?                @default(false)
-  submittedData         Json?                   @default("{}")
-  items                 Json[]                  @default([])
-  requirements          Json[]                  @default([])
-  bulletPoints          Json[]                  @default([])
-  privateNotes          Note[]
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  Payment               Payment[]
-  RequirementAnswer     RequirementAnswer[]
-  OrderToken            String                  @unique
-  OrderMessage          OrderMessage[]
-  OrderExtensionRequest OrderExtensionRequest[]
-  designerName          String?                 @default("")
+  id                       String                  @id @map("_id") @db.ObjectId
+  userId                   String                  @db.ObjectId
+  stripeId                 String                  @unique
+  user                     User                    @relation(fields: [userId], references: [id])
+  projectName              String
+  projectNumber            String                  @unique
+  duration                 String
+  totalPrice               String
+  paymentStatus            PaymentStatus           @default(PENDING)
+  startDate                DateTime                @default(now())
+  deliveryDate             DateTime
+  projectStartDate         DateTime?
+  projectStatus            ProjectStatus           @default(Waiting)
+  projectType              String?
+  projectImage             String?
+  trackProjectStatus       trackProjectStatus      @default(PENDING)
+  clientApproval           Boolean?                @default(false)
+  adminDeliveryRequest     Boolean?                @default(false)
+  submittedData            Json?                   @default("{}")
+  items                    Json[]                  @default([])
+  requirements             Json[]                  @default([])
+  isRequirementsFullFilled Boolean?                @default(false)
+  bulletPoints             Json[]                  @default([])
+  privateNotes             Note[]
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  Payment                  Payment[]
+  OrderToken               String                  @unique
+  OrderMessage             OrderMessage[]
+  OrderExtensionRequest    OrderExtensionRequest[]
+  designerName             String?                 @default("")
 }
 
 model OrderExtensionRequest {
@@ -395,16 +395,6 @@ model OrderExtensionRequest {
   updatedAt         DateTime      @updatedAt
 
   order Order @relation(fields: [orderId], references: [id])
-}
-
-model RequirementAnswer {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String   @db.ObjectId
-  order     Order    @relation(fields: [orderId], references: [id])
-  question  String // Store the requirement question here
-  answer    String // Store the user's response here
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Payment {
