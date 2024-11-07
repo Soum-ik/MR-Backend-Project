@@ -7,7 +7,7 @@ fi
 # Check if yarn.lock exists and run the appropriate package manager
 if [ -f yarn.lock ]; then
   echo "yarn.lock found. Running 'yarn install'."
-  yarn install
+  yarn add
 elif [ -f bun.lockb ]; then
   echo "bun.lockb found. Running 'bun install'."
   bun install
