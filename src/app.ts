@@ -67,6 +67,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+
+
 // Middleware to handle 404 (Not Found) errors
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(httpStatus.NOT_FOUND).json({
