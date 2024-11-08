@@ -357,8 +357,8 @@ model Order {
   duration                 String
   totalPrice               String
   paymentStatus            PaymentStatus           @default(PENDING)
-  startDate                DateTime                @default(now())
-  deliveryDate             DateTime
+  startDate                DateTime?                
+  deliveryDate             DateTime?
   projectStartDate         DateTime?
   projectStatus            ProjectStatus           @default(Waiting)
   projectType              String?

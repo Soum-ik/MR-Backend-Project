@@ -4,6 +4,7 @@ import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
 import catchAsync from "../../libs/utlitys/catchSynch";
 import AppError from "../../errors/AppError";
+import { ProjectStatus } from "../Order_page/Order_page.constant";
 
 const findOrder = catchAsync(async (req: Request, res: Response) => {
     const { projectNumber, userName } = req.query;
@@ -74,7 +75,51 @@ const updateDesignerName = catchAsync(async (req: Request, res: Response) => {
 
 })
 
+// const getOrderCount = catchAsync(async (req: Request, res: Response) => {
+//     const { timeFilter } = req.query;
+//     const [completedOrders, canceledOrders, totalEarnings] = await Promise.all([
+//         // Get completed orders count
+//         prisma.order.count({
+//             where: {
+//                 projectStatus: ProjectStatus.COMPLETED
+//             }
+//         }),
+//         // Get canceled orders count 
+//         prisma.order.count({
+//             where: {
+//                 projectStatus: ProjectStatus.CANCELED
+//             }
+//         }),
+//         // Get total earnings and calculate average
+//         prisma.order.aggregate({
+//             where: {
+//                 projectStatus: ProjectStatus.COMPLETED
+//             },
+//             _sum: {
+//                 totalAmount: true
+//             },
+//             _avg: {
+//                 totalAmount: true
+//             }
+//         })
+//     ]);
+
+//     const totalOrder = {
+//         completedOrders,
+//         canceledOrders,
+//         totalEarnings: totalEarnings._sum.totalAmount || 0,
+//         averageOrderValue: totalEarnings._avg.totalAmount || 0
+//     };
+//     return sendResponse(res, {
+//         statusCode: httpStatus.OK,
+//         success: true,
+//         message: "Total order count fetched successfully",
+//         data: totalOrder
+//     })
+// })
+
 export const OrderController = {
     findOrder,
-    updateDesignerName
+    updateDesignerName,
+    // getOrderCount
 }
