@@ -376,6 +376,7 @@ model Order {
   updatedAt                DateTime                @updatedAt
   Payment                  Payment[]
   OrderToken               String                  @unique
+  totalQuantity            Int                     @default(0)
   OrderMessage             OrderMessage[]
   OrderExtensionRequest    OrderExtensionRequest[]
   designerName             String?                 @default("")
