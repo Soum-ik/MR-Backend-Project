@@ -5,6 +5,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import AppError from '../errors/AppError';
 import httpStatus from 'http-status';
+import catchAsync from '../libs/utlitys/catchSynch';
 
 interface FileData {
     url: string;
@@ -14,8 +15,8 @@ interface FileData {
 }
 
 export const uploadAttachmentToS3AndFormatBody = () => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        try {
+    return catchAsync(
+        async (req: Request, res: Response, next: NextFunction) => {
             const body: { file?: FileData; files?: FileData[] } = {};
             const files = req.files as Express.Multer.File[];
             const bucketNameWatermark = 'mr-backend-watermark-resized';
@@ -176,44 +177,38 @@ export const uploadAttachmentToS3AndFormatBody = () => {
             })
 
             const uploads = path.join(process.cwd(), 'uploads');
+            
+            // Since we're using catchAsync wrapper, we don't need additional try/catch here
+            // Create uploads directory if it doesn't exist
+            await fs.mkdir(uploads, { recursive: true });
+            
             const uploadsFiles = await fs.readdir(uploads);
             console.log(uploadsFiles, 'uploadsfiles');
 
             const processedFiles = await fs.readdir(processedDir);
 
-
             if (uploadsFiles.length > 0) {
                 await Promise.all(uploadsFiles.map(async file => {
                     const filePath = path.join(uploads, file);
-                    try {
-                        if (await fs.stat(filePath).then(() => true).catch(() => false)) {
-                            console.log(file, 'file exists and is being removed');
-                            await fs.unlink(filePath);
-                        } else {
-                            console.log(file, 'file does not exist');
-                        }
-                    } catch (error) {
-                        console.log(`Error checking or deleting file ${file}:`, error);
-                        // Do not throw an error to avoid sending it in the response
+                    const exists = await fs.stat(filePath).then(() => true).catch(() => false);
+                    if (exists) {
+                        console.log(file, 'file exists and is being removed');
+                        await fs.unlink(filePath);
+                    } else {
+                        console.log(file, 'file does not exist');
                     }
                 }));
             }
 
             if (processedFiles.length > 0) {
-                await Promise.all(processedFiles.map(file => {
-                    fs.unlink(path.join(processedDir, file));
+                await Promise.all(processedFiles.map(async file => {
+                    await fs.unlink(path.join(processedDir, file));
                 }));
             }
-            await Promise.all(filesToDelete);
+ 
 
             req.body = { ...body };
             next();
-        } catch (error) {
-            console.error('Error in uploadAttachmentToS3AndFormatBody:', error);
-            res.status(500).json({
-                error: 'An error occurred while processing the file upload',
-                details: error
-            });
         }
-    };
+    )
 };

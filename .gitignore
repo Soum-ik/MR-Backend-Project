@@ -68,7 +68,6 @@ web_modules/
 *.tsbuildinfo
 
 # Optional npm cache directory
-uploads
 .npm
 
 # Optional eslint cache
