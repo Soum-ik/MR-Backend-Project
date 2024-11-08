@@ -81,6 +81,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       totalPrice: data?.totalAmount.toString(),
       paymentStatus: 'PENDING',
       startDate: '',
+      totalQuantity: data?.totalQuantity as string,
       deliveryDate: '',
       trackProjectStatus: OrderStatus.PROJECT_PLACED,
       projectStatus: ProjectStatus.WAITING,
