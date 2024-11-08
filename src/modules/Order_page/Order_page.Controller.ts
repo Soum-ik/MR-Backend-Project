@@ -6,19 +6,29 @@ import catchAsync from "../../libs/utlitys/catchSynch";
 import AppError from "../../errors/AppError";
 
 const findOrder = catchAsync(async (req: Request, res: Response) => {
+    const { projectNumber, userName } = req.query;
 
-    const { projectNumber } = req.params;
+    if (!projectNumber && !userName) {
+        throw new AppError(httpStatus.BAD_REQUEST, "At least one of project number or user name is required");
+    }
 
     // Check if order exists
-    const order = await prisma.order.findUnique({
+    const order = await prisma.order.findFirst({
         where: {
-            projectNumber: projectNumber as string
+            ...(projectNumber ? { projectNumber: projectNumber as string } : {}),
+            ...(userName ? {
+                user: {
+                    userName: userName as string
+                }
+            } : {})
         },
-        include: {
-            OrderExtensionRequest: true,
-            OrderMessage: true,
-            Payment: true,
-        }
+        ...(projectNumber ? {
+            include: {
+                OrderExtensionRequest: true,
+                OrderMessage: true,
+                Payment: true,
+            }
+        } : {})
     });
     if (!order) {
         throw new AppError(httpStatus.NOT_FOUND, "Order not found");
