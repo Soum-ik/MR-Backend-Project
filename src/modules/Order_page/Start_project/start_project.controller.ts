@@ -14,7 +14,7 @@ export const startProject = async (req: Request, res: Response) => {
             },
             data: {
                 trackProjectStatus: OrderStatus.PROJECT_RUNNING,
-                projectStatus: ProjectStatus.WAITING
+                projectStatus: ProjectStatus.ONGOING
             }
         })
 

@@ -14,11 +14,7 @@ import sendResponse from '../../libs/sendResponse';
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 // Utility function to calculate delivery date
-const calculateDeliveryDate = (duration: number): Date => {
-  const deliveryDate = new Date();
-  deliveryDate.setDate(deliveryDate.getDate() + duration);
-  return deliveryDate;
-};
+
 
 const orderId = new ObjectId();
 
@@ -84,8 +80,8 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       duration: data?.deliveryDuration.toString(),
       totalPrice: data?.totalAmount.toString(),
       paymentStatus: 'PENDING',
-      startDate: new Date(),
-      deliveryDate: calculateDeliveryDate(data?.deliveryDuration),
+      startDate: '',
+      deliveryDate: '',
       trackProjectStatus: OrderStatus.PROJECT_PLACED,
       projectStatus: ProjectStatus.WAITING,
       requirements: data?.requirements,

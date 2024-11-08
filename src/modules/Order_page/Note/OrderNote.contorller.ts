@@ -99,7 +99,10 @@ const UpdateOrderNote = async (req: Request, res: Response) => {
 
 const DeleteOrderNote = catchAsync(async (req: Request, res: Response) => {
     const { user_id, role } = req.user as TokenCredential;
-    const { noteId, orderId } = req.query;
+    const { noteId, orderId } = req.params;
+
+    console.log(noteId, orderId);
+    
 
     if (!user_id) {
         throw new AppError(httpStatus.NOT_FOUND, "User token is required!");
@@ -109,7 +112,7 @@ const DeleteOrderNote = catchAsync(async (req: Request, res: Response) => {
         return sendResponse<any>(res, {
             statusCode: httpStatus.BAD_REQUEST,
             success: false,
-            message: "Note ID and order ID are required! to delete the note",
+            message: "Note ID and order ID are required to delete the note",
         });
     }
 
@@ -119,7 +122,7 @@ const DeleteOrderNote = catchAsync(async (req: Request, res: Response) => {
             id: noteId as string,
             orderId: orderId as string,
             ...(role === 'USER' ? { userId: user_id } : { userId: { in: adminUser } })
-        }
+        },
     });
 
     if (!deleteOrderNote) {

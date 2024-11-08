@@ -7,6 +7,12 @@ import { ProjectStatus } from "../Order_page.constant";
 import { OrderStatus } from "../Order_page.constant";
 
 
+const calculateDeliveryDate = (duration: number): Date => {
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + duration);
+    return deliveryDate;
+};
+
 const answerRequirements = async (req: Request, res: Response) => {
     try {
         const { orderId, requirements, isRequirementsFullFilled } = req.body;
@@ -28,15 +34,17 @@ const answerRequirements = async (req: Request, res: Response) => {
                 isRequirementsFullFilled: isRequirementsFullFilled
             }
         })
-
-        if (updateRequirements) {
+        if (updateRequirements.isRequirementsFullFilled) {
+            const { duration } = updateRequirements
             await prisma.order.update({
                 where: {
                     id: orderId
                 },
                 data: {
                     trackProjectStatus: OrderStatus.REQUIREMENTS_SUBMITTED,
-                    projectStatus: ProjectStatus.ONGOING
+                    projectStatus: ProjectStatus.ONGOING,
+                    startDate: new Date(),
+                    deliveryDate: calculateDeliveryDate(parseInt(duration))
                 }
             })
 

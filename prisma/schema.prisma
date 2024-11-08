@@ -379,6 +379,7 @@ model Order {
   OrderMessage             OrderMessage[]
   OrderExtensionRequest    OrderExtensionRequest[]
   designerName             String?                 @default("")
+  projectTips              Json?                   @default("{}")
 }
 
 model OrderExtensionRequest {

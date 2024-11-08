@@ -5,6 +5,7 @@ import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { USER_ROLE } from '../../user/user.constant';
+import AppError from '../../../errors/AppError';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -443,15 +444,19 @@ const deleteMessage = async (req: Request, res: Response) => {
     if (timeDifference <= 5) {
       // Check if the user is either the sender or an admin
       const isSender = message.senderId === user_id; // Assuming req.user contains the authenticated user's info
-      const isUserAdmin = role === 'ADMIN'; // Assuming you have a role property in user
+      const isUserAdmin = ['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN', 'USER'].includes(role as string); // Assuming you have a role property in user
 
       if (isSender || isUserAdmin) {
         // Delete the message
-        await prisma.message.delete({
+       const deleteMessage = await prisma.message.delete({
           where: {
             id: messageId,
           },
         });
+
+        if (!deleteMessage) {
+          throw new AppError(httpStatus.NOT_FOUND, "Message not found!");
+        }
 
         return sendResponse(res, {
           statusCode: httpStatus.OK,
