@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 import sendResponse from "../../../libs/sendResponse";
 import { TokenCredential } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
-import { z } from "zod";
 import catchAsync from "../../../libs/utlitys/catchSynch";
 import AppError from "../../../errors/AppError";
 import { adminUsers } from "../../../utils/adminUserId";
@@ -42,9 +41,11 @@ const CreateOrderNote = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
-const UpdateOrderNote = async (req: Request, res: Response) => {
+const UpdateOrderNote = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
-    const { noteId, note, orderId } = req.body;
+    const { noteId, orderId } = req.params;
+
+    const { content } = req.body;
 
     if (!user_id) {
         return sendResponse<any>(res, {
@@ -54,59 +55,30 @@ const UpdateOrderNote = async (req: Request, res: Response) => {
         });
     }
 
-    const noteSchema = z.object({
-        content: z.object({
-            title: z.string(),
-            note: z.string(),
-        })
+    const updatedOrderNote = await prisma.note.update({
+        where: { id: noteId, orderId: orderId, userId: user_id },
+        data: {
+            content: content,
+        }
     });
 
-    try {
-        const validatedNote = noteSchema.parse(note);
-
-        const updatedOrderNote = await prisma.note.update({
-            where: { id: noteId, orderId: orderId },
-            data: {
-                content: validatedNote.content,
-            }
-        });
-
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            message: "Order note updated successfully",
-            data: updatedOrderNote,
-        });
-
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.BAD_GATEWAY,
-                success: false,
-                message: "Validation error",
-                data: error,
-            });
-        }
-
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            message: "An unexpected error occurred",
-            data: error,
-        });
+    if (!updatedOrderNote) {
+        throw new AppError(httpStatus.NOT_FOUND, "Order note not found!");
     }
-}
+
+    return sendResponse<any>(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Order note updated successfully",
+        data: updatedOrderNote,
+    });
+
+
+})
 
 const DeleteOrderNote = catchAsync(async (req: Request, res: Response) => {
     const { user_id, role } = req.user as TokenCredential;
     const { noteId, orderId } = req.params;
-
-    console.log(noteId, orderId);
-    
-
-    if (!user_id) {
-        throw new AppError(httpStatus.NOT_FOUND, "User token is required!");
-    }
 
     if (!noteId && !orderId) {
         return sendResponse<any>(res, {
@@ -115,8 +87,8 @@ const DeleteOrderNote = catchAsync(async (req: Request, res: Response) => {
             message: "Note ID and order ID are required to delete the note",
         });
     }
-
     const adminUser = await adminUsers()
+
     const deleteOrderNote = await prisma.note.delete({
         where: {
             id: noteId as string,
