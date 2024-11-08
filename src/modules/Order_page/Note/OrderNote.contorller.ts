@@ -97,8 +97,8 @@ const UpdateOrderNote = async (req: Request, res: Response) => {
     }
 }
 
-const DeleteOrderNote = async (req: Request, res: Response) => {
-    const { user_id } = req.user as TokenCredential;
+const DeleteOrderNote = catchAsync(async (req: Request, res: Response) => {
+    const { user_id, role } = req.user as TokenCredential;
     const { noteId, orderId } = req.query;
 
     if (!user_id) {
@@ -113,26 +113,25 @@ const DeleteOrderNote = async (req: Request, res: Response) => {
         });
     }
 
-    try {
-        await prisma.note.delete({
-            where: { id: noteId as string, orderId: orderId as string }
-        });
+    const adminUser = await adminUsers()
+    const deleteOrderNote = await prisma.note.delete({
+        where: {
+            id: noteId as string,
+            orderId: orderId as string,
+            ...(role === 'USER' ? { userId: user_id } : { userId: { in: adminUser } })
+        }
+    });
 
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            message: "Order note deleted successfully, order title %{}",
-        });
-
-    } catch (error) {
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            message: "An unexpected error occurred",
-            data: error,
-        });
+    if (!deleteOrderNote) {
+        throw new AppError(httpStatus.NOT_FOUND, "Order note not found!");
     }
-}
+
+    return sendResponse<any>(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Order note deleted successfully, order title",
+    });
+})
 
 const findOrderNote = catchAsync(async (req: Request, res: Response) => {
     const { user_id, role } = req.user as TokenCredential

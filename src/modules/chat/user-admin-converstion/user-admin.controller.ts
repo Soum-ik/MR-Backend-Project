@@ -308,7 +308,7 @@ const getMessages = async (req: Request, res: Response) => {
             },
           ],
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' },
       });
 
       if (messages.length > 0) {
