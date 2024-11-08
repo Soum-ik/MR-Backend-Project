@@ -7,6 +7,6 @@ const OrderNoteRouter = Router();
 OrderNoteRouter.post("/create-order-note", authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER), OrderNoteController.CreateOrderNote);
 OrderNoteRouter.patch("/update-order-note", OrderNoteController.UpdateOrderNote);
 OrderNoteRouter.delete("/delete-order-note", OrderNoteController.DeleteOrderNote);
-OrderNoteRouter.get("/find-order-note", OrderNoteController.findOrderNote);
+OrderNoteRouter.get("/find-order-note/:orderId", authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER), OrderNoteController.findOrderNote);
 
 export default OrderNoteRouter;

@@ -324,7 +324,7 @@ const getMessages = async (req: Request, res: Response) => {
                         { hiddenFromAdmin: false }
                     ]
                 },
-                orderBy: { createdAt: "desc" },
+                orderBy: { createdAt: "asc" },
             });
 
 

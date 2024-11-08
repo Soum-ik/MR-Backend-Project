@@ -21,7 +21,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 const SignUp = async (
-  req: Request<{}, {}, SignupRequestBody>,
+  req: Request<object, object, SignupRequestBody>,
   res: Response,
 ) => {
   try {
@@ -99,7 +99,7 @@ const SignUp = async (
 };
 
 const SignIn = async (
-  req: Request<{}, {}, SignupRequestBody>,
+  req: Request<object, object, SignupRequestBody>,
   res: Response,
 ) => {
   try {
@@ -170,7 +170,24 @@ const getUserById = async (req: Request, res: Response) => {
   console.log(id);
 
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({
+      where: { id }, select: {
+        address: true,
+        city: true,
+        country: true,
+        description: true,
+        email: true,
+        fullName: true,
+        id: true,
+        image: true,
+        industryName: true,
+        userName: true,
+        number: true,
+        SocialMediaLinks: true,
+        role: true,
+        language: true,
+      }
+    });
     if (!user) {
       return sendResponse(res, {
         statusCode: httpStatus.NOT_FOUND,
