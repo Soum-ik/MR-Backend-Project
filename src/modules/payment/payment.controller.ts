@@ -37,7 +37,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
           ? (item.baseAmount + item.fastDeliveryPrice) * 100
           : item.baseAmount * 100,
       },
-      quantity: item.quantity,
+      quantity: item?.quantity,
     })),
     mode: 'payment',
     success_url: `http://localhost:5173/project-requirements/${projectNumber}`,
