@@ -140,10 +140,11 @@ router.use('/order-message', handleOrderMessageRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 router.post('/contactForChat', authenticateToken(USER_ROLE.USER), startContact);
 
-router.use('/order-status', getOrderStatusRoute);
 router.use('/order', OrderNoteRouter);
-
+router.use('/order-status', getOrderStatusRoute);
 router.use('/find-order', findOrderRouter);
+
+
 router.use('/requirement', RequirementSubmitRoute);
 
 router.post(

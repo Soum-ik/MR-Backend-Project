@@ -31,7 +31,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
                 // Save payment info in the database
                 await prisma.payment.update({
                     where: { stripeId: session.id.split('_').join("") },
-                    data: { status: session.payment_status },
+                    data: { status: PaymentStatus.PAID },
                 });
     
                 console.log("Payment successfully updated in the database.");
@@ -42,7 +42,7 @@ const stripeWebhook = async (req: Request, res: Response) => {
                     data: {
                         trackProjectStatus: OrderStatus.PROJECT_PLACED,
                         projectStatus: ProjectStatus.WAITING,
-                        paymentStatus: PaymentStatus.COMPLETED,
+                        paymentStatus: PaymentStatus.PAID,
                     },
                 });
     

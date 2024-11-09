@@ -42,6 +42,15 @@ model User {
   archive               Boolean           @default(false)
   block_for_chat        Boolean           @default(false)
 
+  // Affiliate fields
+  // referralCode      String?            @unique
+  // referredBy        String?            @db.ObjectId
+  // referredUsers     User[]             @relation("ReferralRelation")
+  // referrer          User?              @relation("ReferralRelation", fields: [referredBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // affiliateEarnings Float              @default(0)
+  // isAffiliateActive Boolean            @default(false)
+  // affiliatePayments AffiliatePayment[]
+
   sentMessages     Message[]      @relation("SentMessages")
   receivedMessages Message[]      @relation("ReceivedMessages")
   contactForChatId String?        @db.ObjectId
@@ -55,6 +64,18 @@ model User {
 
   @@map("Users")
 }
+
+// model AffiliatePayment {
+//   id            String        @id @default(auto()) @map("_id") @db.ObjectId
+//   userId        String        @db.ObjectId
+//   user          User          @relation(fields: [userId], references: [id])
+//   amount        Float
+//   status        PaymentStatus @default(PENDING)
+//   paymentMethod String?
+//   paymentDate   DateTime?
+//   createdAt     DateTime      @default(now())
+//   updatedAt     DateTime      @updatedAt
+// }
 
 model OrderMessage {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -357,7 +378,7 @@ model Order {
   duration                 String
   totalPrice               String
   paymentStatus            PaymentStatus           @default(PENDING)
-  startDate                DateTime?                
+  startDate                DateTime?
   deliveryDate             DateTime?
   projectStartDate         DateTime?
   projectStatus            ProjectStatus           @default(Waiting)
@@ -381,6 +402,8 @@ model Order {
   OrderExtensionRequest    OrderExtensionRequest[]
   designerName             String?                 @default("")
   projectTips              Json?                   @default("{}")
+  // referralCode             String? // Track which referral code was used
+  // affiliateCommission      Float? // Commission amount for the affiliate
 }
 
 model OrderExtensionRequest {
@@ -403,7 +426,7 @@ model Payment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
   stripeId  String   @unique
-  status    String
+  status    PaymentStatus   @default(PENDING)
   amount    String
   currency  String
   createdAt DateTime @default(now())
@@ -415,7 +438,7 @@ model Payment {
 
 enum PaymentStatus {
   PENDING
-  COMPLETED
+  PAID
   FAILED
   REFUNDED
 }

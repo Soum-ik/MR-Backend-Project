@@ -79,8 +79,8 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       projectImage: data?.projectImage || '',
       duration: data?.deliveryDuration.toString(),
       totalPrice: data?.totalAmount.toString(),
-      paymentStatus: 'PENDING',
-      totalQuantity: data?.totalQuantity as string,
+      paymentStatus: PaymentStatus.PENDING,
+      totalQuantity: data?.totalQuantity.toString(),
       trackProjectStatus: OrderStatus.PROJECT_PLACED,
       projectStatus: ProjectStatus.WAITING,
       requirements: data?.requirements,
@@ -92,9 +92,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   if (!order) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull');
   }
-
   console.log("Order successfully created with status 'PENDING'.");
-
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
