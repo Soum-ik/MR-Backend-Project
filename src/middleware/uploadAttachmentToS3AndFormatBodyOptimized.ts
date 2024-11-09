@@ -133,9 +133,6 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
 
                 if (files.every(file => file.mimetype.includes('image'))) {
                     const processedFiles = await Promise.all(files.map(processImageWithWatermark));
-                    const processedFilesOptimized = await Promise.all(files.map(processImageWithOptimized));
-
-                    // Upload original files
                     await uploadMultipleFilesToS3(bucketNameWatermark,
                         processedFiles.map(({ watermarkPath, watermarkfileName }) => ({
                             filePath: watermarkPath,
@@ -143,8 +140,11 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                         })),
                         'public-read'
                     );
+                    
+                   
+    
 
-                    // Upload optimized files
+                    const processedFilesOptimized = await Promise.all(files.map(processImageWithOptimized));
                     await uploadMultipleFilesToS3(bucketNameWatermark,
                         processedFilesOptimized.map(({ optimizedPath, optimizedfileName }) => ({
                             filePath: optimizedPath,
