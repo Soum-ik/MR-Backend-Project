@@ -123,7 +123,7 @@ const extendDelivery = async (req: Request, res: Response) => {
                 days: parseInt(days, 10),
                 amount: amount,
                 reason: reason || '',
-                paymentStatus: requestedByClient ? PaymentStatus.COMPLETED : PaymentStatus.PENDING,
+                paymentStatus: requestedByClient ? PaymentStatus.PAID : PaymentStatus.PENDING,
                 adminApproved: requestedByClient ? null : true, // Auto-approved by admin if requested by admin
                 userApproved: requestedByClient ? true : null    // Auto-approved by user if requested by user
             }

@@ -44,7 +44,7 @@ const authenticate_for_startProject = async (req: Request, res: Response, next: 
                 message: 'Order are not found',
             });
         }
-        if (order_status?.paymentStatus === PaymentStatus.COMPLETED) {
+        if (order_status?.paymentStatus === PaymentStatus.PAID) {
             req.body = { user, ...order_status }
             next();
         } else {
