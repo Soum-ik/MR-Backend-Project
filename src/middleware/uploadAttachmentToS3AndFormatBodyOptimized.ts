@@ -41,15 +41,17 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                 try {
 
                     // Read dimensions of the main image with type safety
-                    const mainImage = sharp(inputPath);
+                    const mainImage = sharp(inputPath).jpeg({ quality: 30 })
                     const metadata = await mainImage.metadata();
 
                     if (!metadata.width || !metadata.height) {
                         throw new Error('Failed to retrieve image dimensions');
                     }
 
-                    const { width, height } = metadata;
 
+
+
+                    const { width, height } = metadata;
                     // Resize watermark to match the main image dimensions
                     const watermark = await sharp(watermarkPath)
                         .resize(width, height, { fit: 'cover' })
@@ -140,9 +142,9 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                         })),
                         'public-read'
                     );
-                    
-                   
-    
+
+
+
 
                     const processedFilesOptimized = await Promise.all(files.map(processImageWithOptimized));
                     await uploadMultipleFilesToS3(bucketNameWatermark,
