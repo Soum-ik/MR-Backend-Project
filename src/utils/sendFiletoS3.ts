@@ -44,7 +44,7 @@ export const uploadFileToS3 = (
                     `File uploaded successfully to ${bucketName}/${fileName}`,
                 );
                 // Delete the file asynchronously
-
+                
                 resolve(`${bucketName}/${fileName}`);
             })
             .catch((error: any) => {

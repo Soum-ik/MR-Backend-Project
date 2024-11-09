@@ -87,7 +87,7 @@ const extendDelivery = async (req: Request, res: Response) => {
         }
 
         // Calculate the new delivery date based on the requested days
-        const newDeliveryDate = new Date(order.deliveryDate);
+        const newDeliveryDate = order.deliveryDate ? new Date(order.deliveryDate) : new Date();
         newDeliveryDate.setDate(newDeliveryDate.getDate() + parseInt(days, 10));
 
         // Handle client-initiated request
@@ -189,7 +189,7 @@ const approveExtensionRequest = async (req: Request, res: Response) => {
             if (!order) {
                 throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
             }
-            const finalNewDeliveryDate = new Date(order.deliveryDate);
+            const finalNewDeliveryDate = new Date(order.deliveryDate || new Date());
             finalNewDeliveryDate.setDate(finalNewDeliveryDate.getDate() + updatedRequest.days);
 
             await prisma.order.update({

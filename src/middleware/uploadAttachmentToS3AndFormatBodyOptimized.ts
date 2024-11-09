@@ -9,9 +9,9 @@ import catchAsync from '../libs/utlitys/catchSynch';
 
 interface FileData {
     url: string;
+    optimizedUrl: string;
     originalName: string;
     fileType: string;
-    optimizedUrl: string;
     fileSize: number;
 }
 
@@ -77,8 +77,6 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                 }
             };
 
-
-
             // Process a single image with watermark using Sharp
             const processImageWithOptimized = async (file: Express.Multer.File) => {
                 const inputPath = file.path;
@@ -93,7 +91,7 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                             fit: 'inside',
                             withoutEnlargement: true
                         })
-                        .jpeg({ quality: 20 })
+                        .jpeg({ quality: 30 })
                         .toFile(outputPath)
 
 
@@ -115,13 +113,13 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
 
                 if (file.mimetype.includes('image')) {
                     const { optimizedPath, optimizedfileName } = await processImageWithOptimized(file);
-                    const { watermarkPath, watermarkfileName } = await processImageWithWatermark(file);
-
                     await uploadFileToS3(bucketNameWatermark, optimizedPath, optimizedfileName, 'public-read');
+
+                    const { watermarkPath, watermarkfileName } = await processImageWithWatermark(file);
                     await uploadFileToS3(bucketNameWatermark, watermarkPath, watermarkfileName, 'public-read');
                     body.file = {
-                        url: `https://${bucketNameWatermark}.s3.amazonaws.com/${optimizedfileName}`,
-                        optimizedUrl: `https://${bucketNameWatermark}.s3.amazonaws.com/${watermarkfileName}`,
+                        url: `https://${bucketNameWatermark}.s3.amazonaws.com/${watermarkfileName}`,
+                        optimizedUrl: `https://${bucketNameWatermark}.s3.amazonaws.com/${optimizedfileName}`,
                         originalName: file.originalname,
                         fileType: file.mimetype,
                         fileSize: (await fs.stat(optimizedPath)).size
