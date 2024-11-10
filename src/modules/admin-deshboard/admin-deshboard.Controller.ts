@@ -42,8 +42,7 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
             }
         }
     });
-
-    console.log(order);
+ 
 
     if (!order) {
         throw new AppError(httpStatus.NOT_FOUND, "Order not found");
@@ -84,7 +83,7 @@ const updateDesignerName = catchAsync(async (req: Request, res: Response) => {
         statusCode: httpStatus.OK,
         success: true,
         message: 'Designer name updated successfully',
-        data: updateDesignerName
+        data: ''
     })
 
 })
@@ -191,11 +190,7 @@ export const getOrderCount = catchAsync(async (req: Request, res: Response): Pro
 });
 
 const projectStatus = catchAsync(async (req: Request, res: Response) => {
-
-
     const order = await prisma.order.findMany();
-
-
     // Initialize with all possible project statuses
     const initialStatusCounts = {
         Waiting: { count: 0, totalPrice: 0 },
