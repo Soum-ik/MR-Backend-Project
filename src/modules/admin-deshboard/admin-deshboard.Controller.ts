@@ -231,7 +231,7 @@ const projectStatus = catchAsync(async (req: Request, res: Response) => {
         },
         ...Object.entries(orderStatusCounts).map(([status, data], index) => ({
             id: index + 1,
-            name: `${status} Projects`,
+            name: `${status}`,
             quantity: data.count,
             totalPrice: data.totalPrice
         }))
