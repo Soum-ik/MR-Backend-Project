@@ -33,6 +33,13 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
             OrderExtensionRequest: true,
             OrderMessage: true,
             Payment: true,
+            user: {
+                select: {
+                    id: true,
+                    userName: true,
+                    image: true
+                }
+            }
         }
     });
 

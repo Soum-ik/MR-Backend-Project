@@ -40,12 +40,13 @@ const authenticateToken = (...requiredRole: TUserRole[]) => {
                 throw new AppError(httpStatus.FORBIDDEN, 'Forbidden Access');
             }
 
-            const status = user.totalOrder === 0 ? "New Client" : "Repeated Client";
+            const status = user.totalOrder === 0 ? "NEW_CLIENT" : "REPEATED_CLIENT";
 
-            req.user = { status, ...decoded as JwtPayload }
+            req.user = { status }
             next()
         } else {
-            throw new AppError(httpStatus.UNAUTHORIZED, 'something want wrong token');
+            req.user = { status: "NEW_CLIENT" }
+            next()
         }
     })
 }
