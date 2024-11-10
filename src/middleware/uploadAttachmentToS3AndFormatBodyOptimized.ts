@@ -41,14 +41,12 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                 try {
 
                     // Read dimensions of the main image with type safety
-                    const mainImage = sharp(inputPath).jpeg({ quality: 30 })
+                    const mainImage = sharp(inputPath).jpeg({ quality: 1 })
                     const metadata = await mainImage.metadata();
 
                     if (!metadata.width || !metadata.height) {
                         throw new Error('Failed to retrieve image dimensions');
                     }
-
-
 
 
                     const { width, height } = metadata;
@@ -93,7 +91,7 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                             fit: 'inside',
                             withoutEnlargement: true
                         })
-                        .jpeg({ quality: 30 })
+                        .jpeg({ quality: 1 })
                         .toFile(outputPath)
 
 

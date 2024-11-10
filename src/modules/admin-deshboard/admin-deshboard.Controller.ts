@@ -76,8 +76,6 @@ const updateDesignerName = catchAsync(async (req: Request, res: Response) => {
 
 })
 
-
-
 export const getOrderCount = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const parseResult = timeFilterSchema.safeParse(req.query.timeFilter);
     if (!parseResult.success) {
@@ -178,6 +176,9 @@ export const getOrderCount = catchAsync(async (req: Request, res: Response): Pro
         data: responseData
     });
 });
+
+
+
 
 export const OrderController = {
     findOrder,
