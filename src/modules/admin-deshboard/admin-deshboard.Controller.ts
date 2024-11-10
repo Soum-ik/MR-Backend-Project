@@ -183,19 +183,64 @@ const projectStatus = catchAsync(async (req: Request, res: Response) => {
     const order = await prisma.order.findMany({
         where: {
             projectStatus: projectStatus ?
-                { equals: projectStatus as ProjectStatus } :
-                {
-                    notIn: [ProjectStatus.CANCELED, ProjectStatus.DISPUTE, ProjectStatus.COMPLETED]
-                }
+                { equals: projectStatus as ProjectStatus } : {}
         }
     });
+
+    // Initialize with all possible project statuses
+    const initialStatusCounts = {
+        Waiting: { count: 0, totalPrice: 0 },
+        Ongoing: { count: 0, totalPrice: 0 },
+        Revision: { count: 0, totalPrice: 0 },
+        Dispute: { count: 0, totalPrice: 0 }, 
+        Delivered: { count: 0, totalPrice: 0 },
+        Canceled: { count: 0, totalPrice: 0 },
+        Completed: { count: 0, totalPrice: 0 }
+    };
+
+    const orderStatusCounts = order.reduce((acc, order) => {
+        const status = order.projectStatus;
+        acc[status].count++;
+        acc[status].totalPrice += Number(order.totalPrice || 0);
+        return acc;
+    }, initialStatusCounts);
+
+    // Calculate active projects (excluding Canceled and Completed)
+    const activeProjectsCount = order.reduce((count, order) => {
+        if (order.projectStatus !== 'Canceled' && order.projectStatus !== 'Completed') {
+            return count + 1;
+        }
+        return count;
+    }, 0);
+
+    const activeProjectsTotalPrice = order.reduce((total, order) => {
+        if (order.projectStatus !== 'Canceled' && order.projectStatus !== 'Completed') {
+            return total + Number(order.totalPrice || 0);
+        }
+        return total;
+    }, 0);
+
+    const formattedOrders = [
+        {
+            id: 0,
+            name: 'Active Projects',
+            quantity: activeProjectsCount,
+            totalPrice: activeProjectsTotalPrice
+        },
+        ...Object.entries(orderStatusCounts).map(([status, data], index) => ({
+            id: index + 1,
+            name: `${status} Projects`,
+            quantity: data.count,
+            totalPrice: data.totalPrice
+        }))
+    ];
 
     if (order.length === 0) {
         return sendResponse(res, {
             statusCode: httpStatus.OK,
             success: true,
             message: 'No order found',
-            data: order
+            data: null
         });
     }
 
@@ -203,7 +248,7 @@ const projectStatus = catchAsync(async (req: Request, res: Response) => {
         statusCode: httpStatus.OK,
         success: true,
         message: 'Order fetched successfully',
-        data: order
+        data: formattedOrders
     });
 })
 
