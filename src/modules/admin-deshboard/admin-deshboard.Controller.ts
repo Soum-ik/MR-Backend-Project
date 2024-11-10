@@ -10,7 +10,7 @@ import { Prisma } from "@prisma/client";
 import { PaymentStatus } from "../payment/payment.constant";
 
 const findOrder = catchAsync(async (req: Request, res: Response) => {
-    const { projectNumber, userName } = req.query;
+    const { projectNumber, userName, projectStatus } = req.query;
 
 
     // Check if order exists
@@ -20,6 +20,12 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
             ...(userName && {
                 user: {
                     userName: userName as string
+                }
+            }),
+            ...(projectStatus && { projectStatus: projectStatus as ProjectStatus }),
+            ...(projectStatus === 'Active' && {
+                projectStatus: {
+                    notIn: [ProjectStatus.CANCELED, ProjectStatus.COMPLETED]
                 }
             })
         },
@@ -178,21 +184,17 @@ export const getOrderCount = catchAsync(async (req: Request, res: Response): Pro
 });
 
 const projectStatus = catchAsync(async (req: Request, res: Response) => {
-    const { projectStatus } = req.query;
 
-    const order = await prisma.order.findMany({
-        where: {
-            projectStatus: projectStatus ?
-                { equals: projectStatus as ProjectStatus } : {}
-        }
-    });
+
+    const order = await prisma.order.findMany();
+
 
     // Initialize with all possible project statuses
     const initialStatusCounts = {
         Waiting: { count: 0, totalPrice: 0 },
         Ongoing: { count: 0, totalPrice: 0 },
         Revision: { count: 0, totalPrice: 0 },
-        Dispute: { count: 0, totalPrice: 0 }, 
+        Dispute: { count: 0, totalPrice: 0 },
         Delivered: { count: 0, totalPrice: 0 },
         Canceled: { count: 0, totalPrice: 0 },
         Completed: { count: 0, totalPrice: 0 }
