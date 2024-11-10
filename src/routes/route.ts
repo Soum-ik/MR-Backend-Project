@@ -40,6 +40,7 @@ import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessa
 import uploadImage from '../modules/uploadImage/uploadController';
 import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
+import analyticsRouter from '../modules/Analytics/analytics.route';
 
 const router = express.Router();
 router.get(
@@ -143,7 +144,7 @@ router.post('/contactForChat', authenticateToken(USER_ROLE.USER), startContact);
 router.use('/order', OrderNoteRouter);
 router.use('/order-status', getOrderStatusRoute);
 router.use('/find-order', findOrderRouter);
-
+router.use('/analytics', analyticsRouter);
 
 router.use('/requirement', RequirementSubmitRoute);
 

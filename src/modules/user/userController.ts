@@ -437,6 +437,7 @@ const getAllUser = async (req: Request, res: Response) => {
       lastSeen: true,
       book_mark: true,
       archive: true,
+      totalOrder: true,
       block_for_chat: true,
     },
   });

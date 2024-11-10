@@ -177,11 +177,39 @@ export const getOrderCount = catchAsync(async (req: Request, res: Response): Pro
     });
 });
 
+const projectStatus = catchAsync(async (req: Request, res: Response) => {
+    const { projectStatus } = req.query;
 
+    const order = await prisma.order.findMany({
+        where: {
+            projectStatus: projectStatus ?
+                { equals: projectStatus as ProjectStatus } :
+                {
+                    notIn: [ProjectStatus.CANCELED, ProjectStatus.DISPUTE, ProjectStatus.COMPLETED]
+                }
+        }
+    });
 
+    if (order.length === 0) {
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: 'No order found',
+            data: order
+        });
+    }
+
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Order fetched successfully',
+        data: order
+    });
+})
 
 export const OrderController = {
     findOrder,
     updateDesignerName,
-    getOrderCount
+    getOrderCount,
+    projectStatus
 }

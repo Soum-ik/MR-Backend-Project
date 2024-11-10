@@ -2,13 +2,15 @@ import { z } from "zod";
 
 export const TIME_FILTER_OPTIONS = {
     ALL_TIME: 'All Times',
+    LAST_7_DAYS: 'Last 7 Days',
+    LAST_30_DAYS: 'Last 30 Days', 
     THIS_MONTH: 'This Month',
     LAST_MONTH: 'Last Month',
     LAST_3_MONTH: 'Last 3 Month',
     LAST_6_MONTHS: 'Last 6 Months',
     THIS_YEAR: 'This Year',
     YEAR_2023: '2023',
-    YEAR_2022: '2022'
+    YEAR_2022: '2022',
 } as const;
 
 export const timeFilterSchema = z.enum(Object.values(TIME_FILTER_OPTIONS) as [string, ...string[]]);
@@ -19,6 +21,16 @@ export const calculateDateRange = (timeFilter: z.infer<typeof timeFilterSchema>)
     let endDate: Date = new Date();
 
     switch (timeFilter) {
+        case TIME_FILTER_OPTIONS.LAST_7_DAYS: {
+            startDate = new Date(now);
+            startDate.setDate(startDate.getDate() - 7);
+            break;
+        }
+        case TIME_FILTER_OPTIONS.LAST_30_DAYS: {
+            startDate = new Date(now);
+            startDate.setDate(startDate.getDate() - 30);
+            break;
+        }
         case TIME_FILTER_OPTIONS.THIS_MONTH: {
             startDate = new Date(now.getFullYear(), now.getMonth(), 1);
             endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
