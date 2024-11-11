@@ -6,7 +6,7 @@ export const TIME_FILTER_OPTIONS = {
     LAST_30_DAYS: 'Last 30 Days', 
     THIS_MONTH: 'This Month',
     LAST_MONTH: 'Last Month',
-    LAST_3_MONTH: 'Last 3 Month',
+    LAST_3_MONTHS: 'Last 3 Months',
     LAST_6_MONTHS: 'Last 6 Months',
     THIS_YEAR: 'This Year',
     YEAR_2023: '2023',
@@ -41,7 +41,7 @@ export const calculateDateRange = (timeFilter: z.infer<typeof timeFilterSchema>)
             endDate = new Date(now.getFullYear(), now.getMonth(), 0);
             break;
         }
-        case TIME_FILTER_OPTIONS.LAST_3_MONTH: {
+        case TIME_FILTER_OPTIONS.LAST_3_MONTHS: {
             startDate = new Date(now);
             startDate.setMonth(startDate.getMonth() - 3);
             break;
