@@ -6,6 +6,7 @@ import { USER_ROLE } from "../user/user.constant";
 import { worldDomination } from "./world-domination/world-domination";
 import { ProjectDetailsController } from "./Project-details/project-details.controller";
 import { TopKeywordController } from "./Top-Keyword/Top-keyword.controller";
+import affiliateRouter from "../affiliate/affiliate.route";
 
 const analyticsRouter = Router();
 

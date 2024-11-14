@@ -22,33 +22,33 @@ async function main() {
     }
 
     // handle unHandledRejection
-    // process.on('unhandledRejection', (err) => {
-    //     print.red('UNHANDLED REJECTION... 💥. Process Terminated', err);
+    process.on('unhandledRejection', (err) => {
+        print.red('UNHANDLED REJECTION... 💥. Process Terminated', err);
 
-    //     if (server) {
-    //         server.close(() => {
-    //             process.exit(1);
-    //         });
-    //     } else {
-    //         process.exit(1);
-    //     }
-    // });
+        if (server) {
+            server.close(() => {
+                process.exit(1);
+            });
+        } else {
+            process.exit(1);
+        }
+    });
 }
 
 main();
 
 
 // handle uncaughtExceptions
-// process.on('uncaughtException', (err) => {
-//     print.red('Uncaught Exception...😓. Process Terminated', err);
-//     process.exit(1);
-// });
+process.on('uncaughtException', (err) => {
+    print.red('Uncaught Exception...😓. Process Terminated', err);
+    process.exit(1);
+});
 
 
-// process.on('SIGTERM', (err) => {
-//     print.yellow('👋 SIGTERM RECEIVED. Shutting down gracefully');
-//     server.close(() => {
-//         print.red('💥 Process terminated!', err);
-//         process.exit(1);
-//     });
-// });
+process.on('SIGTERM', (err) => {
+    print.yellow('👋 SIGTERM RECEIVED. Shutting down gracefully');
+    server.close(() => {
+        print.red('💥 Process terminated!', err);
+        process.exit(1);
+    });
+});

@@ -41,6 +41,7 @@ import uploadImage from '../modules/uploadImage/uploadController';
 import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
 import analyticsRouter from '../modules/Analytics/analytics.route';
+import affiliateRouter from '../modules/affiliate/affiliate.route';
 
 const router = express.Router();
 router.get(
@@ -149,7 +150,7 @@ router.use('/order', OrderNoteRouter);
 router.use('/order-status', getOrderStatusRoute);
 router.use('/find-order', findOrderRouter);
 router.use('/analytics', analyticsRouter);
-
+router.use('/affiliate', affiliateRouter);
 router.use('/requirement', RequirementSubmitRoute);
 
 router.post(
