@@ -21,9 +21,9 @@ const orderId = new ObjectId();
 const stripePayment = catchAsync(async (req: Request, res: any) => {
   const projectNumber = await projectNumberCreator();
 
-  const { data } = req.body;
+  const { data, tags } = req.body;
   console.log('data showing:', data);
-
+  console.log('tags showing:', tags);
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: data?.items.map((item: any) => ({
@@ -88,6 +88,28 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       OrderToken: orderToken,
     },
   });
+
+  // Only create tags that don't already exist
+  const existingTags = await prisma.tags.findMany({
+    where: {
+      name: {
+        in: tags?.map((tag: string) => tag.trim())
+      }
+    }
+  });
+
+  const existingTagNames = new Set(existingTags.map(tag => tag.name));
+
+  const newTags = tags?.filter((tag: string) => !existingTagNames.has(tag.trim()));
+
+  if (newTags?.length) {
+    await prisma.tags.createMany({
+      data: newTags.map((tag: string) => ({
+        name: tag.trim(),
+        orderId: order.id,
+      }))
+    });
+  }
 
   if (!order) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull');

@@ -68,6 +68,10 @@ router.post(
 router.post(
   '/upload-attachment',
   uploadFile.array('files'),
+  (req, res, next) => {
+    console.log('uploadAttachmentToS3AndFormatBody');
+    next();
+  },
   uploadAttachmentToS3AndFormatBody(),
   catchAsync((req, res) => {
     sendResponse(res, {

@@ -8,6 +8,7 @@ import { promise } from "zod";
 import { timeFilterSchema } from "../../../utils/calculateDateRange";
 import { calculateDateRange } from "../../../utils/calculateDateRange";
 import { Prisma } from "@prisma/client";
+import { ProjectType } from "./project-deatails.constant";
 
 const ActiveProject = catchAsync(async (req: Request, res: Response) => {
     const [Revision, Ongoing, Waiting, Delivered] = await Promise.all([
@@ -121,7 +122,7 @@ const ProjectBuyers = catchAsync(async (req: Request, res: Response) => {
             }
         }
     } : {};
-    
+
     const buyers = await prisma.user.findMany({
         where: {
             role: "USER",
@@ -152,6 +153,72 @@ const ProjectBuyers = catchAsync(async (req: Request, res: Response) => {
             OldBuyers: oldBuys.length
         }
     });
+})
+
+const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
+    const parseResult = timeFilterSchema.safeParse(req.query.timeFilter);
+    if (!parseResult.success) {
+        sendResponse(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Invalid time filter',
+            data: null
+        });
+        return;
+    }
+
+    const timeFilter = parseResult.data;
+    const { startDate, endDate } = calculateDateRange(timeFilter);
+
+    const whereClause: Prisma.OrderWhereInput = startDate ? {
+        createdAt: {
+            gte: startDate,
+            lte: endDate
+        },
+    } : {};
+    const [Completed, Cancelled, NewProjects] = await Promise.all([
+        prisma.order.findMany({
+            where: {
+                ...whereClause,
+                projectStatus: ProjectStatus.COMPLETED
+            }
+        }),
+        prisma.order.findMany({
+            where: {
+                ...whereClause,
+                projectStatus: ProjectStatus.CANCELED
+            }
+        }),
+        prisma.order.findMany({
+            where: {
+                ...whereClause,
+                projectStatus: {
+                    in: [ProjectStatus.REVISION, ProjectStatus.ONGOING, ProjectStatus.WAITING, ProjectStatus.DELIVERED, ProjectStatus.DISPUTE]
+                }
+            }
+        })
+    ])
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Project options fetched successfully",
+        data: {
+            Completed: Completed?.length,
+            Cancelled: Cancelled?.length,
+            NewProjects: NewProjects?.length
+        }
+    })
+})
+
+const ProjectOptions = catchAsync(async (req: Request, res: Response) => {
+    // const [Completed, Cancelled, NewProjects] = await Promise.all([
+    //     prisma.order.findMany({
+    //         where: {
+    //             projectStatus: ProjectType.MD_PROJECT
+    //         }
+    //     })
+    // ])
 })
 
 export const ProjectDetailsController = {

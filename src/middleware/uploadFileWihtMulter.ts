@@ -14,6 +14,6 @@ const storage = multer.diskStorage({
       `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`,
     );
   },
-});
+});                         
 
 export const uploadFile = multer({ storage });

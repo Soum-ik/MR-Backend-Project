@@ -5,6 +5,7 @@ import authenticateToken from "./visitors/visitors.middleware";
 import { USER_ROLE } from "../user/user.constant";
 import { worldDomination } from "./world-domination/world-domination";
 import { ProjectDetailsController } from "./Project-details/project-details.controller";
+import { TopKeywordController } from "./Top-Keyword/Top-keyword.controller";
 
 const analyticsRouter = Router();
 
@@ -17,5 +18,6 @@ analyticsRouter.get('/project-details/active-project', ProjectDetailsController.
 analyticsRouter.get('/project-details/finished-projects', ProjectDetailsController.FinishedProjects);
 analyticsRouter.get('/project-details/project-buyers', ProjectDetailsController.ProjectBuyers);
 
-
+analyticsRouter.get('/top-keyword', TopKeywordController.getTopKeywords);
+analyticsRouter.get('/top-keyword/order', TopKeywordController.getOrderByKey);
 export default analyticsRouter;

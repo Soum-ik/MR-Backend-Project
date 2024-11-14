@@ -41,41 +41,49 @@ model User {
   book_mark             Boolean           @default(false)
   archive               Boolean           @default(false)
   block_for_chat        Boolean           @default(false)
-
-  // Affiliate fields
-  // referralCode      String?            @unique
-  // referredBy        String?            @db.ObjectId
-  // referredUsers     User[]             @relation("ReferralRelation")
-  // referrer          User?              @relation("ReferralRelation", fields: [referredBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  // affiliateEarnings Float              @default(0)
-  // isAffiliateActive Boolean            @default(false)
-  // affiliatePayments AffiliatePayment[]
-
-  sentMessages     Message[]      @relation("SentMessages")
-  receivedMessages Message[]      @relation("ReceivedMessages")
-  contactForChatId String?        @db.ObjectId
-  Notification     Notification[]
-  Order            Order[]
-  Note             Note[]
-  Payment          Payment[]
+  affiliateId           String?           @db.ObjectId
+  
+  sentMessages          Message[]         @relation("SentMessages")
+  receivedMessages      Message[]         @relation("ReceivedMessages")
+  contactForChatId      String?           @db.ObjectId
+  Notification          Notification[]
+  Order                 Order[]
+  Note                  Note[]
+  Payment               Payment[]
 
   OrderMessageSent     OrderMessage[] @relation("OrderMessageSent")
   OrderMessageReceived OrderMessage[] @relation("OrderMessageReceived")
+  Affiliate            Affiliate[]
 
   @@map("Users")
 }
 
-// model AffiliatePayment {
-//   id            String        @id @default(auto()) @map("_id") @db.ObjectId
-//   userId        String        @db.ObjectId
-//   user          User          @relation(fields: [userId], references: [id])
-//   amount        Float
-//   status        PaymentStatus @default(PENDING)
-//   paymentMethod String?
-//   paymentDate   DateTime?
-//   createdAt     DateTime      @default(now())
-//   updatedAt     DateTime      @updatedAt
-// }
+model Affiliate {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  amount Float
+  clicks Int      @default(0)
+  links  String[] @default([])
+
+  paymentMethod String?
+  paymentDate   DateTime?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  AffiliateJoin AffiliateJoin[]
+}
+
+model AffiliateJoin {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  affiliateId String?    @db.ObjectId
+  affiliate   Affiliate? @relation(fields: [affiliateId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 model OrderMessage {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -382,7 +390,7 @@ model Order {
   deliveryDate             DateTime?
   projectStartDate         DateTime?
   projectStatus            ProjectStatus           @default(Waiting)
-  projectType              String?
+  projectType              ProjectType
   projectImage             String?
   trackProjectStatus       trackProjectStatus      @default(PENDING)
   clientApproval           Boolean?                @default(false)
@@ -403,7 +411,19 @@ model Order {
   designerName             String?                 @default("")
   projectTips              Json?                   @default("{}")
   // referralCode             String? // Track which referral code was used
-  // affiliateCommission      Float? // Commission amount for the affiliate
+  // affiliateCommission      Float? // Commission amount for the affiliat
+  tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
+  tagsId                   String?                 @db.ObjectId
+}
+
+model tags {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  order       Order[]  @relation("OrderToTags")
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @updatedAt
 }
 
 model OrderExtensionRequest {
@@ -480,4 +500,11 @@ enum ProjectStatus {
   Delivered
   Canceled
   Completed
+}
+
+enum ProjectType {
+  OFFER //banner
+  CUSTOM // inbox
+  DIRECT //single
+  MD_PROJECT //multi
 }
