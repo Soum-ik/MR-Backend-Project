@@ -42,18 +42,19 @@ model User {
   archive               Boolean           @default(false)
   block_for_chat        Boolean           @default(false)
   affiliateId           String?           @db.ObjectId
-  
-  sentMessages          Message[]         @relation("SentMessages")
-  receivedMessages      Message[]         @relation("ReceivedMessages")
-  contactForChatId      String?           @db.ObjectId
-  Notification          Notification[]
-  Order                 Order[]
-  Note                  Note[]
-  Payment               Payment[]
+
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  contactForChatId String?        @db.ObjectId
+  Notification     Notification[]
+  Order            Order[]
+  Note             Note[]
+  Payment          Payment[]
 
   OrderMessageSent     OrderMessage[] @relation("OrderMessageSent")
   OrderMessageReceived OrderMessage[] @relation("OrderMessageReceived")
   Affiliate            Affiliate[]
+  review               review[]
 
   @@map("Users")
 }
@@ -376,6 +377,24 @@ model Note {
   createdAt DateTime @default(now())
 }
 
+model review {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  senderId String @db.ObjectId
+  sender   User   @relation(fields: [senderId], references: [id])
+
+  orderId String @db.ObjectId
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  message String
+
+  rating     Int
+  senderType senderType 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Order {
   id                       String                  @id @map("_id") @db.ObjectId
   userId                   String                  @db.ObjectId
@@ -414,6 +433,7 @@ model Order {
   // affiliateCommission      Float? // Commission amount for the affiliat
   tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
   tagsId                   String?                 @db.ObjectId
+  review                   review[]
 }
 
 model tags {
@@ -507,4 +527,9 @@ enum ProjectType {
   CUSTOM // inbox
   DIRECT //single
   MD_PROJECT //multi
+}
+
+enum senderType {
+  CLIENT
+  OWNER
 }
