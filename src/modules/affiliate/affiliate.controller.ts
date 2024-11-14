@@ -48,10 +48,33 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateAffiliateClicks = catchAsync(async (req: Request, res: Response) => {
-    const { link, affiliate_id } = req.params;
+    const { link, affiliate_id } = req.query;
 
+
+
+    if (!affiliate_id && !link) {
+        throw new AppError(400, "At least one of Affiliate ID or Link is required");
+    }
+
+    // First find the affiliate
+    const existingAffiliate = await prisma.affiliate.findFirst({
+        where: {
+            OR: [
+                { id: affiliate_id?.toString() },
+                { links: link?.toString() }
+            ]
+        }
+    });
+
+    if (!existingAffiliate) {
+        throw new AppError(404, "Affiliate not found");
+    }
+
+    // Then update using the found ID
     const affiliate = await prisma.affiliate.update({
-        where: { id: affiliate_id, links: link },
+        where: {
+            id: existingAffiliate.id
+        },
         data: {
             clicks: {
                 increment: 1
@@ -68,14 +91,14 @@ const updateAffiliateClicks = catchAsync(async (req: Request, res: Response) => 
 });
 
 const deleteAffiliate = catchAsync(async (req: Request, res: Response) => {
-    const { affiliate_id, user_id } = req.params;
+    const { affiliate_id, user_id } = req.query;
 
     if (!affiliate_id || !user_id) {
         throw new AppError(400, "Affiliate ID and User ID are required");
     }
 
     await prisma.affiliate.delete({
-        where: { id: affiliate_id, userId: user_id }
+        where: { id: affiliate_id?.toString(), userId: user_id?.toString() }
     });
 
     return sendResponse(res, {
@@ -85,31 +108,22 @@ const deleteAffiliate = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const joinAffiliate = catchAsync(async (req: Request, res: Response) => {
-    const { affiliate_id, user_id } = req.body;
-
-    const affiliate = await prisma.affiliateJoin.create({
-        data: {
-            affiliateId: affiliate_id,
-            userId: user_id
-        }
-    });
-
-    return sendResponse(res, {
-        statusCode: 201,
-        success: true,
-        message: AFFILIATE_SUCCESS.CREATED,
-        data: affiliate
-    });
-});
-
 const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
     const affiliates = await prisma.affiliate.findMany({
         include: {
             AffiliateJoin: {
                 select: {
                     id: true,
-                    createdAt: true
+                    createdAt: true,
+                    user: {
+                        select: {
+                            Order: {
+                                select: {
+                                    totalPrice: true
+                                }
+                            }
+                        }
+                    }
                 }
             },
             user: {
@@ -117,7 +131,13 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
                     id: true,
                     fullName: true,
                     email: true,
-                    userName: true
+                    userName: true,
+                    totalOrder: true,
+                    Order: {
+                        select: {
+                            totalPrice: true
+                        }
+                    }
                 }
             }
         }
@@ -129,14 +149,18 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
             id: affiliate.user.id,
             fullName: affiliate.user.fullName,
             email: affiliate.user.email,
-            userName: affiliate.user.userName
+            userName: affiliate.user.userName,
+            // totalOrders: affiliate.user.totalOrder,
+            totalAmount: affiliate.user.Order.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0)
         },
         affiliateLink: affiliate.links,
         clicks: affiliate.clicks,
         amount: affiliate.amount,
         joinedUsers: affiliate.AffiliateJoin.map(join => ({
             joinId: join.id,
-            joinedAt: join.createdAt
+            joinedAt: join.createdAt,
+            totalOrders: join.user.Order.length,
+            totalAmount: join.user.Order.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0)
         }))
     }));
 
@@ -152,6 +176,5 @@ export const AffiliateController = {
     createAffiliate,
     deleteAffiliate,
     updateAffiliateClicks,
-    joinAffiliate,
     getAllAffiliates
 };
