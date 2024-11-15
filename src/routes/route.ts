@@ -42,6 +42,8 @@ import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
 import analyticsRouter from '../modules/Analytics/analytics.route';
 import affiliateRouter from '../modules/affiliate/affiliate.route';
+import { searchProjectsRouter } from '../modules/searching/searching.route';
+import ImageStoreRouter from '../modules/image-store/image.router';
 
 const router = express.Router();
 router.get(
@@ -109,6 +111,9 @@ router.get(
   UserController.getSingelUser,
 );
 
+
+router.use('/image', ImageStoreRouter)
+router.use('/search', searchProjectsRouter);
 router.use('/', UserRoute);
 router.use('/category', CategoryRoute);
 router.use('/upload', UploadRoute);

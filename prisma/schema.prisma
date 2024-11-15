@@ -13,6 +13,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ImageStore {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  image Json?
+}
+
 model User {
   id                    String            @id @default(auto()) @map("_id") @db.ObjectId
   fullName              String?
@@ -405,6 +410,8 @@ model Order {
   stripeId                 String                  @unique
   user                     User                    @relation(fields: [userId], references: [id])
   projectName              String
+  orderFrom                String?
+  form                     String?
   projectNumber            String                  @unique
   duration                 String
   totalPrice               String
@@ -433,8 +440,6 @@ model Order {
   OrderExtensionRequest    OrderExtensionRequest[]
   designerName             String?                 @default("")
   projectTips              Json?                   @default("{}")
-  // referralCode             String? // Track which referral code was used
-  // affiliateCommission      Float? // Commission amount for the affiliat
   tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
   tagsId                   String?                 @db.ObjectId
   review                   review[]

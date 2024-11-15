@@ -8,11 +8,7 @@ import { timeFilterSchema } from "../../../utils/calculateDateRange";
 import { calculateDateRange } from "../../../utils/calculateDateRange";
 
 const increaseVisitors = catchAsync(async (req: Request, res: Response) => {
-
     const { status } = req.user as { status: VisitorStatus };
-
-    console.log(req.ip);
-
     const visitor = await prisma.visitors.create({
         data: {
             status: status as VisitorStatus

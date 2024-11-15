@@ -17,7 +17,7 @@ import socketServer from './socket/socket-server';
 import globalError from './middleware/globalError';
 import moment from 'moment';
 import sendResponse from './libs/sendResponse';
-// import './scheduler_task/scheduler';
+import './scheduler_task/scheduler';
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute

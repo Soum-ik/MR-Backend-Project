@@ -36,7 +36,7 @@ const getWorldDomination = catchAsync(async (req: Request, res: Response) => {
         }
     });
 
-    console.log(totalUser[0].Order);
+
 
     // Filter out users without a country
     const usersWithCountry = totalUser.filter((user): user is typeof user & { country: string } => Boolean(user.country));
@@ -64,7 +64,6 @@ const getWorldDomination = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: "World domination payment statistics fetched successfully",
         data: {
-            data : totalUser[0].Order,
             totalCountries: worldDomination.length,
             worldDominationProgress: ((worldDomination.length / totalWorld) * 100).toFixed(2) + '%',
             countryPaymentDetails: worldDomination.sort((a, b) => b.totalPaidPayments - a.totalPaidPayments)
