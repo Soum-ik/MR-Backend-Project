@@ -174,9 +174,18 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
                 });
             }
 
-            const filesToDelete = files.map(file => {
-                fs.unlink(file.path);
-            })
+            // Handle file cleanup with error handling and retries
+            const deleteFile = async (filePath: string, retries = 3, delay = 1000) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        await fs.unlink(filePath);
+                        return;
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            };
 
             const uploads = path.join(process.cwd(), 'uploads');
             const uploadsFiles = await fs.readdir(uploads);
@@ -184,25 +193,38 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
 
             const processedFiles = await fs.readdir(processedDir);
 
+            // Clean up files with retry mechanism
+            const cleanupPromises = [];
 
             if (uploadsFiles.length > 0) {
-                await Promise.all(uploadsFiles.map(async file => {
+                cleanupPromises.push(...uploadsFiles.map(async file => {
                     const filePath = path.join(uploads, file);
-                    if (await fs.stat(filePath).then(() => true).catch(() => false)) {
-                        console.log(file, 'file exists and is being removed');
-                        await fs.unlink(filePath);
-                    } else {
-                        console.log(file, 'file does not exist');
+                    try {
+                        await fs.stat(filePath);
+                        console.log(file, 'file exists and attempting to remove');
+                        await deleteFile(filePath);
+                    } catch (error) {
+                        console.log(file, 'file does not exist or cannot be accessed');
                     }
                 }));
             }
 
             if (processedFiles.length > 0) {
-                await Promise.all(processedFiles.map(file => {
-                    fs.unlink(path.join(processedDir, file));
-                }));
+                cleanupPromises.push(...processedFiles.map(file => 
+                    deleteFile(path.join(processedDir, file))
+                ));
             }
-            await Promise.all(filesToDelete);
+
+            cleanupPromises.push(...files.map(file => 
+                deleteFile(file.path)
+            ));
+
+            try {
+                await Promise.all(cleanupPromises);
+            } catch (error) {
+                console.error('Error during file cleanup:', error);
+                // Continue execution even if cleanup fails
+            }
 
             req.body = { ...body };
             next();
