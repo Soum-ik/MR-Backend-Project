@@ -115,6 +115,7 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
                 select: {
                     id: true,
                     createdAt: true,
+                    userId: true,
                     user: {
                         select: {
                             Order: {
@@ -136,33 +137,41 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
                     Order: {
                         select: {
                             totalPrice: true
+                        },
+                        where: {
+                            projectStatus: "Completed",
                         }
                     }
                 }
             }
         }
     });
+    async function getUserName(user_id: string) {
+        const user = await prisma.user.findUnique({
+            where: { id: user_id }
+        });
+        return user?.userName;
+    }
 
     // Transform data to show who joined with whom
-    const formattedAffiliates = affiliates.map(affiliate => ({
+    const formattedAffiliates = await Promise.all(affiliates.map(async affiliate => ({
         affiliateOwner: {
             id: affiliate.user.id,
             fullName: affiliate.user.fullName,
             email: affiliate.user.email,
             userName: affiliate.user.userName,
-            // totalOrders: affiliate.user.totalOrder,
-            totalAmount: affiliate.user.Order.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0)
         },
         affiliateLink: affiliate.links,
         clicks: affiliate.clicks,
         amount: affiliate.amount,
-        joinedUsers: affiliate.AffiliateJoin.map(join => ({
-            joinId: join.id,
-            joinedAt: join.createdAt,
+        joinedUsers: await Promise.all(affiliate.AffiliateJoin.map(async join => ({
+            joinId: join.userId,
+            createdAt: join.createdAt,
+            userName: await getUserName(join.userId),
             totalOrders: join.user.Order.length,
             totalAmount: join.user.Order.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0)
-        }))
-    }));
+        })))
+    })));
 
     return sendResponse(res, {
         statusCode: 200,
