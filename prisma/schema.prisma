@@ -46,7 +46,7 @@ model User {
   book_mark             Boolean           @default(false)
   archive               Boolean           @default(false)
   block_for_chat        Boolean           @default(false)
-  affiliateId           String?           
+  affiliateId           String?
 
   sentMessages     Message[]      @relation("SentMessages")
   receivedMessages Message[]      @relation("ReceivedMessages")
@@ -89,7 +89,7 @@ model AffiliateJoin {
   user   User   @relation(fields: [userId], references: [id])
 
   affiliateLink String
-  affiliate   Affiliate @relation(fields: [affiliateLink], references: [link])
+  affiliate     Affiliate @relation(fields: [affiliateLink], references: [link])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
