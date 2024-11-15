@@ -46,7 +46,7 @@ model User {
   book_mark             Boolean           @default(false)
   archive               Boolean           @default(false)
   block_for_chat        Boolean           @default(false)
-  affiliateId           String?           @db.ObjectId
+  affiliateId           String?           
 
   sentMessages     Message[]      @relation("SentMessages")
   receivedMessages Message[]      @relation("ReceivedMessages")

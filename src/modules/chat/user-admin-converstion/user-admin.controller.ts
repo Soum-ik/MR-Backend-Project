@@ -455,22 +455,16 @@ const getMessages = async (req: Request, res: Response) => {
   }
 };
 
+// Delete message
 const deleteMessage = async (req: Request, res: Response) => {
-  const messageId = req.params.id;
+  const { messageId } = req.params;
   const { user_id, role } = req.user as TokenCredential;
-  if (!user_id) {
-    return sendResponse<any>(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'Token are required!',
-    });
-  }
+
   try {
     // Fetch the message from the database
     const message = await prisma.message.findUnique({
       where: {
         id: messageId,
-        senderId: user_id as string,
       },
     });
 
@@ -479,7 +473,7 @@ const deleteMessage = async (req: Request, res: Response) => {
       return sendResponse(res, {
         statusCode: httpStatus.NOT_FOUND,
         success: false,
-        message: 'this message are not for you',
+        message: 'Message not found!',
       });
     }
 
@@ -492,42 +486,28 @@ const deleteMessage = async (req: Request, res: Response) => {
       (currentTime.getTime() - messageTime.getTime()) / (1000 * 60); // Convert to minutes
 
     // Allow deletion if the message is less than or equal to 5 minutes old
-    if (timeDifference <= 5) {
-      // Check if the user is either the sender or an admin
-      const isSender = message.senderId === user_id; // Assuming req.user contains the authenticated user's info
-      const isUserAdmin = ['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN', 'USER'].includes(role as string); // Assuming you have a role property in user
 
-      if (isSender || isUserAdmin) {
-        // Delete the message
-        const deleteMessage = await prisma.message.delete({
-          where: {
-            id: messageId,
-          },
-        });
+    const isUserAdmin = ['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN'].includes(role as string); // Assuming you have a role property in user
 
-        if (!deleteMessage) {
-          throw new AppError(httpStatus.NOT_FOUND, "Message not found!");
-        }
+    const deleteMessage = await prisma.message.delete({
+      where: {
+        id: messageId,
+        ...(!isUserAdmin && { senderId: user_id as string }),
+      },
+    });
 
-        return sendResponse(res, {
-          statusCode: httpStatus.OK,
-          success: true,
-          message: 'Message deleted successfully',
-        });
-      } else {
-        return sendResponse(res, {
-          statusCode: httpStatus.FORBIDDEN,
-          success: false,
-          message: 'You are not authorized to delete this message',
-        });
-      }
-    } else {
-      return sendResponse(res, {
-        statusCode: httpStatus.BAD_REQUEST,
-        success: false,
-        message: 'Message can only be deleted within 5 minutes of sending',
-      });
+    console.log(deleteMessage);
+
+    if (!deleteMessage) {
+      throw new AppError(httpStatus.NOT_FOUND, "Message not found!");
     }
+
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Message deleted successfully',
+    });
+
   } catch (error) {
     console.error(error);
     return sendResponse(res, {
@@ -538,6 +518,7 @@ const deleteMessage = async (req: Request, res: Response) => {
   }
 };
 
+// Delete conversation
 const deleteConversation = async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
   const { userId } = req.params; // ID of the other participant in the conversation

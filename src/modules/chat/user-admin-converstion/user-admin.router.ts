@@ -15,7 +15,7 @@ router.patch('/update/:messageId', messageControlller.updateMessage);
 // Route to get messages between user and admin
 router.get('/get', messageControlller.getMessages);
 
-router.delete('/:id', messageControlller.deleteMessage)
+router.delete('/:messageId', messageControlller.deleteMessage)
 
 router.delete('/delete-conversation/:userId', messageControlller.deleteConversation)
 

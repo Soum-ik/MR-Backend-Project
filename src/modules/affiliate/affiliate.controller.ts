@@ -10,10 +10,12 @@ import { PaymentStatus, ProjectStatus } from "@prisma/client";
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
 
-    const { link, } = req.body;
+    const { link }: { link: string } = req.body;
     const user = await prisma.user.findUnique({
         where: { id: user_id }
     });
+
+    const trimLink = link.split(" ").join("-");
 
     if (!user) {
         return sendResponse(res, {
@@ -25,7 +27,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
 
     const Link = await prisma.affiliate.findFirst({
         where: {
-            link: link
+            link: trimLink
         }
     })
 
@@ -36,7 +38,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const affiliate = await prisma.affiliate.create({
         data: {
             userId: user_id,
-            link: link
+            link: trimLink
         }
     });
 
@@ -91,14 +93,14 @@ const updateAffiliateClicks = catchAsync(async (req: Request, res: Response) => 
 });
 
 const deleteAffiliate = catchAsync(async (req: Request, res: Response) => {
-    const { affiliate_id, user_id } = req.query;
+    const { affiliate_link, user_id } = req.query;
 
-    if (!affiliate_id || !user_id) {
+    if (!affiliate_link || !user_id) {
         throw new AppError(400, "Affiliate ID and User ID are required");
     }
 
     await prisma.affiliate.delete({
-        where: { id: affiliate_id?.toString(), userId: user_id?.toString() }
+        where: { link: affiliate_link?.toString(), userId: user_id?.toString() }
     });
 
     return sendResponse(res, {
