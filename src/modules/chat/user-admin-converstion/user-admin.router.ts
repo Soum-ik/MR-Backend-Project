@@ -9,6 +9,9 @@ router.post('/send', messageControlller.sendMessage);
 // Route to reply to a message
 router.post('/reply', messageControlller.replyToMessage);
 
+// Route to update a message
+router.patch('/update/:id', messageControlller.updateMessage);
+
 // Route to get messages between user and admin
 router.get('/get', messageControlller.getMessages);
 
