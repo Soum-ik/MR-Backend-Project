@@ -5,6 +5,7 @@ import sendResponse from "../../libs/sendResponse";
 import { AFFILIATE_DEFAULT, AFFILIATE_ERRORS, AFFILIATE_SUCCESS } from "./affiliate.constant";
 import { TokenCredential } from "../../libs/authHelper";
 import AppError from "../../errors/AppError";
+import { PaymentStatus, ProjectStatus } from "@prisma/client";
 
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
@@ -24,7 +25,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
 
     const Link = await prisma.affiliate.findFirst({
         where: {
-            links: link
+            link: link
         }
     })
 
@@ -35,7 +36,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const affiliate = await prisma.affiliate.create({
         data: {
             userId: user_id,
-            links: link
+            link: link
         }
     });
 
@@ -51,7 +52,6 @@ const updateAffiliateClicks = catchAsync(async (req: Request, res: Response) => 
     const { link, affiliate_id } = req.query;
 
 
-
     if (!affiliate_id && !link) {
         throw new AppError(400, "At least one of Affiliate ID or Link is required");
     }
@@ -61,7 +61,7 @@ const updateAffiliateClicks = catchAsync(async (req: Request, res: Response) => 
         where: {
             OR: [
                 { id: affiliate_id?.toString() },
-                { links: link?.toString() }
+                { link: link?.toString() }
             ]
         }
     });
@@ -161,7 +161,7 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
             email: affiliate.user.email,
             userName: affiliate.user.userName,
         },
-        affiliateLink: affiliate.links,
+        affiliateLink: affiliate.link,
         clicks: affiliate.clicks,
         amount: affiliate.amount,
         joinedUsers: await Promise.all(affiliate.AffiliateJoin.map(async join => ({
@@ -181,9 +181,72 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
+    const { user_id } = req.user as TokenCredential;
+
+    const affiliates = await prisma.affiliate.findMany({
+        where: { userId: user_id },
+        include: {
+            AffiliateJoin: {
+                include: {
+                    user: {
+                        select: {
+                            Order: {
+                                where: {
+                                    projectStatus: "Completed"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const formattedAffiliates = affiliates.map(affiliate => ({
+        links: affiliate.link,
+        totalClicks: affiliate.clicks,
+        join: affiliate.AffiliateJoin.length,
+        sales: affiliate.AffiliateJoin.reduce((acc, join) => acc + join.user.Order.length, 0)
+    }));
+
+    const totalAmount = await prisma.affiliateJoin.findMany({
+        select: {
+            user: {
+                include: {
+                    Order: {
+                        where: {
+                            projectStatus: ProjectStatus.Completed,
+                            paymentStatus: PaymentStatus.PAID
+                        },
+                        select: {
+                            totalPrice: true
+                        }
+                    }
+                }
+            }
+        }
+    })
+
+    const totalEarnings = totalAmount.reduce((acc, join) => acc + join.user.Order.length * 5, 0);
+
+
+
+
+
+
+    return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: AFFILIATE_SUCCESS.FETCHED,
+        data: { totalEarnings, formattedAffiliates }
+    });
+});
+
 export const AffiliateController = {
     createAffiliate,
     deleteAffiliate,
     updateAffiliateClicks,
-    getAllAffiliates
+    getAllAffiliates,
+    usersAffiliate
 };

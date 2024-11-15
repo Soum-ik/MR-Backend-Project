@@ -9,6 +9,9 @@ router.post('/send', messageControlller.sendMessage);
 // Route to reply to a message
 router.post('/reply', messageControlller.replyToMessage);
 
+// Route to update a message
+router.patch('/update/:messageId', messageControlller.updateMessage);
+
 // Route to get messages between user and admin
 router.get('/get', messageControlller.getMessages);
 
@@ -16,6 +19,6 @@ router.delete('/:id', messageControlller.deleteMessage)
 
 router.delete('/delete-conversation/:userId', messageControlller.deleteConversation)
 
-router.use('/unread', unreadMessageRoutes)  
+router.use('/unread', unreadMessageRoutes)
 
 export const handleMessageRoute = router;

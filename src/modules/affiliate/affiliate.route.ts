@@ -17,11 +17,10 @@ affiliateRouter.get('/all',
     AffiliateController.getAllAffiliates);
 
 affiliateRouter.put('/update',
-    authenticateToken(USER_ROLE.USER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
     AffiliateController.updateAffiliateClicks);
 
-// affiliateRouter.post('/join',
-//     authenticateToken(USER_ROLE.USER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
-//     AffiliateController.joinAffiliate);
+affiliateRouter.get('/find-affiliate',
+    authenticateToken(USER_ROLE.USER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
+    AffiliateController.usersAffiliate);
 
 export default affiliateRouter;

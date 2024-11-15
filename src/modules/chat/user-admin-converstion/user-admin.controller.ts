@@ -178,6 +178,57 @@ const sendMessage = async (req: Request, res: Response) => {
   }
 };
 
+
+// Update message
+const updateMessage = async (req: Request, res: Response) => {
+  const { user_id } = req.user as TokenCredential;
+
+  const { messageId } = req.params;
+
+  if (!user_id) {
+    return sendResponse<any>(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: 'Token are required!',
+    });
+  }
+  const {
+    messageText,
+    attachment,
+    replyTo,
+    customOffer,
+    timeAndDate,
+  } = req.body;
+
+  const message = await prisma.message.update({
+    where: {
+      id: messageId,
+    },
+    data: {
+      messageText,
+      attachment,
+      replyTo,
+      customOffer,
+      timeAndDate,
+    },
+  });
+
+  if (!message) {
+    return sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: 'Message not found!',
+    });
+  }
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    data: message,
+    message: 'Message updated successfully',
+  });
+}
+
 // Reply to a message
 const replyToMessage = async (req: Request, res: Response) => {
   const { role, user_id } = req.user as TokenCredential;
@@ -448,7 +499,7 @@ const deleteMessage = async (req: Request, res: Response) => {
 
       if (isSender || isUserAdmin) {
         // Delete the message
-       const deleteMessage = await prisma.message.delete({
+        const deleteMessage = await prisma.message.delete({
           where: {
             id: messageId,
           },
@@ -547,10 +598,13 @@ const deleteConversation = async (req: Request, res: Response) => {
   }
 };
 
+
+
 export const messageControlller = {
   getMessages,
   replyToMessage,
   sendMessage,
+  updateMessage,
   deleteMessage,
   deleteConversation,
 };

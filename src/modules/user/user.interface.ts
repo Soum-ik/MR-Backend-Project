@@ -8,6 +8,7 @@ export interface SignupRequestBody {
     userName: string;
     email: string;
     password: string;
+    affiliate_link?: string;
 }
 
 // Define the User interface
