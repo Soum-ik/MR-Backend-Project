@@ -457,14 +457,14 @@ const getMessages = async (req: Request, res: Response) => {
 
 // Delete message
 const deleteMessage = async (req: Request, res: Response) => {
-  const { messageId } = req.params;
-  const { user_id, role } = req.user as TokenCredential;
+  const { commonkey } = req.params;
+  // const { user_id, role } = req.user as TokenCredential;
 
   try {
     // Fetch the message from the database
-    const message = await prisma.message.findUnique({
+    const message = await prisma.message.findMany({
       where: {
-        id: messageId,
+        commonkey: commonkey as string,
       },
     });
 
@@ -477,26 +477,12 @@ const deleteMessage = async (req: Request, res: Response) => {
       });
     }
 
-    // Get the current time and the time the message was created
-    const currentTime = new Date();
-    const messageTime = new Date(message.createdAt);
-
-    // Calculate the time difference in minutes
-    const timeDifference =
-      (currentTime.getTime() - messageTime.getTime()) / (1000 * 60); // Convert to minutes
-
-    // Allow deletion if the message is less than or equal to 5 minutes old
-
-    const isUserAdmin = ['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN'].includes(role as string); // Assuming you have a role property in user
-
-    const deleteMessage = await prisma.message.delete({
+    const deleteMessage = await prisma.message.deleteMany({
       where: {
-        id: messageId,
-        ...(!isUserAdmin && { senderId: user_id as string }),
+        commonkey: commonkey as string,
       },
     });
 
-    console.log(deleteMessage);
 
     if (!deleteMessage) {
       throw new AppError(httpStatus.NOT_FOUND, "Message not found!");
