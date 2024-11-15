@@ -25,8 +25,7 @@ const SignUp = async (
   res: Response,
 ) => {
   try {
-    const { country, fullName, userName, email, password } = req.body;
-    const { affiliate_id } = req.query;
+    const { country, fullName, userName, email, password, affiliate_link } = req.body;
 
     // Validate request body
     if (!email || !password) {
@@ -72,16 +71,17 @@ const SignUp = async (
         userName,
         email,
         password,
+        affiliateId: affiliate_link
       },
     });
 
     const { role, id, email: Useremail } = createUser;
 
     // Only create affiliate join if affiliate_id is provided
-    if (affiliate_id) {
+    if (affiliate_link) {
       await prisma.affiliateJoin.create({
         data: {
-          affiliateId: affiliate_id.toString(),
+          affiliateLink: affiliate_link,
           userId: id
         }
       });
