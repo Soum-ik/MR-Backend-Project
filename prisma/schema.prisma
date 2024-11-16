@@ -418,6 +418,7 @@ model Order {
   paymentStatus            PaymentStatus           @default(PENDING)
   startDate                DateTime?
   deliveryDate             DateTime?
+  durationHours            String?  
   projectStartDate         DateTime?
   projectStatus            ProjectStatus           @default(Waiting)
   projectType              ProjectType

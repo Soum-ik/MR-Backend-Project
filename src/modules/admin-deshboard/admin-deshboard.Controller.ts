@@ -8,6 +8,7 @@ import { ProjectStatus } from "../Order_page/Order_page.constant";
 import { calculateDateRange, timeFilterSchema } from "../../utils/calculateDateRange";
 import { Prisma } from "@prisma/client";
 import { PaymentStatus } from "../payment/payment.constant";
+import { PrismaClientRustPanicError } from "@prisma/client/runtime/library";
 
 const findOrder = catchAsync(async (req: Request, res: Response) => {
     const { projectNumber, userName, projectStatus } = req.query;
@@ -42,7 +43,7 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
             }
         }
     });
- 
+
 
     if (!order) {
         throw new AppError(httpStatus.NOT_FOUND, "Order not found");
@@ -256,9 +257,45 @@ const projectStatus = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
+const UsersStatus = catchAsync(async (req: Request, res: Response) => {
+
+    const [returning, newUser, affiliate] = await Promise.all([
+        prisma.user.findMany({
+            where: {
+                totalOrder: {
+                    gt: 0
+                }
+            },
+            include: {
+                AffiliateJoin: true
+            }
+        }),
+        prisma.user.findMany({
+            where: {
+                totalOrder: 0
+            }
+        }),
+        prisma.user.findMany({
+            where: {
+                affiliateId: {
+                    not: null
+                }
+            }
+        })
+    ])
+
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Users fetched successfully',
+        data: { returning, newUser, affiliate }
+    });
+})
+
 export const OrderController = {
     findOrder,
     updateDesignerName,
     getOrderCount,
-    projectStatus
+    projectStatus,
+    UsersStatus
 }

@@ -10,63 +10,54 @@ import { countries, getCountryCode } from 'countries-list'
 const getWorldDomination = catchAsync(async (req: Request, res: Response) => {
     const totalWorld = 195;
 
-    const totalUser = await prisma.user.findMany({
+    const totalUser = await prisma.order.findMany({
         where: {
-            Order: {
-                some: {
-                    AND: [
-                        { paymentStatus: PaymentStatus.PAID },
-                        { projectStatus: ProjectStatus.COMPLETED }
-                    ]
-                }
-            }
+            paymentStatus: PaymentStatus.PAID,
+            projectStatus: ProjectStatus.COMPLETED
         },
         select: {
-            country: true,
-            Order: {
+            user: {
                 select: {
-                    totalPrice: true,
-                    user: {
-                        select: {
-                            country: true
-                        }
-                    }
+                    country: true
                 }
             }
         }
     });
 
+    const country = totalUser.map((user) => user.user.country);
+
 
 
     // Filter out users without a country
-    const usersWithCountry = totalUser.filter((user): user is typeof user & { country: string } => Boolean(user.country));
+    // const usersWithCountry = totalUser.filter((user): user is typeof user & { country: string } => Boolean(user.country));
 
-    // Count total payments per country
-    const countryPayments = usersWithCountry.reduce((acc: Record<string, number>, user) => {
-        if (user.country) {
-            const countryCode = getCountryCode(user.country);
-            if (countryCode) {
-                acc[countryCode] = (acc[countryCode] || 0) + user.Order.length;
-            }
-        }
-        return acc;
-    }, {});
+    // // Count total payments per country
+    // const countryPayments = usersWithCountry.reduce((acc: Record<string, number>, user) => {
+    //     if (user.country) {
+    //         const countryCode = getCountryCode(user.country);
+    //         if (countryCode) {
+    //             acc[countryCode] = (acc[countryCode] || 0) + user.Order.length;
+    //         }
+    //     }
+    //     return acc;
+    // }, {});
 
-    const worldDomination = Object.entries(countryPayments).map(([countryCode, paymentCount]) => ({
-        country: countryCode,
-        // countryName: countries[countryCode]?.name || 'Unknown',
-        totalPaidPayments: paymentCount,
-        percentageOfWorld: ((paymentCount / totalWorld) * 100).toFixed(2) + '%'
-    }));
+    // const worldDomination = Object.entries(countryPayments).map(([countryCode, paymentCount]) => ({
+    //     country: countryCode,
+    //     // countryName: countries[countryCode]?.name || 'Unknown',
+    //     totalPaidPayments: paymentCount,
+    //     percentageOfWorld: ((paymentCount / totalWorld) * 100).toFixed(2) + '%'
+    // }));
 
     return sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "World domination payment statistics fetched successfully",
         data: {
-            totalCountries: worldDomination.length,
-            worldDominationProgress: ((worldDomination.length / totalWorld) * 100).toFixed(2) + '%',
-            countryPaymentDetails: worldDomination.sort((a, b) => b.totalPaidPayments - a.totalPaidPayments)
+            country
+            // totalCountries: worldDomination.length,
+            // worldDominationProgress: ((worldDomination.length / totalWorld) * 100).toFixed(2) + '%',
+            // countryPaymentDetails: worldDomination.sort((a, b) => b.totalPaidPayments - a.totalPaidPayments)
         }
     });
 });
