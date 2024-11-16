@@ -6,7 +6,7 @@ import catchAsync from "../../libs/utlitys/catchSynch";
 import AppError from "../../errors/AppError";
 import { ProjectStatus } from "../Order_page/Order_page.constant";
 import { calculateDateRange, timeFilterSchema } from "../../utils/calculateDateRange";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { PaymentStatus } from "../payment/payment.constant";
 import { PrismaClientRustPanicError } from "@prisma/client/runtime/library";
 
@@ -267,20 +267,56 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
                 }
             },
             include: {
-                AffiliateJoin: true
-            }
+                AffiliateJoin: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                userName: true,
+                                image: true
+                            }
+                        }
+                    }
+                }
+            },
         }),
         prisma.user.findMany({
             where: {
-                totalOrder: 0
-            }
+                totalOrder: 0,
+                role: {
+                    not: {
+                        in: [Role.ADMIN, Role.SUB_ADMIN, Role.SUPER_ADMIN]
+                    }
+                }
+            },
+            select: {
+                id: true,
+                userName: true,
+                image: true,
+                createdAt: true
+            },
+
         }),
         prisma.user.findMany({
             where: {
                 affiliateId: {
                     not: null
                 }
-            }
+            },
+            include: {
+                AffiliateJoin: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                userName: true,
+                                image: true
+                            }
+                        }
+                    }
+                }
+            },
+
         })
     ])
 

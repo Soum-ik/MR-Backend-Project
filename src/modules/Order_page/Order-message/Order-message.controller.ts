@@ -5,6 +5,7 @@ import { TokenCredential } from "../../../libs/authHelper";
 import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
 import { USER_ROLE } from "../../user/user.constant";
+import catchAsync from "../../../libs/utlitys/catchSynch";
 
 // Controller: Send a message
 export const sendMessage = async (req: Request, res: Response) => {
@@ -326,9 +327,47 @@ export const deleteMessage = async (req: Request, res: Response) => {
     }
 };
 
+
+
+
+export const updateProjectMessage = catchAsync(async (req: Request, res: Response) => {
+
+    const { messageText, attachment, replyTo, customOffer, timeAndDate, recipientId, projectNumber, orderMessageId } = req.body;
+
+    if (!orderMessageId) {
+        return sendResponse(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Order message id is required'
+        });
+    }
+
+    const updateMessage = await prisma.orderMessage.update({
+        where: { id: orderMessageId }, data: { messageText, attachment, replyTo, customOffer, timeAndDate, recipientId, projectNumber }
+    })
+
+    if (!updateMessage) {
+        return sendResponse(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            success: false,
+            message: 'Message not found'
+        });
+    }
+
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: updateMessage,
+        message: 'Message updated successfully'
+    });
+})
+
+
+
 export const orderMessageController = {
     sendMessage,
     replyToMessage,
     getMessages,
-    deleteMessage
+    deleteMessage,
+    updateProjectMessage
 }   

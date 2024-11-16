@@ -5,12 +5,12 @@ import { prisma } from "../../../libs/prismaHelper";
 import sendResponse from "../../../libs/sendResponse";
 import { PaymentStatus } from "../../payment/payment.constant";
 import { ProjectStatus } from "../../Order_page/Order_page.constant";
-import { countries, getCountryCode } from 'countries-list'
+import { getCountryCode, TCountryCode } from 'countries-list'
 
 const getWorldDomination = catchAsync(async (req: Request, res: Response) => {
     const totalWorld = 195;
 
-    const totalUser = await prisma.order.findMany({
+    const orderWithCountry = await prisma.order.findMany({
         where: {
             paymentStatus: PaymentStatus.PAID,
             projectStatus: ProjectStatus.COMPLETED
@@ -20,44 +20,54 @@ const getWorldDomination = catchAsync(async (req: Request, res: Response) => {
                 select: {
                     country: true
                 }
-            }
+            },
+            totalPrice: true
         }
     });
 
-    const country = totalUser.map((user) => user.user.country);
+    // Calculate total completed orders for percentage calculations
+    const totalCompletedOrders = orderWithCountry.length;
 
+    const worldDomiation = ((orderWithCountry.length / totalWorld) * 100).toFixed(2) + '%';
 
+    // Aggregate country-wise data
+    const countryDetails: Record<string, { totalEarned: number, count: number }> = orderWithCountry.reduce((acc, user) => {
+        const country = user.user.country;
+        if (country) {
+            if (!acc[country]) {
+                acc[country] = { totalEarned: 0, count: 0 };
+            }
+            acc[country].totalEarned += parseFloat(user.totalPrice);
+            acc[country].count++;
+        }
+        return acc;
+    }, {} as Record<string, { totalEarned: number, count: number }>);
 
-    // Filter out users without a country
-    // const usersWithCountry = totalUser.filter((user): user is typeof user & { country: string } => Boolean(user.country));
+    // Build the final output
+    const worldDominationDetails = Object.entries(countryDetails).map(([country, details]) => {
+        const percentage = ((details.count / totalCompletedOrders) * 100).toFixed(2);
+        return {
+            country: getCountryCode(country),
+            value: `Earned $${details.totalEarned.toFixed(2)} & World ${percentage}%`
+        };
+    }).reduce((unique, item) => {
+        const existingItem = unique.find(i => i.country === item.country);
+        if (existingItem) {
+            existingItem.value = `Earned $${(parseFloat(existingItem.value.split('$')[1].split(' &')[0]) + parseFloat(item.value.split('$')[1].split(' &')[0])).toFixed(2)} & World ${((parseFloat(existingItem.value.split('World ')[1].split('%')[0]) + parseFloat(item.value.split('World ')[1].split('%')[0]))).toFixed(2)}%`;
+        } else {
+            unique.push(item);
+        }
+        return unique;
+    }, [] as { country: false | TCountryCode; value: string; }[]);
 
-    // // Count total payments per country
-    // const countryPayments = usersWithCountry.reduce((acc: Record<string, number>, user) => {
-    //     if (user.country) {
-    //         const countryCode = getCountryCode(user.country);
-    //         if (countryCode) {
-    //             acc[countryCode] = (acc[countryCode] || 0) + user.Order.length;
-    //         }
-    //     }
-    //     return acc;
-    // }, {});
-
-    // const worldDomination = Object.entries(countryPayments).map(([countryCode, paymentCount]) => ({
-    //     country: countryCode,
-    //     // countryName: countries[countryCode]?.name || 'Unknown',
-    //     totalPaidPayments: paymentCount,
-    //     percentageOfWorld: ((paymentCount / totalWorld) * 100).toFixed(2) + '%'
-    // }));
 
     return sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "World domination payment statistics fetched successfully",
         data: {
-            country
-            // totalCountries: worldDomination.length,
-            // worldDominationProgress: ((worldDomination.length / totalWorld) * 100).toFixed(2) + '%',
-            // countryPaymentDetails: worldDomination.sort((a, b) => b.totalPaidPayments - a.totalPaidPayments)
+            worldDomiation,
+            worldDominationDetails
         }
     });
 });

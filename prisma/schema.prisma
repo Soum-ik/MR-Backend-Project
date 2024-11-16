@@ -114,6 +114,7 @@ model OrderMessage {
   hiddenFromAdmin Boolean  @default(false)
   replyTo         Json?
   commonKey       String?
+  isCancelled     Boolean  @default(false)
 
   // Relationships
   sender    User  @relation("OrderMessageSent", fields: [senderId], references: [id])
@@ -418,7 +419,7 @@ model Order {
   paymentStatus            PaymentStatus           @default(PENDING)
   startDate                DateTime?
   deliveryDate             DateTime?
-  durationHours            String?  
+  durationHours            String?
   projectStartDate         DateTime?
   projectStatus            ProjectStatus           @default(Waiting)
   projectType              ProjectType
