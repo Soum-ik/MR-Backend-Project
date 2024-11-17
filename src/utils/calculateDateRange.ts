@@ -3,7 +3,7 @@ import { z } from "zod";
 export const TIME_FILTER_OPTIONS = {
     ALL_TIME: 'All Times',
     LAST_7_DAYS: 'Last 7 Days',
-    LAST_30_DAYS: 'Last 30 Days', 
+    LAST_30_DAYS: 'Last 30 Days',
     THIS_MONTH: 'This Month',
     LAST_MONTH: 'Last Month',
     LAST_3_MONTHS: 'Last 3 Months',
@@ -67,10 +67,14 @@ export const calculateDateRange = (timeFilter: z.infer<typeof timeFilterSchema>)
             break;
         }
         case TIME_FILTER_OPTIONS.TODAY: {
-            startDate = new Date(now);
-            endDate = new Date(now);
+            const now = new Date();
+            // Start of the day (midnight)
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            // End of the day (just before midnight)
+            endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
             break;
         }
+
         case TIME_FILTER_OPTIONS.ALL_TIME:
         default:
             break;
