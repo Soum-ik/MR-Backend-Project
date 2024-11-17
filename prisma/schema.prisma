@@ -416,7 +416,7 @@ model Order {
   user                     User                    @relation(fields: [userId], references: [id])
   projectName              String
   orderFrom                String?
-  form                     String?
+  from                     String?
   projectNumber            String                  @unique
   duration                 String?
   totalPrice               String
