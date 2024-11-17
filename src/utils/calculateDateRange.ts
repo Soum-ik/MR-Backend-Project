@@ -11,6 +11,7 @@ export const TIME_FILTER_OPTIONS = {
     THIS_YEAR: 'This Year',
     YEAR_2023: '2023',
     YEAR_2022: '2022',
+    TODAY: 'Today',
 } as const;
 
 export const timeFilterSchema = z.enum(Object.values(TIME_FILTER_OPTIONS) as [string, ...string[]]);
@@ -63,6 +64,11 @@ export const calculateDateRange = (timeFilter: z.infer<typeof timeFilterSchema>)
         case TIME_FILTER_OPTIONS.YEAR_2022: {
             startDate = new Date('2022-01-01');
             endDate = new Date('2022-12-31');
+            break;
+        }
+        case TIME_FILTER_OPTIONS.TODAY: {
+            startDate = new Date(now);
+            endDate = new Date(now);
             break;
         }
         case TIME_FILTER_OPTIONS.ALL_TIME:

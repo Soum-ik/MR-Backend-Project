@@ -6,6 +6,8 @@ import { AFFILIATE_DEFAULT, AFFILIATE_ERRORS, AFFILIATE_SUCCESS } from "./affili
 import { TokenCredential } from "../../libs/authHelper";
 import AppError from "../../errors/AppError";
 import { PaymentStatus, ProjectStatus } from "@prisma/client";
+import { calculateDateRange, timeFilterSchema } from "../../utils/calculateDateRange";
+import httpStatus from "http-status";
 
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
@@ -184,10 +186,36 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
 });
 
 const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
+    const parseResult = timeFilterSchema.safeParse(req.query.timeFilter);
+    if (!parseResult.success) {
+        sendResponse(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Invalid time filter',
+            data: null
+        });
+        return;
+    }
+
+    const timeFilter = parseResult.data;
+    const { startDate, endDate } = calculateDateRange(timeFilter);
+
+    const whereClause = startDate ? {
+        user: {
+            Order: {
+                some: {
+                    createdAt: {
+                    gte: startDate,
+                    lte: endDate
+                }
+                }
+            }
+        }
+    } : {};
     const { user_id } = req.user as TokenCredential;
 
     const affiliates = await prisma.affiliate.findMany({
-        where: { userId: user_id },
+        where: { userId: user_id, ...whereClause },
         include: {
             AffiliateJoin: {
                 include: {
@@ -195,6 +223,7 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
                         select: {
                             Order: {
                                 where: {
+                                    ...whereClause,
                                     projectStatus: "Completed"
                                 }
                             }
@@ -214,10 +243,12 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
 
     const totalAmount = await prisma.affiliateJoin.findMany({
         select: {
+            ...whereClause,
             user: {
                 include: {
                     Order: {
                         where: {
+                            ...whereClause,
                             projectStatus: ProjectStatus.Completed,
                             paymentStatus: PaymentStatus.PAID
                         },
@@ -231,12 +262,14 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
     })
 
     const totalEarnings = totalAmount.reduce((acc, join) => acc + join.user.Order.length * 5, 0);
-
-
-
-
-
-
+    if (formattedAffiliates.length === 0) {
+        formattedAffiliates.push({
+            links: '',
+            totalClicks: 0,
+            join: 0,
+            sales: 0
+        });
+    }
     return sendResponse(res, {
         statusCode: 200,
         success: true,
