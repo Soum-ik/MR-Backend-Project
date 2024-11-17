@@ -4,6 +4,7 @@ import catchAsync from "../../libs/utlitys/catchSynch";
 import sendResponse from "../../libs/sendResponse";
 import { TokenCredential } from "../../libs/authHelper";
 import { USER_ROLE } from "../user/user.constant";
+import { senderType } from "@prisma/client";
 
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
@@ -64,25 +65,23 @@ const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
 const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
     const reviews = await prisma.review.findMany({
         where: {
-            senderType: "CLIENT"
+            senderType: "OWNER" as senderType
         },
-        include: {
-            sender: {
-                select: {
-                    userName: true,
-                    image: true
-                }
-            },
-            order: {
-                select: {
-                    projectName: true,
-                    projectNumber: true
-                }
-            }
-        },
-        orderBy: {
-            createdAt: 'desc'
-        }
+        // include: {
+        //     sender: {
+        //         select: {
+        //             userName: true,
+        //             image: true
+        //         }
+        //     },
+        //     order: {
+        //         select: {
+        //             projectName: true,
+        //             projectNumber: true
+        //         }
+        //     }
+        // },
+        
     });
 
     return sendResponse(res, {
@@ -93,31 +92,6 @@ const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-
-/**
- * Postman Examples:
- * 
- * 1. Create Review
- * POST /api/reviews/create
- * Headers: 
- *   Authorization: Bearer <your-token>
- * Body:
- * {
- *   "message": "Excellent service!",
- *   "rating": 5,
- *   "orderId": "order-123"
- * }
- * 
- * 2. Get Reviews by Order ID
- * GET /api/reviews/:orderId
- * Headers:
- *   Authorization: Bearer <your-token>
- * 
- * 3. Get All Owner Reviews
- * GET /api/reviews/owner
- * Headers:
- *   Authorization: Bearer <your-token>
- */
 
 export const ReviewController = {
     createReview,

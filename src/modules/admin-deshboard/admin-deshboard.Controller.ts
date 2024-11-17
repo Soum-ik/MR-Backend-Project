@@ -8,7 +8,6 @@ import { ProjectStatus } from "../Order_page/Order_page.constant";
 import { calculateDateRange, timeFilterSchema } from "../../utils/calculateDateRange";
 import { Prisma, Role } from "@prisma/client";
 import { PaymentStatus } from "../payment/payment.constant";
-import { PrismaClientRustPanicError } from "@prisma/client/runtime/library";
 
 const findOrder = catchAsync(async (req: Request, res: Response) => {
     const { projectNumber, userName, projectStatus } = req.query;
@@ -41,7 +40,20 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
                     image: true
                 }
             },
-            review: true
+            review: {
+                include: {
+                    sender: {
+                        select: {
+                            userName: true,
+                            image: true,
+                            fullName: true,
+                            role: true,
+                            email: true,
+                            country: true, 
+                        }
+                    }
+                }
+            }
         }
     });
 
@@ -259,7 +271,7 @@ const projectStatus = catchAsync(async (req: Request, res: Response) => {
 })
 
 const UsersStatus = catchAsync(async (req: Request, res: Response) => {
-
+    
     const [returning, newUser, affiliate] = await Promise.all([
         prisma.user.findMany({
             where: {

@@ -398,6 +398,10 @@ model review {
 
   message String
 
+  thumbnail          String?
+  thumbnailWatermark String?
+  isThumbnail        Boolean? @default(true)
+
   rating     Int
   senderType senderType
 
