@@ -55,7 +55,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       orderId: new ObjectId().toString(),
     },
   });
-  
+
 
   console.log(
     "Payment successfully recorded in the database. but it's still pending now",
@@ -78,8 +78,8 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       items: data?.originalItems,
       projectType: data?.projectType || '',
       projectImage: data?.projectImage || '',
-      duration: data?.deliveryDuration.toString(),
-      durationHours: data?.durationHours.toString(),
+      duration: data?.deliveryDuration?.toString(),
+      durationHours: data?.durationHours?.toString(),
       totalPrice: data?.totalAmount.toString(),
       paymentStatus: PaymentStatus.PENDING,
       totalQuantity: data?.totalQuantity.toString(),
