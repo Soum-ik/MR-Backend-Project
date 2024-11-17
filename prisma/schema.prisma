@@ -418,7 +418,7 @@ model Order {
   orderFrom                String?
   form                     String?
   projectNumber            String                  @unique
-  duration                 String
+  duration                 String?
   totalPrice               String
   paymentStatus            PaymentStatus           @default(PENDING)
   startDate                DateTime?

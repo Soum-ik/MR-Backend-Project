@@ -89,6 +89,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       projectType: data?.projectType || '',
       projectImage: data?.projectImage || '',
       duration: data?.deliveryDuration.toString(),
+      durationHours: data?.durationHours,
       totalPrice: data?.totalAmount.toString(),
       paymentStatus: PaymentStatus.PENDING,
       totalQuantity: data?.totalQuantity.toString(),
