@@ -10,12 +10,17 @@ import { Prisma, Role } from "@prisma/client";
 import { PaymentStatus } from "../payment/payment.constant";
 
 const findOrder = catchAsync(async (req: Request, res: Response) => {
-    const { projectNumber, userName, projectStatus } = req.query;
-
+    const { projectNumber, userName, projectStatus, search } = req.query;
 
     // Check if order exists
     const order = await prisma.order.findMany({
         where: {
+            ...(search && {
+                OR: [
+                    { projectNumber: { contains: search as string, mode: 'insensitive' } },
+                    { user: { userName: { contains: search as string, mode: 'insensitive' } } }
+                ]
+            }),
             ...(projectNumber && { projectNumber: projectNumber as string }),
             ...(userName && {
                 user: {

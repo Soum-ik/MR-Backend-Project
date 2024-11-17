@@ -22,8 +22,8 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   const projectNumber = await projectNumberCreator();
 
   const { data, tags } = req.body;
-  console.log('data showing:', data);
-  console.log('tags showing:', tags);
+  console.log(req.body, 'req.body');
+ 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: data?.items.map((item: any) => ({
