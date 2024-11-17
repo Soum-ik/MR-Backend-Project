@@ -65,23 +65,30 @@ const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
 const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
     const reviews = await prisma.review.findMany({
         where: {
-            senderType: "OWNER" as senderType
+            senderType: "CLIENT" as senderType
         },
-        // include: {
-        //     sender: {
-        //         select: {
-        //             userName: true,
-        //             image: true
-        //         }
-        //     },
-        //     order: {
-        //         select: {
-        //             projectName: true,
-        //             projectNumber: true
-        //         }
-        //     }
-        // },
-        
+        select: {
+            message: true,
+            rating: true,
+            createdAt: true,
+            thumbnail: true,
+            isThumbnail: true,
+            thumbnailWatermark: true,
+            senderType: true,
+            sender: {
+                select: {
+                    userName: true,
+                    image: true,
+                },
+            },
+            order: {
+                select: {
+                    projectName: true,
+                    projectNumber: true,
+                },
+            },
+        },
+
     });
 
     return sendResponse(res, {
