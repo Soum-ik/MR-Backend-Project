@@ -44,6 +44,7 @@ import analyticsRouter from '../modules/Analytics/analytics.route';
 import affiliateRouter from '../modules/affiliate/affiliate.route';
 import { searchProjectsRouter } from '../modules/searching/searching.route';
 import ImageStoreRouter from '../modules/image-store/image.router';
+import reviewRouter from '../modules/Review/Review.route';
 
 const router = express.Router();
 router.get(
@@ -112,6 +113,7 @@ router.get(
 );
 
 
+router.use('/review', reviewRouter);
 router.use('/image', ImageStoreRouter)
 router.use('/search', searchProjectsRouter);
 router.use('/', UserRoute);

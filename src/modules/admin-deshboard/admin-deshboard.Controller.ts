@@ -40,7 +40,8 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
                     userName: true,
                     image: true
                 }
-            }
+            },
+            review: true
         }
     });
 
