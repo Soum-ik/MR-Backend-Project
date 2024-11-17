@@ -56,17 +56,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
     },
   });
   
-  
-  // const payment = await prisma.payment.create({
-  //   data: {
-  //     userId: data?.userId,
-  //     stripeId: session.id.split('_').join(''),
-  //     status: PaymentStatus.PENDING,
-  //     amount: data?.totalAmount.toString(),
-  //     currency: session.currency as string,
-  //     orderId: new ObjectId().toString(),
-  //   },
-  // });\
+
   console.log(
     "Payment successfully recorded in the database. but it's still pending now",
   );
@@ -89,7 +79,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       projectType: data?.projectType || '',
       projectImage: data?.projectImage || '',
       duration: data?.deliveryDuration.toString(),
-      durationHours: data?.durationHours,
+      durationHours: data?.durationHours.toString(),
       totalPrice: data?.totalAmount.toString(),
       paymentStatus: PaymentStatus.PENDING,
       totalQuantity: data?.totalQuantity.toString(),

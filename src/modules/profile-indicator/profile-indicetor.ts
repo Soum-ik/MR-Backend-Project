@@ -7,7 +7,7 @@ import { ProjectStatus } from "@prisma/client";
 import { Avg_Response_Time } from "../../scheduler_task/Avg_Response_Time";
 
 
-const indicatorController = catchAsync(async (req: Request, res: Response) => {
+const IndicatorController = catchAsync(async (req: Request, res: Response) => {
 
     const [Active_Projects, LastProjectCompleted, Avg_Rating] = await Promise.all([
         await prisma.order.findMany({
@@ -34,12 +34,14 @@ const indicatorController = catchAsync(async (req: Request, res: Response) => {
     ])
 
     const Avg_Respons = Avg_Response_Time
-    // const Delivery_Time = 
 
     return sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Profile indicator fetched successfully",
-        data: {}
+        data: { Active_Projects, LastProjectCompleted, Avg_Rating, Avg_Respons }
     })
 })
+
+
+export const Indicator = { IndicatorController }
