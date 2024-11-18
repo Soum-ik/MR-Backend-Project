@@ -54,7 +54,7 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
                             fullName: true,
                             role: true,
                             email: true,
-                            country: true, 
+                            country: true,
                         }
                     }
                 }
@@ -339,9 +339,7 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
         prisma.user.findMany({
             where: {
                 ...whereClause,
-                affiliateId: {
-                    not: null
-                }
+                affiliateId: null
             },
             include: {
                 AffiliateJoin: {
