@@ -276,10 +276,30 @@ const projectStatus = catchAsync(async (req: Request, res: Response) => {
 })
 
 const UsersStatus = catchAsync(async (req: Request, res: Response) => {
-    
+    const parseResult = timeFilterSchema.safeParse(req.query.timeFilter);
+    if (!parseResult.success) {
+        sendResponse(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Invalid time filter',
+            data: null
+        });
+        return;
+    }
+
+    const timeFilter = parseResult.data;
+    const { startDate, endDate } = calculateDateRange(timeFilter);
+
+    const whereClause: Prisma.UserWhereInput = startDate ? {
+        createdAt: {
+            gte: startDate,
+            lte: endDate
+        },
+    } : {};
     const [returning, newUser, affiliate] = await Promise.all([
         prisma.user.findMany({
             where: {
+                ...whereClause,
                 totalOrder: {
                     gt: 0
                 }
@@ -300,6 +320,7 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
         }),
         prisma.user.findMany({
             where: {
+                ...whereClause,
                 totalOrder: 0,
                 role: {
                     not: {
@@ -317,6 +338,7 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
         }),
         prisma.user.findMany({
             where: {
+                ...whereClause,
                 affiliateId: {
                     not: null
                 }
