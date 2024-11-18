@@ -106,14 +106,14 @@ model OrderMessage {
   messageText     String?
   attachment      Json[]   @default([])
   createdAt       DateTime @default(now())
-  isFromAdmin     String
+  isFromAdmin    Role?
   customOffer     Json?
   timeAndDate     DateTime @default(now())
   contactForm     Json?
   read            Boolean  @default(false) // To track if the message has been read
   hiddenFromAdmin Boolean  @default(false)
   replyTo         Json?
-  commonKey       String?
+  commonKey       String
   isCancelled     Boolean  @default(false)
   unseend         Boolean  @default(false)
   // Relationships

@@ -110,7 +110,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
     await prisma.tags.createMany({
       data: newTags.map((tag: string) => ({
         name: tag.trim(),
-        orderId: order.id,
+        // orderId: order.id,
       }))
     });
   }

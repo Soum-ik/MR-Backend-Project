@@ -302,9 +302,19 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
                 ...whereClause,
                 totalOrder: {
                     gt: 0
-                }
+                },
+                role: {
+                    notIn: [Role.ADMIN, Role.SUB_ADMIN, Role.SUPER_ADMIN]
+                },
             },
-            include: {
+            select: {
+                id: true,
+                userName: true,
+                fullName: true,
+                image: true,
+                role: true,
+                createdAt: true,
+                affiliateId: true,
                 AffiliateJoin: {
                     include: {
                         user: {
@@ -315,7 +325,7 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
                             }
                         }
                     }
-                }
+                },
             },
         }),
         prisma.user.findMany({
@@ -336,25 +346,35 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
             },
 
         }),
-        prisma.user.findMany({
+        prisma.affiliate.findMany({
             where: {
-                ...whereClause,
-                affiliateId: null
+                user: {
+                    role: {
+                        notIn: [Role.ADMIN, Role.SUB_ADMIN, Role.SUPER_ADMIN]
+                    },
+                },
             },
-            include: {
+            select: {
+                user: {
+                    select: {
+                        id: true,
+                        userName: true,
+                        fullName: true
+                    }
+                },
                 AffiliateJoin: {
-                    include: {
+                    select: {
                         user: {
                             select: {
                                 id: true,
                                 userName: true,
-                                image: true
+                                image: true,
+                                fullName: true
                             }
                         }
                     }
                 }
-            },
-
+            }
         })
     ])
 
