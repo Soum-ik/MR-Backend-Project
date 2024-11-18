@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { messageControlller } from './user-admin.controller';
-import { unreadMessageRoutes } from '../unread/unread-message.route';
+ 
+import { unreadMessageController } from '../unread/unread-message.controller';
+ 
 const router = Router();
 
 // Route to send a message
@@ -19,6 +21,6 @@ router.delete('/:messageId', messageControlller.deleteMessage)
 
 router.delete('/delete-conversation/:userId', messageControlller.deleteConversation)
 
-router.use('/unread', unreadMessageRoutes)
+router.use('/unread', unreadMessageController.getUnseenMessageController)
 
 export const handleMessageRoute = router;

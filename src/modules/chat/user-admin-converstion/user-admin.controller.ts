@@ -6,6 +6,7 @@ import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { USER_ROLE } from '../../user/user.constant';
 import AppError from '../../../errors/AppError';
+import { Role } from '@prisma/client';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -75,7 +76,7 @@ const sendMessage = async (req: Request, res: Response) => {
             messageText,
             attachment,
             replyTo,
-            isFromAdmin: role as string,
+            isFromAdmin: role as Role,
             customOffer,
             timeAndDate: converString,
             commonkey,
@@ -109,7 +110,7 @@ const sendMessage = async (req: Request, res: Response) => {
           messageText,
           attachment,
           replyTo,
-          isFromAdmin: role as string,
+          isFromAdmin: role as Role,
           customOffer,
           timeAndDate: converString,
           commonkey,
@@ -140,7 +141,7 @@ const sendMessage = async (req: Request, res: Response) => {
               messageText,
               attachment,
               replyTo,
-              isFromAdmin: role as string,
+              isFromAdmin: role as Role,
               customOffer,
               timeAndDate: converString,
               commonkey,

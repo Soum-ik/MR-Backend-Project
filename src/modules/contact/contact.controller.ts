@@ -69,7 +69,7 @@ const startContact = async (req: Request, res: Response) => {
                     messageText: validatedBody.message,
                 },
                 timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
-                isFromAdmin: MSG_FROM_ADMIN_NO,
+                isFromAdmin: "USER",
                 commonkey
             },
         })

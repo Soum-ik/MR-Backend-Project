@@ -46,6 +46,7 @@ import { searchProjectsRouter } from '../modules/searching/searching.route';
 import ImageStoreRouter from '../modules/image-store/image.router';
 import reviewRouter from '../modules/Review/Review.route';
 import { Indicator } from '../modules/profile-indicator/profile-indicetor';
+import { unseenMessageRoutes } from '../modules/chat/unread/unread-message.route';
 
 
 const router = express.Router();
@@ -147,6 +148,8 @@ router.use(
   ),
   handleMessageRoute,
 );
+
+router.use('/seen', unseenMessageRoutes);
 router.use('/bookMark', bookMarkRoute);
 router.use('/archive', archiveRoute);
 router.use('/role', authenticateSuperAdmin, handleRoleRoute);

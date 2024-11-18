@@ -115,7 +115,7 @@ model OrderMessage {
   replyTo         Json?
   commonKey       String?
   isCancelled     Boolean  @default(false)
-
+  unseend         Boolean  @default(false)
   // Relationships
   sender    User  @relation("OrderMessageSent", fields: [senderId], references: [id])
   recipient User  @relation("OrderMessageReceived", fields: [recipientId], references: [id])
@@ -156,12 +156,12 @@ model Message {
   messageText    String?
   attachment     Json[]   @default([])
   createdAt      DateTime @default(now())
-  isFromAdmin    String
+  isFromAdmin    Role?
   customOffer    Json?
   timeAndDate    String
   contactForm    Json?
   commonkey      String
-
+  seen         Boolean  @default(false)
   // new added
   replyTo Json?
   // New field to track if the message has been read
