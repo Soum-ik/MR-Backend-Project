@@ -5,6 +5,8 @@ import sendResponse from "../../libs/sendResponse";
 import { TokenCredential } from "../../libs/authHelper";
 import { USER_ROLE } from "../user/user.constant";
 import { senderType } from "@prisma/client";
+import AppError from "../../errors/AppError";
+import httpStatus from "http-status";
 
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
@@ -33,26 +35,37 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
 
 
 const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
-    const { role } = req.user as TokenCredential;
-    const { orderId } = req.params;
+    const { userName } = req.params;
 
-    // If user is CLIENT, show OWNER reviews and vice versa
-    const senderTypeToShow = role === USER_ROLE.USER ? "OWNER" : "CLIENT";
+    if (!userName) {
+        throw new AppError(httpStatus.NOT_ACCEPTABLE, 'User Name need');
+    }
 
-    const reviews = await prisma.review.findMany({
+    const reviews = await prisma.user.findUnique({
         where: {
-            orderId: orderId,
-            senderType: senderTypeToShow
+            userName: userName
         },
-        include: {
-            sender: {
+        select: {
+            review: {
+                where: {
+                    senderType: 'OWNER'
+                },
                 select: {
-                    userName: true,
-                    image: true
+                    message: true,
+                    orderId: true,
+                    rating: true,
+                    createdAt: true,
+                    thumbnail: true,
+                    isThumbnail: true,
+                    thumbnailWatermark: true,
+                    senderType: true,
+                    sender: true
                 }
-            }
+            },
+
         }
-    });
+    })
+
 
     return sendResponse(res, {
         statusCode: 200,
@@ -63,9 +76,11 @@ const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
+    console.log('reciving data');
+
     const reviews = await prisma.review.findMany({
         where: {
-            senderType: "CLIENT" as senderType
+            senderType: 'CLIENT' as senderType
         },
         select: {
             message: true,
@@ -92,6 +107,8 @@ const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
         },
 
     });
+    console.log(reviews, 'review recived');
+
 
     return sendResponse(res, {
         statusCode: 200,
