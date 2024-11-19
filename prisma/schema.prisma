@@ -177,12 +177,15 @@ model Message {
 }
 
 model contactForChat {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
-  email         String?
-  website       String?
-  exampleDesign Json?
-  messageText   String?
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String?
+  website        String?
+  exampleDesign  Json?
+  messageText    String?
+  senderUserName String?
+  userImage      String?
+  senderName     String?
 
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
@@ -396,7 +399,8 @@ model review {
   orderId String @db.ObjectId
   order   Order  @relation(fields: [orderId], references: [id])
 
-  message String
+  message  String
+  userName String?
 
   thumbnail          String?
   thumbnailWatermark String?

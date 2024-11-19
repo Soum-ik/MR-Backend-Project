@@ -36,6 +36,9 @@ const startContact = async (req: Request, res: Response) => {
             name: validatedBody.name ?? '',
             website: validatedBody.websiteOrFacebook ?? '',
             userId: user_id,
+            senderName: validatedBody.senderName,
+            senderUserName: validatedBody.senderUserName,
+            userImage: validatedBody.userImage
         },
     });
 
@@ -68,6 +71,9 @@ const startContact = async (req: Request, res: Response) => {
                     exampleDesign: validatedBody.exampleDesign,
                     messageText: validatedBody.message,
                 },
+                senderName: validatedBody.senderName,
+                senderUserName: validatedBody.senderUserName,
+                userImage: validatedBody.userImage,
                 timeAndDate: validatedBody.timeAndDate?.toString() ?? '',
                 isFromAdmin: "USER",
                 commonkey

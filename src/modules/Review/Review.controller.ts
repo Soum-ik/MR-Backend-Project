@@ -10,7 +10,7 @@ import httpStatus from "http-status";
 
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
-    const { message, rating, orderId } = req.body;
+    const { message, rating, orderId, userName } = req.body;
     const { role, user_id } = req.user as TokenCredential;
 
     const senderType = role === USER_ROLE.USER ? "CLIENT" : "OWNER";
@@ -22,6 +22,7 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
             senderType,
             senderId: user_id,
             orderId: orderId,
+            userName
         },
     });
 
@@ -41,28 +42,10 @@ const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
         throw new AppError(httpStatus.NOT_ACCEPTABLE, 'User Name need');
     }
 
-    const reviews = await prisma.user.findUnique({
+    const reviews = await prisma.review.findMany({
         where: {
+            senderType: 'OWNER',
             userName: userName
-        },
-        select: {
-            review: {
-                where: {
-                    senderType: 'OWNER'
-                },
-                select: {
-                    message: true,
-                    orderId: true,
-                    rating: true,
-                    createdAt: true,
-                    thumbnail: true,
-                    isThumbnail: true,
-                    thumbnailWatermark: true,
-                    senderType: true,
-                    sender: true
-                }
-            },
-
         }
     })
 
