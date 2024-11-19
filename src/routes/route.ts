@@ -187,7 +187,7 @@ router.use('/inbox', Start_Project_Controller);
 router.get('/avaiableforchat', chating.AvaiableForChat);
 
 router.use('/block-chat', blockChatRouter);
-router.delete('/cancel-order', CancelProject)
+router.post('/cancel-order', CancelProject)
 //Multi-Project Route
 router.use('/multi-project', multiProjectRoute);
 
