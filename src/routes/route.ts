@@ -47,6 +47,7 @@ import ImageStoreRouter from '../modules/image-store/image.router';
 import reviewRouter from '../modules/Review/Review.route';
 import { Indicator } from '../modules/profile-indicator/profile-indicetor';
 import { unseenMessageRoutes } from '../modules/chat/unread/unread-message.route';
+import { CancelProject } from '../modules/Order_page/Cancel-project/cancel-project.controller';
 
 
 const router = express.Router();
@@ -186,7 +187,7 @@ router.use('/inbox', Start_Project_Controller);
 router.get('/avaiableforchat', chating.AvaiableForChat);
 
 router.use('/block-chat', blockChatRouter);
-
+router.delete('/cancel-order', CancelProject)
 //Multi-Project Route
 router.use('/multi-project', multiProjectRoute);
 
