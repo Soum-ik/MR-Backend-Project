@@ -7,6 +7,7 @@ import sendResponse from "../../../libs/sendResponse";
 import { USER_ROLE } from "../../user/user.constant";
 import catchAsync from "../../../libs/utlitys/catchSynch";
 import { Role } from "@prisma/client";
+import AppError from "../../../errors/AppError";
 
 // Controller: Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -24,7 +25,7 @@ const sendMessage = async (req: Request, res: Response) => {
             id: user_id as string,
         },
     });
-    const { messageText, attachment, replyTo, customOffer,  recipientId, projectNumber } = req.body;
+    const { messageText, attachment, replyTo, customOffer, recipientId, projectNumber } = req.body;
 
     // If the role is admin, recipientId is required
     if (
@@ -52,7 +53,7 @@ const sendMessage = async (req: Request, res: Response) => {
     });
 
     try {
- 
+
         const commonkey = uuidv4();
 
         if (role === 'USER') {
@@ -70,7 +71,7 @@ const sendMessage = async (req: Request, res: Response) => {
                         replyTo,
                         isFromAdmin: role as Role,
                         customOffer,
-                         
+
                         commonKey: commonkey,
                         projectNumber: projectNumber
                     },
@@ -104,7 +105,7 @@ const sendMessage = async (req: Request, res: Response) => {
                     attachment,
                     replyTo,
                     isFromAdmin: role as Role,
-                    customOffer, 
+                    customOffer,
                     commonKey: commonkey,
                     projectNumber: projectNumber
                 },
@@ -135,7 +136,7 @@ const sendMessage = async (req: Request, res: Response) => {
                             attachment,
                             replyTo,
                             isFromAdmin: role as Role,
-                            customOffer, 
+                            customOffer,
                             commonKey: commonkey,
                             projectNumber: projectNumber,
                         },
@@ -245,27 +246,23 @@ export const getMessages = async (req: Request, res: Response) => {
     const { userId, projectNumber } = req.query;
     const { user_id, role } = req.user as TokenCredential;
 
-    if (!user_id) {
+    if (!projectNumber) {
         return sendResponse(res, {
-            statusCode: httpStatus.UNAUTHORIZED,
+            statusCode: httpStatus.NOT_FOUND,
             success: false,
-            message: "Token is required!",
-        });
+            message: 'project number need!'
+        })
     }
 
     try {
         const roleCondition = role === "USER" ? "asc" : "desc";
         const messages = await prisma.orderMessage.findMany({
             where: {
+                projectNumber: projectNumber as string,
                 OR: [
                     { senderId: user_id as string, recipient: { role: { in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER] } } },
                     { recipientId: user_id as string, sender: { role: { in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER] } } },
                 ],
-                AND: [
-                    {
-                        projectNumber: projectNumber as string
-                    }
-                ]
             },
             orderBy: { createdAt: roleCondition },
         });
