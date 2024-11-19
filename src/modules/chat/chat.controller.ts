@@ -16,6 +16,9 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 					some: {}, // This ensures the contactForChat array is not empty
 				},
 			},
+			// TODO : ----> order: {
+            //     createdAt: "desc",
+            // },
 		});
 
 
