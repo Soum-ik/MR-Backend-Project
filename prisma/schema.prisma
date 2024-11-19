@@ -108,7 +108,7 @@ model OrderMessage {
   createdAt       DateTime @default(now())
   isFromAdmin     Role?
   customOffer     Json?
-  timeAndDate     DateTime @default(now())
+  timeAndDate     String?
   contactForm     Json?
   read            Boolean  @default(false) // To track if the message has been read
   hiddenFromAdmin Boolean  @default(false)
