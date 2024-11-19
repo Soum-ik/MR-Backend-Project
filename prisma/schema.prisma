@@ -106,7 +106,7 @@ model OrderMessage {
   messageText     String?
   attachment      Json[]   @default([])
   createdAt       DateTime @default(now())
-  isFromAdmin    Role?
+  isFromAdmin     Role?
   customOffer     Json?
   timeAndDate     DateTime @default(now())
   contactForm     Json?
@@ -117,9 +117,9 @@ model OrderMessage {
   isCancelled     Boolean  @default(false)
   unseend         Boolean  @default(false)
   // Relationships
-  sender    User  @relation("OrderMessageSent", fields: [senderId], references: [id])
-  recipient User  @relation("OrderMessageReceived", fields: [recipientId], references: [id])
-  order     Order @relation(fields: [projectNumber], references: [projectNumber])
+  sender          User     @relation("OrderMessageSent", fields: [senderId], references: [id])
+  recipient       User     @relation("OrderMessageReceived", fields: [recipientId], references: [id])
+  order           Order    @relation(fields: [projectNumber], references: [projectNumber])
 
   @@map("OrderMessages")
 }
@@ -161,11 +161,11 @@ model Message {
   timeAndDate    String
   contactForm    Json?
   commonkey      String
-  seen         Boolean  @default(false)
+  seen           Boolean  @default(false)
   // new added
-  replyTo Json?
+  replyTo        Json?
   // New field to track if the message has been read
-  read    Boolean @default(false)
+  read           Boolean  @default(false)
 
   hiddenFromAdmin Boolean @default(false)
 
@@ -428,6 +428,7 @@ model Order {
   projectStatus            ProjectStatus           @default(Waiting)
   projectType              ProjectType
   projectImage             String?
+  completedDate            DateTime?
   trackProjectStatus       trackProjectStatus      @default(PENDING)
   clientApproval           Boolean?                @default(false)
   adminDeliveryRequest     Boolean?                @default(false)
@@ -445,7 +446,7 @@ model Order {
   OrderMessage             OrderMessage[]
   OrderExtensionRequest    OrderExtensionRequest[]
   designerName             String?                 @default("")
-  projectTips              Json?                   
+  projectTips              Json?
   tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
   tagsId                   String?                 @db.ObjectId
   review                   review[]
