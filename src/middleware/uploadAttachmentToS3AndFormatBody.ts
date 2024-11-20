@@ -86,12 +86,10 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 const file = files[0];
                 const originalFileName = `${bucketName}-${file.filename}`;
 
-
-
-
+                console.log(file.mimetype);
                 await uploadFileToS3(bucketName, file.path, originalFileName, 'public-read');
 
-                if (file.mimetype.includes('image')) {
+                if (file.mimetype.includes('image') && !file.mimetype.includes('.photoshop') && !file.mimetype.includes('.psd') && !file.mimetype.includes('.ai') && !file.mimetype.includes('.xd')) {
                     const { outputPath, fileName } = await processImageWithWatermark(file);
                     await uploadFileToS3(bucketNameWatermark, outputPath, fileName, 'public-read');
                     body.file = {
@@ -187,7 +185,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
 
             const uploads = path.join(process.cwd(), 'uploads');
             await fs.mkdir(uploads, { recursive: true });
-            
+
             const uploadsFiles = await fs.readdir(uploads);
             console.log(uploadsFiles, 'uploadsfiles');
 
@@ -210,12 +208,12 @@ export const uploadAttachmentToS3AndFormatBody = () => {
             }
 
             if (processedFiles.length > 0) {
-                cleanupPromises.push(...processedFiles.map(file => 
+                cleanupPromises.push(...processedFiles.map(file =>
                     deleteFile(path.join(processedDir, file))
                 ));
             }
 
-            cleanupPromises.push(...files.map(file => 
+            cleanupPromises.push(...files.map(file =>
                 deleteFile(file.path)
             ));
 
