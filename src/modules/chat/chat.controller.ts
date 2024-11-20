@@ -81,6 +81,7 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 
 	const totalUser = filteredUsers.length;
 
+
 	if (totalUser === 0) {
 		return sendResponse<any>(res, {
 			statusCode: httpStatus.OK,
@@ -89,7 +90,12 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 			data: null,
 		});
 	}
-
+	const sortedUsers = filteredUsers.sort((a, b) => {
+        const dateA = new Date(a.lastmessageinfo.createdAt);
+        const dateB = new Date(b.lastmessageinfo.createdAt);
+        return dateB.getTime() - dateA.getTime(); // Sort in descending order (newest first)
+    });
+	
 	return sendResponse<any>(res, {
 		statusCode: httpStatus.OK,
 		success: true,
