@@ -36,8 +36,16 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 				}
 			});
 
-			// Find the last message (if any)
-			const lastMessage = userMessages.length > 0 ? userMessages[0] : null;
+
+			const lastMessage =
+				userMessages.length > 0
+					? userMessages[0]
+					: {
+						messageText: "New Contact form submitted",
+						seen: false,
+						commonkey: null,
+						createdAt: new Date(),
+					};
 			const seenCommonKeys = new Set();
 			const totalUnseenMessage = userMessages.filter((message) => {
 				if (!message.seen && !seenCommonKeys.has(message.commonkey)) {
