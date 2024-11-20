@@ -454,6 +454,7 @@ model Order {
   tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
   tagsId                   String?                 @db.ObjectId
   review                   review[]
+  projectThumbnail         String?
 }
 
 model tags {

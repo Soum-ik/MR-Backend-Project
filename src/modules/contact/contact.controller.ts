@@ -9,7 +9,7 @@ import AppError from "../../errors/AppError";
 const ADMIN_ROLE = "ADMIN";
 const SUB_ADMIN_ROLE = "SUB_ADMIN";
 const SUPER_ADMIN_ROLE = "SUPER_ADMIN";
-const MSG_FROM_ADMIN_NO = "No";
+
 
 const startContact = async (req: Request, res: Response) => {
     const validatedBody = req.body;

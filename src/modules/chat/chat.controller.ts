@@ -1,29 +1,54 @@
-import type { Request, Response } from "express";
+import { Request, Response } from "express";
 import httpStatus from "http-status";
-import { z } from "zod";
 import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
+import catchAsync from "../../libs/utlitys/catchSynch";
 
-const AvaiableForChat = async (req: Request, res: Response) => {
-	try {
-		// Fetch users with necessary filtering and including relevant data
-		const listOfUser = await prisma.user.findMany({
-			include: {
-				contactForChat: true
+const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
+	// Fetch all users with contactForChat relationships
+	const listOfUser = await prisma.user.findMany({
+		include: {
+			contactForChat: true,
+		},
+		where: {
+			contactForChat: {
+				some: {},
 			},
-			where: {
-				contactForChat: {
-					some: {}, // This ensures the contactForChat array is not empty
+		},
+	});
+
+	// Fetch user messages and process users asynchronously
+	const filteredUsers = await Promise.all(
+		listOfUser.map(async (user) => {
+			// Fetch messages for each user
+			const userMessages = await prisma.message.findMany({
+				where: {
+					senderId: user.id,
 				},
-			},
-			// TODO : ----> order: {
-            //     createdAt: "desc",
-            // },
-		});
+				orderBy: {
+					createdAt: "desc", // Fetch the most recent message
+				},
+				select: {
+					messageText: true,
+					seen: true,
+					commonkey: true,
+					createdAt: true
+				}
+			});
+
+			// Find the last message (if any)
+			const lastMessage = userMessages.length > 0 ? userMessages[0] : null;
+			const seenCommonKeys = new Set();
+			const totalUnseenMessage = userMessages.filter((message) => {
+				if (!message.seen && !seenCommonKeys.has(message.commonkey)) {
+					seenCommonKeys.add(message.commonkey); // Add the commonkey to the set if it's unseen and unique
+					return true;
+				}
+				return false;
+			}).length;
 
 
-		// Select only the required fields
-		const filteredUsers = listOfUser.map((user) => {
+
 			const status = user.totalOrder === 0 ? "New Client" : "Repeated Client";
 
 			return {
@@ -38,47 +63,32 @@ const AvaiableForChat = async (req: Request, res: Response) => {
 				isBlocked: user.block_for_chat,
 				isArchived: user.archive,
 				isBookMarked: user.book_mark,
-
+				lastmessageinfo: {
+					...lastMessage,
+					totalUnseenMessage,
+				}
 			};
-		});
+		})
+	);
 
-		const totalUser = filteredUsers.length;
+	const totalUser = filteredUsers.length;
 
-		if (totalUser === 0) {
-			return sendResponse<any>(res, {
-				statusCode: httpStatus.OK,
-				success: true,
-				message: "There is no user available for chat",
-				data: null,
-			});
-		}
-
+	if (totalUser === 0) {
 		return sendResponse<any>(res, {
 			statusCode: httpStatus.OK,
 			success: true,
-			message: "Users with contactForChat retrieved successfully",
-			data: filteredUsers,
-		});
-	} catch (error) {
-		console.error("Error retrieving available users for chat: ", error);
-
-		if (error instanceof z.ZodError) {
-			return sendResponse(res, {
-				statusCode: httpStatus.BAD_REQUEST,
-				success: false,
-				message: "Validation failed",
-				data: null,
-			});
-		}
-
-		return sendResponse(res, {
-			statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-			success: false,
-			message: "Internal server error",
-			data: error,
+			message: "There is no user available for chat",
+			data: null,
 		});
 	}
-};
+
+	return sendResponse<any>(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Users with contactForChat retrieved successfully",
+		data: filteredUsers,
+	});
+});
 
 export const chating = {
 	AvaiableForChat,

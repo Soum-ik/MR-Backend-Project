@@ -328,6 +328,7 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
                 },
             },
         }),
+        
         prisma.user.findMany({
             where: {
                 ...whereClause,

@@ -58,6 +58,7 @@ const getUnseenMessageController = catchAsync(async (req: Request, res: Response
                 id: true,
             },
 
+
         })
 
         return sendResponse(res, {
@@ -72,39 +73,35 @@ const getUnseenMessageController = catchAsync(async (req: Request, res: Response
 
 
 const updateUnseenMessageController = async (req: Request, res: Response) => {
-    const { commonkey } = req.params
     const { role } = req.user as TokenCredential
 
-
-
-    if (!commonkey) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Common key is required")
-    }
+    const { userId } = req.params
 
     const findMessage = await prisma.message.findMany({
-        where: { commonkey: commonkey, seen: false }
+        where: { seen: false }
     })
     if (findMessage.length === 0) {
         throw new AppError(httpStatus.BAD_REQUEST, "No message found")
     }
 
 
-    if (role === Role.ADMIN || role === Role.SUPER_ADMIN || role === Role.SUB_ADMIN) {
-        return await prisma.message.updateMany({
-            where: { commonkey: commonkey, seen: false, isFromAdmin: Role.USER },
-            data: { seen: true }
-        })
-    } else if (role === Role.USER) {
-        return await prisma.message.updateMany({
-            where: { commonkey: commonkey, seen: false, isFromAdmin: { in: [Role.ADMIN, Role.SUPER_ADMIN, Role.SUB_ADMIN] } },
-            data: { seen: true }
-        })
-    }
+    const update = await prisma.message.updateMany({
+        // where: {
+        //     OR: [
+        //         { recipientId: userId as string, senderId: userId as string }
+        //     ]
+        // },
+        data: {
+            seen: true
+        }
+    })
+ 
 
     return sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Unseen messages updated successfully",
+        data: update
     });
 }
 
@@ -133,7 +130,7 @@ const getUnseenMessageControllerList = catchAsync(async (req: Request, res: Resp
 
 export const unreadMessageController = {
     getUnseenMessageController,
+    getUnseenMessageControllerList,
     updateUnseenMessageController,
-    getUnseenMessageControllerList
 }
 
