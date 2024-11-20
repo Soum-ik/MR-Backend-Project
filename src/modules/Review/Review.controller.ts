@@ -48,7 +48,15 @@ const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
             userName: userName
         },
         include: {
-            sender: true
+            sender:   {
+                select : {
+                     role : true,
+                      userName : true, 
+                      fullName : true, 
+                      country : true, 
+                      image  : true
+                }
+            }
         }
     })
 
