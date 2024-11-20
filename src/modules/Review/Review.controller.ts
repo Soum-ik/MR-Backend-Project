@@ -46,6 +46,9 @@ const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
         where: {
             senderType: 'OWNER',
             userName: userName
+        },
+        include: {
+            sender: true
         }
     })
 

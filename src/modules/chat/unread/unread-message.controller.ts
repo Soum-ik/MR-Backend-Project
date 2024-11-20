@@ -72,13 +72,18 @@ const getUnseenMessageController = catchAsync(async (req: Request, res: Response
 })
 
 
-const updateUnseenMessageController = async (req: Request, res: Response) => {
+const updateUnseenMessageController = catchAsync(async (req: Request, res: Response) => {
     const { role } = req.user as TokenCredential
 
     const { userId } = req.params
-
+    console.log(userId);
+    
     const findMessage = await prisma.message.findMany({
-        where: { seen: false }
+        where: {
+            seen: false,
+            senderId: userId,
+            
+        }
     })
     if (findMessage.length === 0) {
         throw new AppError(httpStatus.BAD_REQUEST, "No message found")
@@ -86,16 +91,14 @@ const updateUnseenMessageController = async (req: Request, res: Response) => {
 
 
     const update = await prisma.message.updateMany({
-        // where: {
-        //     OR: [
-        //         { recipientId: userId as string, senderId: userId as string }
-        //     ]
-        // },
+        where: {
+            senderId: userId
+        },
         data: {
             seen: true
         }
     })
- 
+
 
     return sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -103,7 +106,7 @@ const updateUnseenMessageController = async (req: Request, res: Response) => {
         message: "Unseen messages updated successfully",
         data: update
     });
-}
+})
 
 const getUnseenMessageControllerList = catchAsync(async (req: Request, res: Response) => {
     const { commonkey } = req.params
