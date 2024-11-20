@@ -32,6 +32,7 @@ const sendMessage = async (req: Request, res: Response) => {
     recipientId,
     projectNumber,
     timeAndDate,
+    imageComments
   } = req.body;
 
   // If the role is admin, recipientId is required
@@ -80,7 +81,9 @@ const sendMessage = async (req: Request, res: Response) => {
             timeAndDate: timeAndDate.toString(),
             commonKey: commonkey,
             projectNumber: projectNumber,
+            imageComments
           },
+
         });
 
         await prisma.notification.create({
@@ -115,6 +118,7 @@ const sendMessage = async (req: Request, res: Response) => {
           timeAndDate: timeAndDate.toString(),
           commonKey: commonkey,
           projectNumber: projectNumber,
+          imageComments
         },
       });
 
@@ -147,6 +151,7 @@ const sendMessage = async (req: Request, res: Response) => {
               timeAndDate: timeAndDate.toString(),
               commonKey: commonkey,
               projectNumber: projectNumber,
+              imageComments
             },
           });
 

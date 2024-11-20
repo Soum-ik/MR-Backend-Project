@@ -90,17 +90,38 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 			data: null,
 		});
 	}
-	const sortedUsers = filteredUsers.sort((a, b) => {
-        const dateA = new Date(a.lastmessageinfo.createdAt);
-        const dateB = new Date(b.lastmessageinfo.createdAt);
-        return dateB.getTime() - dateA.getTime(); // Sort in descending order (newest first)
+	
+    // Custom sorting logic
+    const sortedUsers = filteredUsers.sort((a, b) => {
+        // First, prioritize users with unseen messages
+        if (a.lastmessageinfo.totalUnseenMessage > 0 && b.lastmessageinfo.totalUnseenMessage === 0) {
+            return -1; // a comes first
+        }
+        if (b.lastmessageinfo.totalUnseenMessage > 0 && a.lastmessageinfo.totalUnseenMessage === 0) {
+            return 1; // b comes first
+        }
+
+        // If both have unseen messages or both have no unseen messages, 
+        // sort by the most recent new message (non-default message)
+        const isANewMessage = a.lastmessageinfo.messageText !== "New Contact form submitted";
+        const isBNewMessage = b.lastmessageinfo.messageText !== "New Contact form submitted";
+
+        if (isANewMessage && !isBNewMessage) {
+            return -1; // a comes first
+        }
+        if (isBNewMessage && !isANewMessage) {
+            return 1; // b comes first
+        }
+
+        // If both have the same message status, maintain original order
+        return 0;
     });
 	
 	return sendResponse<any>(res, {
 		statusCode: httpStatus.OK,
 		success: true,
 		message: "Users with contactForChat retrieved successfully",
-		data: filteredUsers,
+		data: sortedUsers	,
 	});
 });
 
