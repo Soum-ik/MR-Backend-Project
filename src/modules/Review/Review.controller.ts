@@ -89,7 +89,8 @@ const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
                     userName: true,
                     image: true,
                     fullName: true,
-                    country: true
+                    country: true,
+                    role: true
                 },
             },
             order: {
