@@ -430,7 +430,7 @@ const getMessages = async (req: Request, res: Response) => {
               index ===
               self.findIndex((t) => t.commonkey === message.commonkey),
           )
-          .map(({ commonkey, ...rest }) => rest);
+          .map(({ ...rest }) => rest);
         return sendResponse(res, {
           statusCode: httpStatus.OK,
           success: true,
