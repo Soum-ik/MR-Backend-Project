@@ -185,7 +185,7 @@ router.post('/cancel-order', CancelProject)
 router.use('/multi-project', multiProjectRoute);
 
 //payment route
-router.post('/api/checkout-session', payment.stripePayment);
+router.post('/api/-sessicheckouton', payment.stripePayment);
 router.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
