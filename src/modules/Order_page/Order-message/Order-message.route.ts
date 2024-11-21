@@ -24,7 +24,7 @@ router.get('/get',  authenticateToken(
   ), orderMessageController.getMessages);
 
 // Route to update a project message
-router.patch('/update', orderMessageController.updateProjectMessage);
+router.put('/update', orderMessageController.updateProjectMessage);
 
 router.delete('/:commonkey/:projectNumber', orderMessageController.deleteMessage)
 

@@ -375,18 +375,8 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
 
 export const updateProjectMessage = catchAsync(
   async (req: Request, res: Response) => {
-    const {
-      messageText,
-      attachment,
-      replyTo,
-      customOffer,
-      timeAndDate,
-      // recipientId,
-      projectNumber,
-      commonKey,
-      ...rest
-    } = req.body;
-
+    const { projectNumber, commonKey } = req.body;
+    const updateBody = req.body
     if (!commonKey) {
       return sendResponse(res, {
         statusCode: httpStatus.BAD_REQUEST,
@@ -398,13 +388,7 @@ export const updateProjectMessage = catchAsync(
     const updateMessage = await prisma.orderMessage.updateMany({
       where: { projectNumber: projectNumber, commonKey: commonKey },
       data: {
-        messageText,
-        attachment,
-        replyTo,
-        customOffer,
-        timeAndDate,
-        projectNumber,
-        ...rest
+        ...updateBody
       },
     });
 
