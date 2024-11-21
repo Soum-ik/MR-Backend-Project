@@ -18,6 +18,9 @@ analyticsRouter.get('/world-domination', authenticateToken(USER_ROLE.ADMIN, USER
 analyticsRouter.get('/project-details/active-project', ProjectDetailsController.ActiveProject);
 analyticsRouter.get('/project-details/finished-projects', ProjectDetailsController.FinishedProjects);
 analyticsRouter.get('/project-details/project-buyers', ProjectDetailsController.ProjectBuyers);
+analyticsRouter.get('/project-details/project-options', ProjectDetailsController.ProjectOptions);
+analyticsRouter.get('/project-details/avg-selling', ProjectDetailsController.AvgSelling);
+
 
 analyticsRouter.get('/top-keyword', TopKeywordController.getTopKeywords);
 analyticsRouter.get('/top-keyword/order', TopKeywordController.getOrderByKey);

@@ -9,26 +9,45 @@ import {
   timeFilterSchema,
 } from '../../../utils/calculateDateRange';
 import { ProjectStatus } from '../../Order_page/Order_page.constant';
+import { getTimeFilterWhereClause } from '../../../utils/timeFilter';
 
 const ActiveProject = catchAsync(async (req: Request, res: Response) => {
+
+  const parseResult = getTimeFilterWhereClause(timeFilterSchema, req.query.timeFilter);
+
+  if (parseResult.error) {
+    sendResponse(res, {
+      statusCode: httpStatus.BAD_REQUEST,
+      success: false,
+      message: 'Invalid time filter',
+      data: null,
+    });
+    return;
+  }
+  const { whereClause } = parseResult;
+
   const [Revision, Ongoing, Waiting, Delivered] = await Promise.all([
     prisma.order.count({
       where: {
+        ...whereClause,
         projectStatus: ProjectStatus.REVISION,
       },
     }),
     prisma.order.count({
       where: {
+        ...whereClause,
         projectStatus: ProjectStatus.ONGOING,
       },
     }),
     prisma.order.count({
       where: {
+        ...whereClause,
         projectStatus: ProjectStatus.WAITING,
       },
     }),
     prisma.order.count({
       where: {
+        ...whereClause,
         projectStatus: ProjectStatus.DELIVERED,
       },
     }),
@@ -222,26 +241,19 @@ const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
 });
 
 const ProjectOptions = catchAsync(async (req: Request, res: Response) => {
-  const parseResult = timeFilterSchema.safeParse(req.query.timeFilter);
-  if (!parseResult.success) {
+  const parseResult = getTimeFilterWhereClause(timeFilterSchema, req.query.timeFilter);
+
+  if (parseResult.error) {
     sendResponse(res, {
       statusCode: httpStatus.BAD_REQUEST,
       success: false,
       message: 'Invalid time filter',
-      data: null
+      data: null,
     });
     return;
   }
+  const { whereClause } = parseResult;
 
-  const timeFilter = parseResult.data;
-  const { startDate, endDate } = calculateDateRange(timeFilter);
-
-  const whereClause = startDate ? {
-    createdAt: {
-      gte: startDate,
-      lte: endDate
-    },
-  } : {};
   const [Custom, Direct, Offer, MD_Porject] = await Promise.all([
     prisma.order.findMany({
       where: {
@@ -290,8 +302,73 @@ const ProjectOptions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const AvgSelling = catchAsync(async (req: Request, res: Response) => {
+  const parseResult = getTimeFilterWhereClause(timeFilterSchema, req.query.timeFilter);
+
+  if (parseResult.error) {
+    sendResponse(res, {
+      statusCode: httpStatus.BAD_REQUEST,
+      success: false,
+      message: 'Invalid time filter',
+      data: null,
+    });
+    return;
+  }
+  const { whereClause } = parseResult;
+
+
+  const [Custom, Direct] = await Promise.all([
+    prisma.order.findMany({
+      where: {
+        ...whereClause,
+        projectType: 'CUSTOM',
+        projectStatus: 'Completed',
+        paymentStatus: 'PAID'
+      },
+      select: {
+        totalPrice: true
+      }
+
+    }),
+    prisma.order.findMany({
+      where: {
+        ...whereClause,
+        projectType: {
+          notIn: ['CUSTOM']
+        },
+        projectStatus: 'Completed',
+        paymentStatus: 'PAID'
+      },
+      select: {
+        totalPrice: true
+      }
+
+    })
+  ])
+
+  // Calculate the total amount for 'Custom'
+  const customTotal = Custom.reduce((sum, order) => sum + (Number(order.totalPrice) || 0), 0);
+
+  // Calculate the total amount for 'Direct'
+  const directTotal = Direct.reduce((sum, order) => sum + (Number(order.totalPrice) || 0), 0);
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Find Avg selling successfully',
+    data: {
+      customTotal: customTotal,
+      directTotal: directTotal
+    },
+  });
+
+})
+
 export const ProjectDetailsController = {
   ActiveProject,
   FinishedProjects,
   ProjectBuyers,
+  ProjectOptions,
+  ProjectDetails,
+  AvgSelling
 };
