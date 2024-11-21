@@ -316,7 +316,7 @@ export const getMessages = async (req: Request, res: Response) => {
         (msg, i, arr) =>
           i === arr.findIndex((t) => t.commonKey === msg.commonKey),
       )
-      .map(({ commonKey, ...rest }) => rest);
+      .map(({ ...rest }) => rest);
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,
