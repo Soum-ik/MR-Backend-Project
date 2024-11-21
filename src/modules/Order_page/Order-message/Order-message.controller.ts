@@ -376,7 +376,7 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
 export const updateProjectMessage = catchAsync(
   async (req: Request, res: Response) => {
     const { projectNumber, commonKey } = req.body;
-    const updateBody = req.body
+    const { id, ...updateBody } = req.body
     if (!commonKey) {
       return sendResponse(res, {
         statusCode: httpStatus.BAD_REQUEST,
