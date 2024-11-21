@@ -155,14 +155,7 @@ router.use('/bookMark', bookMarkRoute);
 router.use('/archive', archiveRoute);
 router.use('/role', authenticateSuperAdmin, handleRoleRoute);
 router.use('/notification', handleNotificationRoute);
-router.use('/order-message',
-  authenticateToken(
-    USER_ROLE.ADMIN,
-    USER_ROLE.SUPER_ADMIN,
-    USER_ROLE.SUB_ADMIN,
-    USER_ROLE.USER,
-  ),
-handleOrderMessageRoute);
+router.use('/order-message', handleOrderMessageRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 router.post('/contactForChat', authenticateToken(USER_ROLE.USER), startContact);
 

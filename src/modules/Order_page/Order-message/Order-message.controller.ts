@@ -7,10 +7,12 @@ import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
 import { USER_ROLE } from '../../user/user.constant';
+import AppError from '../../../errors/AppError';
 
 // Controller: Send a message
-const sendMessage = async (req: Request, res: Response) => {
+const sendMessage = catchAsync(async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
+
 
   if (!user_id) {
     return sendResponse<any>(res, {
@@ -64,13 +66,91 @@ const sendMessage = async (req: Request, res: Response) => {
     },
   });
 
-  try {
-    const commonkey = uuidv4();
 
-    if (role === 'USER') {
-      // Send message to all admins if the role is USER
-      for (const admin of admins) {
-        const message = await prisma.orderMessage.create({
+  const commonkey = uuidv4();
+
+  if (role === 'USER') {
+    // Send message to all admins if the role is USER
+    for (const admin of admins) {
+      const message = await prisma.orderMessage.create({
+        data: {
+          senderId: user_id as string,
+          userImage: user?.image,
+          senderName: user?.fullName,
+          senderUserName: user?.userName,
+          recipientId: admin.id,
+          messageText,
+          attachment,
+          replyTo,
+          isFromAdmin: role as Role,
+          customOffer,
+          timeAndDate: timeAndDate.toString(),
+          commonKey: commonkey,
+          projectNumber: projectNumber,
+          imageComments,
+          deliverProject,
+          extendDeliveryTime,
+          additionalOffer,
+          cancelProject,
+        },
+
+      });
+
+      await prisma.notification.create({
+        data: {
+          senderLogo: user?.image,
+          type: 'message',
+          senderUserName: user?.userName ?? 'Unknown',
+          recipientId: admin.id, // Notification goes to each admin
+          messageId: message.id, // Associate the message with the notification
+        },
+      });
+    }
+
+    return sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: 'Messages sent to all admins successfully.',
+    });
+  } else {
+    const message = await prisma.orderMessage.create({
+      data: {
+        senderId: user_id as string,
+        userImage: user?.image,
+        senderName: user?.fullName,
+        senderUserName: user?.userName,
+        recipientId,
+        messageText,
+        attachment,
+        replyTo,
+        isFromAdmin: role as Role,
+        customOffer,
+        timeAndDate: timeAndDate.toString(),
+        commonKey: commonkey,
+        projectNumber: projectNumber,
+        imageComments,
+        deliverProject,
+        extendDeliveryTime,
+        additionalOffer,
+        cancelProject,
+      },
+    });
+
+    await prisma.notification.create({
+      data: {
+        senderLogo: user?.image,
+        type: 'message',
+        senderUserName: user?.userName ?? 'Unknown',
+        recipientId: recipientId as string, // Notification goes to the recipient
+        messageId: message.id, // Associate the message with the notification
+      },
+    });
+
+    // Send message to all admins
+    for (const admin of admins) {
+      if (admin.id !== user_id) {
+        // If the admin is not the sender
+        const messageToAdmin = await prisma.orderMessage.create({
           data: {
             senderId: user_id as string,
             userImage: user?.image,
@@ -91,7 +171,6 @@ const sendMessage = async (req: Request, res: Response) => {
             additionalOffer,
             cancelProject,
           },
-
         });
 
         await prisma.notification.create({
@@ -100,119 +179,27 @@ const sendMessage = async (req: Request, res: Response) => {
             type: 'message',
             senderUserName: user?.userName ?? 'Unknown',
             recipientId: admin.id, // Notification goes to each admin
-            messageId: message.id, // Associate the message with the notification
+            messageId: messageToAdmin.id, // Associate the message with the notification
           },
         });
       }
-
-      return sendResponse(res, {
-        statusCode: httpStatus.CREATED,
-        success: true,
-        message: 'Messages sent to all admins successfully.',
-      });
-    } else {
-      const message = await prisma.orderMessage.create({
-        data: {
-          senderId: user_id as string,
-          userImage: user?.image,
-          senderName: user?.fullName,
-          senderUserName: user?.userName,
-          recipientId,
-          messageText,
-          attachment,
-          replyTo,
-          isFromAdmin: role as Role,
-          customOffer,
-          timeAndDate: timeAndDate.toString(),
-          commonKey: commonkey,
-          projectNumber: projectNumber,
-          imageComments,
-          deliverProject,
-          extendDeliveryTime,
-          additionalOffer,
-          cancelProject,
-        },
-      });
-
-      await prisma.notification.create({
-        data: {
-          senderLogo: user?.image,
-          type: 'message',
-          senderUserName: user?.userName ?? 'Unknown',
-          recipientId: recipientId as string, // Notification goes to the recipient
-          messageId: message.id, // Associate the message with the notification
-        },
-      });
-
-      // Send message to all admins
-      for (const admin of admins) {
-        if (admin.id !== user_id) {
-          // If the admin is not the sender
-          const messageToAdmin = await prisma.orderMessage.create({
-            data: {
-              senderId: user_id as string,
-              userImage: user?.image,
-              senderName: user?.fullName,
-              senderUserName: user?.userName,
-              recipientId: admin.id,
-              messageText,
-              attachment,
-              replyTo,
-              isFromAdmin: role as Role,
-              customOffer,
-              timeAndDate: timeAndDate.toString(),
-              commonKey: commonkey,
-              projectNumber: projectNumber,
-              imageComments,
-              deliverProject,
-              extendDeliveryTime,
-              additionalOffer,
-              cancelProject,
-            },
-          });
-
-          await prisma.notification.create({
-            data: {
-              senderLogo: user?.image,
-              type: 'message',
-              senderUserName: user?.userName ?? 'Unknown',
-              recipientId: admin.id, // Notification goes to each admin
-              messageId: messageToAdmin.id, // Associate the message with the notification
-            },
-          });
-        }
-      }
-
-      return sendResponse(res, {
-        statusCode: httpStatus.CREATED,
-        success: true,
-        data: message,
-        message: `Message sent to recipient ID: ${recipientId}`,
-      });
     }
 
-    // Create a notification for the recipient
-  } catch (error) {
-    console.error(error);
     return sendResponse(res, {
-      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-      success: false,
-      message: 'Error sending message.',
+      statusCode: httpStatus.CREATED,
+      success: true,
+      data: message,
+      message: `Message sent to recipient ID: ${recipientId}`,
     });
   }
-};
+
+  // Create a notification for the recipient
+
+})
 
 // Controller: Reply to a message
 export const replyToMessage = async (req: Request, res: Response) => {
   const { role, user_id } = req.user as TokenCredential;
-
-  if (!role) {
-    return sendResponse(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'Token is required!',
-    });
-  }
 
   const { messageId, ...replyData } = req.body;
 
@@ -348,62 +335,43 @@ export const getMessages = async (req: Request, res: Response) => {
 };
 
 // Controller: Delete a message
-export const deleteMessage = async (req: Request, res: Response) => {
-  const { id: messageId, projectNumber } = req.params;
-  const { user_id, role } = req.user as TokenCredential;
+const deleteMessage = catchAsync(async (req: Request, res: Response) => {
+  const { commonkey, projectNumber } = req.params;
 
-  if (!user_id) {
+  const message = await prisma.orderMessage.findMany({
+    where: {
+      commonKey: commonkey as string,
+      projectNumber: projectNumber
+    }
+  });
+
+  // Check if message exists
+  if (!message) {
     return sendResponse(res, {
       statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: 'Token is required!',
+      message: 'Message not found!',
     });
   }
 
-  try {
-    const message = await prisma.orderMessage.findUnique({
-      where: {
-        id: messageId,
-        senderId: user_id as string,
-        projectNumber: projectNumber as string,
-      },
-    });
+  const deleteMessage = await prisma.orderMessage.deleteMany({
+    where: {
+      commonKey: commonkey as string,
+      projectNumber: projectNumber
+    },
+  });
 
-    if (!message) {
-      return sendResponse(res, {
-        statusCode: httpStatus.NOT_FOUND,
-        success: false,
-        message: 'This message is not yours.',
-      });
-    }
 
-    const timeElapsed =
-      (new Date().getTime() - new Date(message.createdAt).getTime()) /
-      (1000 * 60);
-
-    if (timeElapsed <= 5) {
-      await prisma.orderMessage.delete({ where: { id: messageId } });
-      return sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Message deleted successfully.',
-      });
-    } else {
-      return sendResponse(res, {
-        statusCode: httpStatus.BAD_REQUEST,
-        success: false,
-        message: 'Message deletion time limit exceeded.',
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    return sendResponse(res, {
-      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-      success: false,
-      message: 'Error deleting message.',
-    });
+  if (!deleteMessage) {
+    throw new AppError(httpStatus.NOT_FOUND, "Message not found!");
   }
-};
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Message deleted successfully',
+  });
+})
 
 export const updateProjectMessage = catchAsync(
   async (req: Request, res: Response) => {
@@ -413,31 +381,33 @@ export const updateProjectMessage = catchAsync(
       replyTo,
       customOffer,
       timeAndDate,
-      recipientId,
+      // recipientId,
       projectNumber,
-      orderMessageId,
+      commonkey,
     } = req.body;
 
-    if (!orderMessageId) {
+    if (!commonkey) {
       return sendResponse(res, {
         statusCode: httpStatus.BAD_REQUEST,
         success: false,
-        message: 'Order message id is required',
+        message: 'Order message common key is required',
       });
     }
 
-    const updateMessage = await prisma.orderMessage.update({
-      where: { id: orderMessageId },
+    const updateMessage = await prisma.orderMessage.updateMany({
+      where: { projectNumber: projectNumber, commonKey: commonkey },
       data: {
         messageText,
         attachment,
         replyTo,
         customOffer,
         timeAndDate,
-        recipientId,
         projectNumber,
       },
     });
+
+    console.log(updateMessage);
+
 
     if (!updateMessage) {
       return sendResponse(res, {
