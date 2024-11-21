@@ -62,13 +62,13 @@ const FinishedProjects = catchAsync(async (req: Request, res: Response) => {
   const timeFilter = parseResult.data;
   const { startDate, endDate } = calculateDateRange(timeFilter);
 
-  const whereClause: Prisma.OrderWhereInput = startDate
+  const whereClause = startDate
     ? {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      }
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    }
     : {};
 
   const [Completed, Cancelled] = await Promise.all([
@@ -114,15 +114,15 @@ const ProjectBuyers = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause = startDate
     ? {
-        Order: {
-          some: {
-            createdAt: {
-              gte: startDate,
-              lte: endDate,
-            },
+      Order: {
+        some: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
           },
         },
-      }
+      },
+    }
     : {};
 
   const buyers = await prisma.user.findMany({
@@ -174,11 +174,11 @@ const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause: Prisma.OrderWhereInput = startDate
     ? {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      }
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    }
     : {};
   const [Completed, Cancelled, NewProjects] = await Promise.all([
     prisma.order.findMany({
@@ -222,13 +222,72 @@ const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
 });
 
 const ProjectOptions = catchAsync(async (req: Request, res: Response) => {
-  // const [Completed, Cancelled, NewProjects] = await Promise.all([
-  //     prisma.order.findMany({
-  //         where: {
-  //             projectStatus: ProjectType.MD_PROJECT
-  //         }
-  //     })
-  // ])
+  const parseResult = timeFilterSchema.safeParse(req.query.timeFilter);
+  if (!parseResult.success) {
+    sendResponse(res, {
+      statusCode: httpStatus.BAD_REQUEST,
+      success: false,
+      message: 'Invalid time filter',
+      data: null
+    });
+    return;
+  }
+
+  const timeFilter = parseResult.data;
+  const { startDate, endDate } = calculateDateRange(timeFilter);
+
+  const whereClause = startDate ? {
+    createdAt: {
+      gte: startDate,
+      lte: endDate
+    },
+  } : {};
+  const [Custom, Direct, Offer, MD_Porject] = await Promise.all([
+    prisma.order.findMany({
+      where: {
+        ...whereClause,
+        projectType: "CUSTOM",
+        projectStatus: 'Completed',
+        paymentStatus: "PAID",
+
+      }
+    }),
+    prisma.order.findMany({
+      where: {
+        ...whereClause,
+        projectType: "DIRECT",
+        projectStatus: 'Completed',
+        paymentStatus: "PAID"
+      }
+    }),
+    prisma.order.findMany({
+      where: {
+        ...whereClause,
+        projectType: "OFFER",
+        projectStatus: 'Completed',
+        paymentStatus: "PAID"
+      }
+    }),
+    prisma.order.findMany({
+      where: {
+        ...whereClause,
+        projectType: "MD_PROJECT", projectStatus: 'Completed',
+        paymentStatus: "PAID"
+      }
+    })
+  ])
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Find successfully',
+    data: {
+      Custom: Custom?.length,
+      Direct: Direct?.length,
+      Offer: Offer?.length,
+      MD_Porject: MD_Porject?.length,
+    }
+  });
 });
 
 export const ProjectDetailsController = {

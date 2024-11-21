@@ -383,10 +383,10 @@ export const updateProjectMessage = catchAsync(
       timeAndDate,
       // recipientId,
       projectNumber,
-      commonkey,
+      commonKey,
     } = req.body;
 
-    if (!commonkey) {
+    if (!commonKey) {
       return sendResponse(res, {
         statusCode: httpStatus.BAD_REQUEST,
         success: false,
@@ -395,7 +395,7 @@ export const updateProjectMessage = catchAsync(
     }
 
     const updateMessage = await prisma.orderMessage.updateMany({
-      where: { projectNumber: projectNumber, commonKey: commonkey },
+      where: { projectNumber: projectNumber, commonKey: commonKey },
       data: {
         messageText,
         attachment,
