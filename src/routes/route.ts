@@ -48,6 +48,7 @@ import reviewRouter from '../modules/Review/Review.route';
 import { Indicator } from '../modules/profile-indicator/profile-indicetor';
 import { unseenMessageRoutes } from '../modules/chat/unread/unread-message.route';
 import { CancelProject } from '../modules/Order_page/Cancel-project/cancel-project.controller';
+import { stripePayment } from '../modules/payment/AdditionalPaymentController';
 
 
 const router = express.Router();
@@ -185,7 +186,8 @@ router.post('/cancel-order', CancelProject)
 router.use('/multi-project', multiProjectRoute);
 
 //payment route
-router.post('/api/-sessicheckouton', payment.stripePayment);
+router.post('/api/checkout-session', payment.stripePayment);
+router.post('/payment/additional', stripePayment.additionalPayment);
 router.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
