@@ -96,31 +96,35 @@ model AffiliateJoin {
 }
 
 model OrderMessage {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  userImage       String?
-  senderName      String?
-  senderUserName  String?
-  projectNumber   String
-  senderId        String   @db.ObjectId
-  recipientId     String   @db.ObjectId
-  messageText     String?
-  attachment      Json[]   @default([])
-  createdAt       DateTime @default(now())
-  isFromAdmin     Role?
-  customOffer     Json?
-  timeAndDate     String?
-  contactForm     Json?
-  read            Boolean  @default(false) // To track if the message has been read
-  hiddenFromAdmin Boolean  @default(false)
-  replyTo         Json?
-  commonKey       String
-  isCancelled     Boolean  @default(false)
-  unseend         Boolean  @default(false)
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  userImage          String?
+  senderName         String?
+  senderUserName     String?
+  projectNumber      String
+  senderId           String   @db.ObjectId
+  recipientId        String   @db.ObjectId
+  messageText        String?
+  attachment         Json[]   @default([])
+  createdAt          DateTime @default(now())
+  isFromAdmin        Role?
+  customOffer        Json?
+  timeAndDate        String?
+  contactForm        Json?
+  read               Boolean  @default(false) // To track if the message has been read
+  hiddenFromAdmin    Boolean  @default(false)
+  replyTo            Json?
+  commonKey          String
+  isCancelled        Boolean  @default(false)
+  unseend            Boolean  @default(false)
   // Relationships
-  sender          User     @relation("OrderMessageSent", fields: [senderId], references: [id])
-  recipient       User     @relation("OrderMessageReceived", fields: [recipientId], references: [id])
-  order           Order    @relation(fields: [projectNumber], references: [projectNumber])
-  imageComments   Json[]   @default([])
+  sender             User     @relation("OrderMessageSent", fields: [senderId], references: [id])
+  recipient          User     @relation("OrderMessageReceived", fields: [recipientId], references: [id])
+  order              Order    @relation(fields: [projectNumber], references: [projectNumber])
+  imageComments      Json[]   @default([])
+  additionalOffer    Json?
+  deliverProject     Json?
+  extendDeliveryTime Json?
+  cancelProject      Json?
 
   @@map("OrderMessages")
 }

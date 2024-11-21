@@ -28,12 +28,6 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 				orderBy: {
 					createdAt: "desc", // Fetch the most recent message
 				},
-				select: {
-					messageText: true,
-					seen: true,
-					commonkey: true,
-					createdAt: true
-				}
 			});
 
 
@@ -121,7 +115,7 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 		statusCode: httpStatus.OK,
 		success: true,
 		message: "Users with contactForChat retrieved successfully",
-		data: sortedUsers	,
+		data: sortedUsers,
 	});
 });
 

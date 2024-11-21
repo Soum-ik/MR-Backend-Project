@@ -32,7 +32,11 @@ const sendMessage = async (req: Request, res: Response) => {
     recipientId,
     projectNumber,
     timeAndDate,
-    imageComments
+    imageComments,
+    additionalOffer,
+    deliverProject,
+    extendDeliveryTime,
+    cancelProject
   } = req.body;
 
   // If the role is admin, recipientId is required
@@ -81,7 +85,11 @@ const sendMessage = async (req: Request, res: Response) => {
             timeAndDate: timeAndDate.toString(),
             commonKey: commonkey,
             projectNumber: projectNumber,
-            imageComments
+            imageComments,
+            deliverProject,
+            extendDeliveryTime,
+            additionalOffer,
+            cancelProject,
           },
 
         });
@@ -118,7 +126,11 @@ const sendMessage = async (req: Request, res: Response) => {
           timeAndDate: timeAndDate.toString(),
           commonKey: commonkey,
           projectNumber: projectNumber,
-          imageComments
+          imageComments,
+          deliverProject,
+          extendDeliveryTime,
+          additionalOffer,
+          cancelProject,
         },
       });
 
@@ -151,7 +163,11 @@ const sendMessage = async (req: Request, res: Response) => {
               timeAndDate: timeAndDate.toString(),
               commonKey: commonkey,
               projectNumber: projectNumber,
-              imageComments
+              imageComments,
+              deliverProject,
+              extendDeliveryTime,
+              additionalOffer,
+              cancelProject,
             },
           });
 
