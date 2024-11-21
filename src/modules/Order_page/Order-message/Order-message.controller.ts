@@ -384,6 +384,7 @@ export const updateProjectMessage = catchAsync(
       // recipientId,
       projectNumber,
       commonKey,
+      ...rest
     } = req.body;
 
     if (!commonKey) {
@@ -403,6 +404,7 @@ export const updateProjectMessage = catchAsync(
         customOffer,
         timeAndDate,
         projectNumber,
+        ...rest
       },
     });
 
