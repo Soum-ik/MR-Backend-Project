@@ -31,6 +31,9 @@ const authenticateToken = (...requiredRole: TUserRole[]) => {
                 }
             })
 
+            console.log(user);
+            
+
             if (!user) {
                 throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized Access... User not found!');
             }
