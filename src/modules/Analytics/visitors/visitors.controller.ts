@@ -117,6 +117,7 @@ const getVisitors = catchAsync(async (req: Request, res: Response) => {
   let visitorData;
 
   switch (timeFilter) {
+    case TIME_FILTER_OPTIONS.TODAY:
     case TIME_FILTER_OPTIONS.LAST_7_DAYS:
     case TIME_FILTER_OPTIONS.LAST_30_DAYS:
     case TIME_FILTER_OPTIONS.THIS_MONTH:
