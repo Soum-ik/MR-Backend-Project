@@ -85,8 +85,7 @@ const SignUp = async (
 
         // Create the token
         const token = createToken({ role, user_id: id, email: Useremail });
-
-        console.log(createUser, "User created");
+ 
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.CREATED,
@@ -185,8 +184,7 @@ const forgotPass = async (req: Request, res: Response) => {
         });
     } else {
         const verfiyCode = Math.floor(1000000 + Math.random() * 9000000);
-        const { fullName } = findByEmail;
-        console.log(fullName, "check full");
+        const { fullName } = findByEmail; 
         if (!fullName) {
             return console.log("full name need");
         }
@@ -287,8 +285,7 @@ const setNewPass = async (req: Request, res: Response) => {
                 message: "Your new password set successfully",
             });
         }
-    } catch (error) {
-        console.log(error);
+    } catch (error) { 
         return sendResponse<any>(res, {
             data: error,
             statusCode: httpStatus.OK,
