@@ -157,7 +157,7 @@ router.use('/seen', unseenMessageRoutes);
 router.use('/bookMark', bookMarkRoute);
 router.use('/archive', archiveRoute);
 router.use('/role', authenticateSuperAdmin, handleRoleRoute);
-router.use('/notification', handleNotificationRoute);
+// router.use('/notification', handleNotificationRoute);
 router.use('/order-message', handleOrderMessageRoute);
 router.post('/upload-image', uploadFile.any(), uploadImage);
 router.post('/contactForChat', authenticateToken(USER_ROLE.USER), startContact);
