@@ -12,44 +12,24 @@ import { getTimeFilterWhereClause } from '../../../utils/timeFilter';
 import { ProjectStatus } from '../../Order_page/Order_page.constant';
 
 const ActiveProject = catchAsync(async (req: Request, res: Response) => {
-  const parseResult = getTimeFilterWhereClause(
-    timeFilterSchema,
-    req.query.timeFilter,
-  );
-
-  if (parseResult.error) {
-    sendResponse(res, {
-      statusCode: httpStatus.BAD_REQUEST,
-      success: false,
-      message: 'Invalid time filter',
-      data: null,
-    });
-    return;
-  }
-  const { whereClause } = parseResult;
-
   const [Revision, Ongoing, Waiting, Delivered] = await Promise.all([
     prisma.order.count({
       where: {
-        ...whereClause,
         projectStatus: ProjectStatus.REVISION,
       },
     }),
     prisma.order.count({
       where: {
-        ...whereClause,
         projectStatus: ProjectStatus.ONGOING,
       },
     }),
     prisma.order.count({
       where: {
-        ...whereClause,
         projectStatus: ProjectStatus.WAITING,
       },
     }),
     prisma.order.count({
       where: {
-        ...whereClause,
         projectStatus: ProjectStatus.DELIVERED,
       },
     }),
@@ -85,11 +65,11 @@ const FinishedProjects = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause = startDate
     ? {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      }
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    }
     : {};
 
   const [Completed, Cancelled] = await Promise.all([
@@ -135,15 +115,11 @@ const ProjectBuyers = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause = startDate
     ? {
-        Order: {
-          some: {
-            createdAt: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-        },
-      }
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    }
     : {};
 
   const buyers = await prisma.user.findMany({
@@ -195,11 +171,11 @@ const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause: Prisma.OrderWhereInput = startDate
     ? {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      }
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    }
     : {};
   const [Completed, Cancelled, NewProjects] = await Promise.all([
     prisma.order.findMany({
