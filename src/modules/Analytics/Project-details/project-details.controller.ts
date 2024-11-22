@@ -8,12 +8,14 @@ import {
   calculateDateRange,
   timeFilterSchema,
 } from '../../../utils/calculateDateRange';
-import { ProjectStatus } from '../../Order_page/Order_page.constant';
 import { getTimeFilterWhereClause } from '../../../utils/timeFilter';
+import { ProjectStatus } from '../../Order_page/Order_page.constant';
 
 const ActiveProject = catchAsync(async (req: Request, res: Response) => {
-
-  const parseResult = getTimeFilterWhereClause(timeFilterSchema, req.query.timeFilter);
+  const parseResult = getTimeFilterWhereClause(
+    timeFilterSchema,
+    req.query.timeFilter,
+  );
 
   if (parseResult.error) {
     sendResponse(res, {
@@ -83,11 +85,11 @@ const FinishedProjects = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause = startDate
     ? {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    }
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      }
     : {};
 
   const [Completed, Cancelled] = await Promise.all([
@@ -133,15 +135,15 @@ const ProjectBuyers = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause = startDate
     ? {
-      Order: {
-        some: {
-          createdAt: {
-            gte: startDate,
-            lte: endDate,
+        Order: {
+          some: {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
           },
         },
-      },
-    }
+      }
     : {};
 
   const buyers = await prisma.user.findMany({
@@ -193,11 +195,11 @@ const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause: Prisma.OrderWhereInput = startDate
     ? {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    }
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      }
     : {};
   const [Completed, Cancelled, NewProjects] = await Promise.all([
     prisma.order.findMany({
@@ -241,7 +243,10 @@ const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
 });
 
 const ProjectOptions = catchAsync(async (req: Request, res: Response) => {
-  const parseResult = getTimeFilterWhereClause(timeFilterSchema, req.query.timeFilter);
+  const parseResult = getTimeFilterWhereClause(
+    timeFilterSchema,
+    req.query.timeFilter,
+  );
 
   if (parseResult.error) {
     sendResponse(res, {
@@ -258,52 +263,55 @@ const ProjectOptions = catchAsync(async (req: Request, res: Response) => {
     prisma.order.findMany({
       where: {
         ...whereClause,
-        projectType: "CUSTOM",
+        projectType: 'CUSTOM',
         projectStatus: 'Completed',
-        paymentStatus: "PAID",
-
-      }
+        paymentStatus: 'PAID',
+      },
     }),
     prisma.order.findMany({
       where: {
         ...whereClause,
-        projectType: "DIRECT",
+        projectType: 'DIRECT',
         projectStatus: 'Completed',
-        paymentStatus: "PAID"
-      }
+        paymentStatus: 'PAID',
+      },
     }),
     prisma.order.findMany({
       where: {
         ...whereClause,
-        projectType: "OFFER",
+        projectType: 'OFFER',
         projectStatus: 'Completed',
-        paymentStatus: "PAID"
-      }
+        paymentStatus: 'PAID',
+      },
     }),
     prisma.order.findMany({
       where: {
         ...whereClause,
-        projectType: "MD_PROJECT", projectStatus: 'Completed',
-        paymentStatus: "PAID"
-      }
-    })
-  ])
+        projectType: 'MD_PROJECT',
+        projectStatus: 'Completed',
+        paymentStatus: 'PAID',
+      },
+    }),
+  ]);
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Find successfully',
     data: {
-      Custom: Custom?.length,
-      Direct: Direct?.length,
-      Offer: Offer?.length,
-      MD_Porject: MD_Porject?.length,
-    }
+      custom: Custom?.length,
+      direct: Direct?.length,
+      offer: Offer?.length,
+      'M-D Project': MD_Porject?.length,
+    },
   });
 });
 
 const AvgSelling = catchAsync(async (req: Request, res: Response) => {
-  const parseResult = getTimeFilterWhereClause(timeFilterSchema, req.query.timeFilter);
+  const parseResult = getTimeFilterWhereClause(
+    timeFilterSchema,
+    req.query.timeFilter,
+  );
 
   if (parseResult.error) {
     sendResponse(res, {
@@ -316,53 +324,55 @@ const AvgSelling = catchAsync(async (req: Request, res: Response) => {
   }
   const { whereClause } = parseResult;
 
-
   const [Custom, Direct] = await Promise.all([
     prisma.order.findMany({
       where: {
         ...whereClause,
         projectType: 'CUSTOM',
         projectStatus: 'Completed',
-        paymentStatus: 'PAID'
+        paymentStatus: 'PAID',
       },
       select: {
-        totalPrice: true
-      }
-
+        totalPrice: true,
+      },
     }),
     prisma.order.findMany({
       where: {
         ...whereClause,
         projectType: {
-          notIn: ['CUSTOM']
+          notIn: ['CUSTOM'],
         },
         projectStatus: 'Completed',
-        paymentStatus: 'PAID'
+        paymentStatus: 'PAID',
       },
       select: {
-        totalPrice: true
-      }
-
-    })
-  ])
+        totalPrice: true,
+      },
+    }),
+  ]);
 
   // Calculate the total amount for 'Custom'
-  const customTotal = Custom.reduce((sum, order) => sum + (Number(order.totalPrice) || 0), 0);
+  const customTotal = Custom.reduce(
+    (sum, order) => sum + (Number(order.totalPrice) || 0),
+    0,
+  );
 
   // Calculate the total amount for 'Direct'
-  const directTotal = Direct.reduce((sum, order) => sum + (Number(order.totalPrice) || 0), 0);
+  const directTotal = Direct.reduce(
+    (sum, order) => sum + (Number(order.totalPrice) || 0),
+    0,
+  );
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Find Avg selling successfully',
     data: {
-      customTotal: customTotal,
-      directTotal: directTotal
+      custom: customTotal,
+      direct: directTotal,
     },
   });
-
-})
+});
 
 export const ProjectDetailsController = {
   ActiveProject,
@@ -370,5 +380,5 @@ export const ProjectDetailsController = {
   ProjectBuyers,
   ProjectOptions,
   ProjectDetails,
-  AvgSelling
+  AvgSelling,
 };
