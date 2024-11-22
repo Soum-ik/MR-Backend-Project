@@ -37,6 +37,18 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
     cancel_url: 'http://localhost:5173/payment-failed',
   });
 
+  const payment = await prisma.payment.create({
+    data: {
+      userId: data?.userId,
+      stripeId: session.id.split('_').join(''),
+      status: PaymentStatus.PENDING,
+      amount: data?.totalAmount.toString(),
+      currency: session.currency as string,
+      orderId: new ObjectId().toString(),
+      PaymentType : data.paymentType
+    },
+  });
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

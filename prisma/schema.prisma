@@ -498,6 +498,8 @@ model Payment {
   createdAt DateTime      @default(now())
   orderId   String        @db.ObjectId
 
+  PaymentType paymentType?
+
   user  User  @relation(fields: [userId], references: [id])
   Order Order @relation(fields: [orderId], references: [id])
 }
@@ -558,4 +560,9 @@ enum ProjectType {
 enum senderType {
   CLIENT
   OWNER
+}
+
+enum paymentType {
+  AdditionalOffer
+  ExtendDelivery
 }

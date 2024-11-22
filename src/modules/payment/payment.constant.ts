@@ -5,3 +5,7 @@ export enum PaymentStatus {
     REFUNDED = "REFUNDED"
 }
 
+export enum paymentType {
+    AdditionalOffer = 'AdditionalOffer',
+    ExtendDelivery = 'ExtendDelivery'
+}
