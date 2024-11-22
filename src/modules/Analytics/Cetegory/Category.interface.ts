@@ -6,7 +6,7 @@ interface Project {
 interface CategorySummary {
     name: string;
     projects: number;
-    earnings: number;
+    Earnings: number;
 }
 
 export {

@@ -76,12 +76,12 @@ export const Cetagorys = catchAsync(async (req: Request, res: Response) => {
         const category = acc.find((item) => item.name === categoryName);
         if (category) {
             category.projects += 1;
-            category.earnings += totalAmount;
+            category.Earnings += totalAmount;
         } else {
             acc.push({
                 name: categoryName,
                 projects: 1,
-                earnings: totalAmount,
+                Earnings: totalAmount,
             });
         }
 
