@@ -49,6 +49,7 @@ import { Indicator } from '../modules/profile-indicator/profile-indicetor';
 import { unseenMessageRoutes } from '../modules/chat/unread/unread-message.route';
 import { CancelProject } from '../modules/Order_page/Cancel-project/cancel-project.controller';
 import { stripePayment } from '../modules/payment/AdditionalPaymentController';
+import {  NotificationInbox } from '../modules/Notification/route';
 
 
 const router = express.Router();
@@ -151,6 +152,7 @@ router.use(
   handleMessageRoute,
 );
 
+router.use('/notification', NotificationInbox)
 router.use('/seen', unseenMessageRoutes);
 router.use('/bookMark', bookMarkRoute);
 router.use('/archive', archiveRoute);

@@ -58,30 +58,39 @@ const stripeWebhook = async (req: Request, res: Response) => {
 
 
 
-        // for extendard delivary
-        const findOrder = await prisma.order.findUnique({
-          where: {
-            projectNumber: event.projectNumber,
-            id: event.orderId
-          }, select: {
-            totalPrice: true
-          }
-        })
+        // for extendard delivary   just update what you want
+        // const findOrder = await prisma.order.findUnique({
+        //   where: {
+        //     projectNumber: event.projectNumber,
+        //     id: event.orderId
+        //   }, select: {
+        //     totalPrice: true
+        //   }
+        // })
 
-        if (!findOrder) {
-          throw new AppError(httpStatus.NOT_FOUND, 'Unfortunately, this order is not found.')
-        }
+        // if (!findOrder) {
+        //   throw new AppError(httpStatus.NOT_FOUND, 'Unfortunately, this order is not found.')
+        // }
 
-        const extendard_delivart = await prisma.order.update({
-          where: {
-            projectNumber: event.projectNumber,
-            id: event.orderId
-          }, data: {
-            totalPrice: (Number(findOrder?.totalPrice) + Number(event?.totalAmount)).toString(),
-            
-          }
-        })
+        // const extendard_delivart = await prisma.order.update({
+        //   where: {
+        //     projectNumber: event.projectNumber,
+        //     id: event.orderId
+        //   }, data: {
+        //     totalPrice: (Number(findOrder?.totalPrice) + Number(event?.totalAmount)).toString(),
 
+        //   }
+        // })
+
+        // same for addtitional offer based on the requirment just update few  things
+        // const additional offer = await prisma.order.update({
+                //   where: {
+                //     projectNumber: event.projectNumber,
+                //     id: event.orderId
+                //   }, data: {
+                //     
+                //   }
+                // })
 
 
 
