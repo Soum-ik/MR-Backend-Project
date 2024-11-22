@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
 import { prisma } from '../../libs/prismaHelper';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
-import { PaymentStatus } from './payment.constant';
+import { PaymentStatus, PaymentType } from './payment.constant';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -27,10 +27,10 @@ const stripeWebhook = async (req: Request, res: Response) => {
       const session = event.data.object as Stripe.Checkout.Session;
       console.log('session', session);
 
-      if (session?.metadata?.paymentType === 'Additional Offer') {
+      if (session?.metadata?.paymentType === PaymentType.ADDITIONAL_OFFER) {
         // Handle additional packages
         console.log('Additional Offer payment completed:', session);
-      } else if (session?.metadata?.paymentType === 'Extend Delivery') {
+      } else if (session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY) {
         // Handle design order payment
         console.log('Tips payment completed:', session);
       }
@@ -128,6 +128,9 @@ const stripeWebhook = async (req: Request, res: Response) => {
     //     }
     //     break;
     // }
+
+
+
   }
 
   res.json({ received: true });

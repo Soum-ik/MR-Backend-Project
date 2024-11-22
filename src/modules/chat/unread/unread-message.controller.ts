@@ -76,13 +76,23 @@ const updateUnseenMessageController = catchAsync(async (req: Request, res: Respo
     const { role } = req.user as TokenCredential
 
     const { userId } = req.params
-    console.log(userId);
-    
+
+
     const findMessage = await prisma.message.findMany({
         where: {
             seen: false,
-            senderId: userId,
-            
+            OR: [
+                {
+                    senderId: userId,
+                },
+                {
+                    recipientId: userId
+                }
+
+            ]
+
+            // senderId: userId,
+            // recipientId :  userId
         }
     })
     if (findMessage.length === 0) {
@@ -92,7 +102,22 @@ const updateUnseenMessageController = catchAsync(async (req: Request, res: Respo
 
     const update = await prisma.message.updateMany({
         where: {
-            senderId: userId
+            OR: [
+                {
+                    senderId: userId, recipient: {
+                        role: {
+                            in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
+                        }
+                    }
+                },
+                {
+                    recipientId: userId, sender: {
+                        role: {
+                            in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
+                        }
+                    }
+                },
+            ]
         },
         data: {
             seen: true

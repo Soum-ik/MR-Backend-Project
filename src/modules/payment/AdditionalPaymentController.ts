@@ -13,7 +13,6 @@ const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 const additionalPayment = catchAsync(async (req: Request, res: any) => {
   const { data } = req.body;
-  console.log(req.body, 'req.body');
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -37,6 +36,7 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
     cancel_url: 'http://localhost:5173/payment-failed',
   });
 
+  //   this is the payment controller it will handle all kind offer 
   const payment = await prisma.payment.create({
     data: {
       userId: data?.userId,
@@ -44,7 +44,7 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
       status: PaymentStatus.PENDING,
       amount: data?.totalAmount.toString(),
       currency: session.currency as string,
-      orderId: new ObjectId().toString(),
+      orderId: data.orderId,
       PaymentType : data.paymentType
     },
   });

@@ -65,7 +65,7 @@ export const Cetagorys = catchAsync(async (req: Request, res: Response) => {
 
 
     const directs = Direct.map(item => item.items[0]).map(categoryName => (categoryName))
-    console.log(directs);
+
 
 
     // Process data to get summary

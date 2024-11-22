@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
 import catchAsync from "../../libs/utlitys/catchSynch";
-
 const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 	// Fetch all users with contactForChat relationships
 	const listOfUser = await prisma.user.findMany({
@@ -23,7 +22,22 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 			// Fetch messages for each user
 			const userMessages = await prisma.message.findMany({
 				where: {
-					senderId: user.id,
+					OR: [
+						{
+							senderId: user.id, recipient: {
+								role: {
+									in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
+								}
+							}
+						},
+						{
+							recipientId: user.id, sender: {
+								role: {
+									in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
+								}
+							}
+						},
+					]
 				},
 				orderBy: {
 					createdAt: "desc", // Fetch the most recent message
@@ -38,7 +52,7 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 						messageText: "New Contact form submitted",
 						seen: false,
 						commonkey: null,
-						createdAt: new Date(),
+						createdAt: user.createdAt,
 					};
 			const seenCommonKeys = new Set();
 			const totalUnseenMessage = userMessages.filter((message) => {
@@ -84,33 +98,33 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 			data: null,
 		});
 	}
-	
-    // Custom sorting logic
-    const sortedUsers = filteredUsers.sort((a, b) => {
-        // First, prioritize users with unseen messages
-        if (a.lastmessageinfo.totalUnseenMessage > 0 && b.lastmessageinfo.totalUnseenMessage === 0) {
-            return -1; // a comes first
-        }
-        if (b.lastmessageinfo.totalUnseenMessage > 0 && a.lastmessageinfo.totalUnseenMessage === 0) {
-            return 1; // b comes first
-        }
 
-        // If both have unseen messages or both have no unseen messages, 
-        // sort by the most recent new message (non-default message)
-        const isANewMessage = a.lastmessageinfo.messageText !== "New Contact form submitted";
-        const isBNewMessage = b.lastmessageinfo.messageText !== "New Contact form submitted";
+	// Custom sorting logic
+	const sortedUsers = filteredUsers.sort((a, b) => {
+		// First, prioritize users with unseen messages
+		if (a.lastmessageinfo.totalUnseenMessage > 0 && b.lastmessageinfo.totalUnseenMessage === 0) {
+			return -1; // a comes first
+		}
+		if (b.lastmessageinfo.totalUnseenMessage > 0 && a.lastmessageinfo.totalUnseenMessage === 0) {
+			return 1; // b comes first
+		}
 
-        if (isANewMessage && !isBNewMessage) {
-            return -1; // a comes first
-        }
-        if (isBNewMessage && !isANewMessage) {
-            return 1; // b comes first
-        }
+		// If both have unseen messages or both have no unseen messages, 
+		// sort by the most recent new message (non-default message)
+		const isANewMessage = a.lastmessageinfo.messageText !== "New Contact form submitted";
+		const isBNewMessage = b.lastmessageinfo.messageText !== "New Contact form submitted";
 
-        // If both have the same message status, maintain original order
-        return 0;
-    });
-	
+		if (isANewMessage && !isBNewMessage) {
+			return -1; // a comes first
+		}
+		if (isBNewMessage && !isANewMessage) {
+			return 1; // b comes first
+		}
+
+		// If both have the same message status, maintain original order
+		return 0;
+	});
+
 	return sendResponse<any>(res, {
 		statusCode: httpStatus.OK,
 		success: true,
