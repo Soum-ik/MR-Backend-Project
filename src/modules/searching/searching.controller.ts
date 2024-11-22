@@ -1,3 +1,4 @@
+import { tags } from './../../../node_modules/.prisma/client/index.d';
 import { Request, Response } from "express";
 import sendResponse from "../../libs/sendResponse";
 import httpStatus from "http-status";
@@ -20,15 +21,17 @@ export const searchProjects = async (req: Request, res: Response) => {
                         mode: 'insensitive'
                     }
                 },
-
-
                 {
                     title: {
                         startsWith: searchQueryString,
                         mode: 'insensitive'
                     }
                 },
-
+                {
+                    tags: {
+                        has: searchQueryString,
+                    }
+                },
             ]
         },
         select: {
