@@ -4,6 +4,8 @@ import { STRIPE_SECRET_KEY } from '../../config/config';
 import { prisma } from '../../libs/prismaHelper';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
 import { PaymentStatus, PaymentType } from './payment.constant';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -53,6 +55,35 @@ const stripeWebhook = async (req: Request, res: Response) => {
             paymentStatus: PaymentStatus.PAID,
           },
         });
+
+
+
+        // for extendard delivary
+        const findOrder = await prisma.order.findUnique({
+          where: {
+            projectNumber: event.projectNumber,
+            id: event.orderId
+          }, select: {
+            totalPrice: true
+          }
+        })
+
+        if (!findOrder) {
+          throw new AppError(httpStatus.NOT_FOUND, 'Unfortunately, this order is not found.')
+        }
+
+        const extendard_delivart = await prisma.order.update({
+          where: {
+            projectNumber: event.projectNumber,
+            id: event.orderId
+          }, data: {
+            totalPrice: (Number(findOrder?.totalPrice) + Number(event?.totalAmount)).toString(),
+            
+          }
+        })
+
+
+
 
         console.log('order', order);
         console.log("Order successfully updated with status 'PLACED'.");
