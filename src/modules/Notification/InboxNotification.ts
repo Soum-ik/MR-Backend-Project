@@ -5,7 +5,7 @@ import { TokenCredential } from '../../libs/authHelper';
 import type { Request, Response } from 'express'
 import httpStatus from 'http-status';
 
- const getMessages = catchAsync(async (req: Request, res: Response) => {
+const getMessages = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
 
     const allMessages = await prisma.message.findMany({
@@ -14,6 +14,9 @@ import httpStatus from 'http-status';
             seen: false
         }
     })
+
+    
+    console.log(allMessages, 'all messages');
 
     const uniqueTotalInboxMessages = allMessages
         .filter(
@@ -31,6 +34,14 @@ import httpStatus from 'http-status';
             message: 'Total inbox message'
         })
     }
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: {
+            total: uniqueTotalInboxMessages
+        },
+        message: 'Total inbox message'
+    })
 })
 
 
