@@ -9,8 +9,8 @@ export const TIME_FILTER_OPTIONS = {
     LAST_3_MONTHS: 'Last 3 Months',
     LAST_6_MONTHS: 'Last 6 Months',
     THIS_YEAR: 'This Year',
-    YEAR_2023: '2023',
-    YEAR_2022: '2022',
+    LAST_YEAR: `${new Date().getFullYear() - 1}`,
+    LAST2_YEAR: `${new Date().getFullYear() - 2}`,
     TODAY: 'Today',
 } as const;
 
@@ -18,6 +18,7 @@ export const timeFilterSchema = z.enum(Object.values(TIME_FILTER_OPTIONS) as [st
 
 export const calculateDateRange = (timeFilter: z.infer<typeof timeFilterSchema>) => {
     const now = new Date();
+    const currentYear = now.getFullYear();
     let startDate: Date | null = null;
     let endDate: Date = new Date();
 
@@ -56,26 +57,28 @@ export const calculateDateRange = (timeFilter: z.infer<typeof timeFilterSchema>)
             startDate = new Date(now.getFullYear(), 0, 1);
             break;
         }
-        case TIME_FILTER_OPTIONS.YEAR_2023: {
-            startDate = new Date('2023-01-01');
-            endDate = new Date('2023-12-31');
+        case TIME_FILTER_OPTIONS.LAST_YEAR: {
+            startDate = new Date(`${currentYear - 1}-01-01`);
+            endDate = new Date(`${currentYear - 1}-12-31`);
             break;
         }
-        case TIME_FILTER_OPTIONS.YEAR_2022: {
-            startDate = new Date('2022-01-01');
-            endDate = new Date('2022-12-31');
+        case TIME_FILTER_OPTIONS.LAST2_YEAR: {
+            startDate = new Date(`${currentYear - 2}-01-01`);
+            endDate = new Date(`${currentYear - 2}-12-31`);
             break;
         }
         case TIME_FILTER_OPTIONS.TODAY: {
             const now = new Date();
-            // Start of the day (midnight)
             startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-            // End of the day (just before midnight)
             endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
             break;
         }
 
-        case TIME_FILTER_OPTIONS.ALL_TIME:
+        case TIME_FILTER_OPTIONS.ALL_TIME: {
+            startDate = new Date(0);
+            endDate = new Date()
+            break
+        }
         default:
             break;
     }
