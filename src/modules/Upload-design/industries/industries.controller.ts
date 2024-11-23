@@ -1,9 +1,11 @@
+import { uploadDesignSchema } from './../upload.validation'; 
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { z } from 'zod';
 import { DataItem } from '../upload.inteface';
+import catchAsync from '../../../libs/utlitys/catchSynch';
 
 
 const getByNameSchema = z.object({
@@ -67,47 +69,36 @@ const getByname = async (req: Request, res: Response) => {
     }
 };
 
-const getAll = async (req: Request, res: Response) => {
-    try {
-        // Fetch all folders from the database
-        const findAll = await prisma.industrys.findMany({ select: { name: true }, orderBy: { id: 'desc' } });
+const getAll = catchAsync(async (req: Request, res: Response) => {
 
-        function extractNames(data: DataItem[]): string[] {
-            const names = data.flatMap(item => item.name); // Flatten all 'name' arrays into one array
-            return [...new Set(names)]; // Remove duplicates using a Set and convert it back to an array
+    // Fetch all folders from the database
+    const findAll = await prisma.uploadDesign.findMany(
+        {
+            select: {
+                industrys: true
+            }
         }
-        const extractDatas = extractNames(findAll)
+    );
 
-        // Send success response with retrieved data
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            data: extractDatas,
-            message: `Folders retrieved successfully`,
-        });
+    console.log(findAll);
+    
 
-    } catch (error) {
-        console.error('Error fetching folders:', error);
-
-        // Handle validation errors
-        if (error instanceof z.ZodError) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.BAD_REQUEST,
-                success: false,
-                data: null,
-                message: `Validation error: ${error.message}`,
-            });
-        }
-
-        // Handle other types of errors
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            data: null,
-            message: `Internal server error`,
-        });
+    function extractNames(data: any[]) {
+        const names = data.flatMap(item => item.industrys); // Flatten all 'name' arrays into one array
+        return [...new Set(names)]; // Remove duplicates using a Set and convert it back to an array
     }
-}
+    const extractDatas = extractNames(findAll)
+    
+    // Send success response with retrieved data
+    return sendResponse<any>(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: extractDatas,
+        message: `Folders retrieved successfully`,
+    });
+
+
+})
 
 export const Industrys = {
     getByname, getAll
