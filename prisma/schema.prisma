@@ -315,10 +315,11 @@ model FeatureAllFolder {
 }
 
 model AllSubFolder {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
-  slug       String @unique
-  folder     String
-  subFolders Json[] @default([])
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String @unique
+  subFolder String @unique
+  folderName String
+  order     Int
 }
 
 model AllDesigns {
@@ -460,7 +461,7 @@ model Order {
   tagsId                   String?                 @db.ObjectId
   review                   review[]
   projectThumbnail         String?
-  deliveryAttempt          Int?                     @default(0)
+  deliveryAttempt          Int?                    @default(0)
 }
 
 model tags {

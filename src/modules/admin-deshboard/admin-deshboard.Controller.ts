@@ -134,11 +134,11 @@ export const getOrderCount = catchAsync(
 
     const whereClause: Prisma.OrderWhereInput = startDate
       ? {
-          createdAt: {
-            gte: startDate,
-            lte: endDate,
-          },
-        }
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      }
       : {};
 
     const [completedOrders, canceledOrders, cancelledAmount, payments] =
@@ -213,13 +213,13 @@ export const getOrderCount = catchAsync(
       ...totalOrder,
       periodInfo: startDate
         ? {
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-            filterUsed: timeFilter,
-          }
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          filterUsed: timeFilter,
+        }
         : {
-            filterUsed: 'All Times',
-          },
+          filterUsed: 'All Times',
+        },
     };
 
     sendResponse(res, {
@@ -321,11 +321,11 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause: Prisma.UserWhereInput = startDate
     ? {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      }
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    }
     : {};
   const [returning, newUser, affiliate] = await Promise.all([
     prisma.user.findMany({

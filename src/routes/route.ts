@@ -49,7 +49,8 @@ import { Indicator } from '../modules/profile-indicator/profile-indicetor';
 import { unseenMessageRoutes } from '../modules/chat/unread/unread-message.route';
 import { CancelProject } from '../modules/Order_page/Cancel-project/cancel-project.controller';
 import { stripePayment } from '../modules/payment/AdditionalPaymentController';
-import {  NotificationInbox } from '../modules/Notification/route';
+import { NotificationInbox } from '../modules/Notification/route';
+import { DDroute } from '../modules/Drag&Drop/DD.route';
 
 
 const router = express.Router();
@@ -118,6 +119,8 @@ router.get(
   UserController.getSingelUser,
 );
 
+
+router.use('/dd', DDroute)
 router.get('/profile-indicator', Indicator.IndicatorController)
 router.use('/review', reviewRouter);
 router.use('/image', ImageStoreRouter)
