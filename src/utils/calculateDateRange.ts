@@ -74,11 +74,7 @@ export const calculateDateRange = (timeFilter: z.infer<typeof timeFilterSchema>)
             break;
         }
 
-        case TIME_FILTER_OPTIONS.ALL_TIME: {
-            startDate = new Date(0);
-            endDate = new Date()
-            break
-        }
+        case TIME_FILTER_OPTIONS.ALL_TIME:
         default:
             break;
     }

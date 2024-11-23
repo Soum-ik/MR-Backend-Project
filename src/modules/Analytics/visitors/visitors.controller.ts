@@ -8,7 +8,6 @@ import {
   TIME_FILTER_OPTIONS,
   timeFilterSchema,
 } from '../../../utils/calculateDateRange';
-// import { calculateDateRange } from "../../../utils/calculateDateRange";
 
 const increaseVisitors = catchAsync(async (req: Request, res: Response) => {
   const { status } = req.user as { status: VisitorStatus };

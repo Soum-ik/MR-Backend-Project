@@ -34,11 +34,6 @@ export const searchProjects = async (req: Request, res: Response) => {
                 },
             ]
         },
-        select: {
-            title: true,
-            id: true,
-            designId: true,
-        },
         orderBy: {
             title: 'asc'
         }

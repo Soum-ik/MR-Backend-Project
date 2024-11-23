@@ -8,6 +8,7 @@ import { ProjectDetailsController } from "./Project-details/project-details.cont
 import { TopKeywordController } from "./Top-Keyword/Top-keyword.controller";
 import affiliateRouter from "../affiliate/affiliate.route";
 import { Cetagorys } from "./Cetegory/Category.controller";
+import getProjectAnalytics from "./Project-chart/projectChart";
 
 const analyticsRouter = Router();
 
@@ -22,6 +23,10 @@ analyticsRouter.get('/project-details/finished-projects', ProjectDetailsControll
 analyticsRouter.get('/project-details/project-buyers', ProjectDetailsController.ProjectBuyers);
 analyticsRouter.get('/project-details/project-options', ProjectDetailsController.ProjectOptions);
 analyticsRouter.get('/project-details/avg-selling', ProjectDetailsController.AvgSelling);
+
+
+
+analyticsRouter.get('/project-details/getProjectAnalytics', getProjectAnalytics);
 
 
 analyticsRouter.get('/top-keyword', TopKeywordController.getTopKeywords);

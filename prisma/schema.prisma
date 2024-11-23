@@ -460,6 +460,7 @@ model Order {
   tagsId                   String?                 @db.ObjectId
   review                   review[]
   projectThumbnail         String?
+  deliveryAttempt          Int?                     @default(0)
 }
 
 model tags {

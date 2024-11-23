@@ -40,10 +40,8 @@ const adminMessageHandler = (socket: Socket, io: any) => {
         const onlineUsers = socketStore.getOnlineUsers();
 
         // Find the target user socket by userId
-        const targetUserSocket = onlineUsers.find(user => user.userId === message.userId);
-
-
-
+        const targetUserSocket = onlineUsers.find(user => user.userId);
+        
         if (targetUserSocket) {
             // Emit the delete command to the specific user
             io.to(targetUserSocket.socketId).emit("delete-message", {
