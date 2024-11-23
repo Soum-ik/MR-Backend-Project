@@ -245,44 +245,24 @@ async function getYearlyVisitorData(startDate: Date, endDate: Date) {
 }
 
 async function getAllTimeVisitorData(startDate: Date, endDate: Date) {
-  // Calculate the number of years to fetch, ensuring we only retrieve data for a maximum of 12 years
-  const maxYears = 12;
-  const yearDifference = endDate.getFullYear() - startDate.getFullYear() + 1;
-
-  // If the difference between startDate and endDate is more than 12 years, adjust startDate
-  const adjustedStartYear = Math.max(
-    startDate.getFullYear(),
-    endDate.getFullYear() - maxYears + 1,
+  const yearsToFetch = Math.ceil(
+    endDate.getFullYear() - startDate.getFullYear() + 1,
   );
-
-  // If the difference is more than 12 years, adjust the start date to the calculated year
-  const adjustedStartDate = new Date(
-    adjustedStartYear,
-    startDate.getMonth(),
-    startDate.getDate(),
-  );
-
-  // Calculate the number of years to fetch based on the adjusted startDate
-  const yearsToFetch = Math.min(
-    maxYears,
-    endDate.getFullYear() - adjustedStartYear + 1,
-  );
-
   const yearlyData = [];
 
   for (let i = 0; i < yearsToFetch; i++) {
-    const currentYear = adjustedStartYear + i;
+    const currentYear = startDate.getFullYear() + i;
 
     // Determine the start month for the current year
     let startMonth = 0;
-    if (currentYear === adjustedStartYear) {
-      startMonth = adjustedStartDate.getMonth(); // start from the month of adjustedStartDate
+    if (currentYear === startDate.getFullYear()) {
+      startMonth = startDate.getMonth(); // start from the month of startDate in the start year
     }
 
     // Determine the end month for the current year
     let endMonth = 11;
     if (currentYear === endDate.getFullYear()) {
-      endMonth = endDate.getMonth(); // end at the month of endDate
+      endMonth = endDate.getMonth(); // end at the month of endDate in the end year
     }
 
     // Initialize the counters for total visitors, new visitors, and returning visitors
@@ -294,8 +274,9 @@ async function getAllTimeVisitorData(startDate: Date, endDate: Date) {
     for (let monthIndex = 0; monthIndex <= 11; monthIndex++) {
       // Only fetch data for months within the startDate and endDate range
       if (
-        (currentYear > adjustedStartYear ||
-          (currentYear === adjustedStartYear && monthIndex >= startMonth)) &&
+        (currentYear > startDate.getFullYear() ||
+          (currentYear === startDate.getFullYear() &&
+            monthIndex >= startMonth)) &&
         (currentYear < endDate.getFullYear() ||
           (currentYear === endDate.getFullYear() && monthIndex <= endMonth))
       ) {
