@@ -19,10 +19,10 @@ import moment from 'moment';
 import sendResponse from './libs/sendResponse';
 import './scheduler_task/scheduler';
 
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per windowMs
-});
+// const limiter = rateLimit({
+//   windowMs: 1 * 60 * 1000, // 1 minute
+//   max: 100, // Limit each IP to 100 requests per windowMs
+// });
 
 const app: Application = express();
 
@@ -53,7 +53,7 @@ app.use(morganLogger);
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 
-app.use(limiter);
+// app.use(limiter);
 app.set('etag', WEB_CACHE);
 app.use('/api/v1', router);
 
