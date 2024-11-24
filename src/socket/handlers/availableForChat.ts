@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import socketStore from "../socket-store";
 
-const adminMessageHandler = (socket: Socket, io: any) => {
+const availableForChat = (socket: Socket, io: any) => {
     socket.on("available-for-chat", (message) => {
         const onlineUsers = socketStore.getOnlineUsers();
 
@@ -34,4 +34,4 @@ const adminMessageHandler = (socket: Socket, io: any) => {
     });
 };
 
-export default adminMessageHandler;
+export default availableForChat;
