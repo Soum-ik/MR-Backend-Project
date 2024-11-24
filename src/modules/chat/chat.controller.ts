@@ -1,140 +1,124 @@
-import { Request, Response } from "express";
-import httpStatus from "http-status";
-import { prisma } from "../../libs/prismaHelper";
-import sendResponse from "../../libs/sendResponse";
-import catchAsync from "../../libs/utlitys/catchSynch";
+import { Request, Response } from 'express';
+import httpStatus from 'http-status';
+import { prisma } from '../../libs/prismaHelper';
+import sendResponse from '../../libs/sendResponse';
+import catchAsync from '../../libs/utlitys/catchSynch';
 const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
-	// Fetch all users with contactForChat relationships
-	const listOfUser = await prisma.user.findMany({
-		include: {
-			contactForChat: true,
-		},
-		where: {
-			contactForChat: {
-				some: {},
-			},
-		},
-	});
+  // Fetch all users with contactForChat relationships
+  const listOfUser = await prisma.user.findMany({
+    include: {
+      contactForChat: true,
+    },
+    where: {
+      contactForChat: {
+        some: {},
+      },
+    },
+  });
 
-	// Fetch user messages and process users asynchronously
-	const filteredUsers = await Promise.all(
-		listOfUser.map(async (user) => {
-			// Fetch messages for each user
-			const userMessages = await prisma.message.findMany({
-				where: {
-					OR: [
-						{
-							senderId: user.id, recipient: {
-								role: {
-									in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
-								}
-							}
-						},
-						{
-							recipientId: user.id, sender: {
-								role: {
-									in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
-								}
-							}
-						},
-					]
-				},
-				orderBy: {
-					createdAt: "desc", // Fetch the most recent message
-				},
-			});
+  // Fetch user messages and process users asynchronously
+  const filteredUsers = await Promise.all(
+    listOfUser.map(async (user) => {
+      // Fetch messages for each user
+      const userMessages = await prisma.message.findMany({
+        where: {
+          OR: [
+            {
+              senderId: user.id,
+              recipient: {
+                role: {
+                  in: ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'],
+                },
+              },
+            },
+            {
+              recipientId: user.id,
+              sender: {
+                role: {
+                  in: ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'],
+                },
+              },
+            },
+          ],
+        },
+        orderBy: {
+          createdAt: 'desc', // Fetch the most recent message
+        },
+      });
 
+      const lastMessage =
+        userMessages.length > 0
+          ? userMessages[0]
+          : {
+              messageText: '',
+              seen: true,
+              commonkey: null,
+              createdAt: null,
+            };
+      const seenCommonKeys = new Set();
+      const totalUnseenMessage = userMessages.filter((message) => {
+        if (!message.seen && !seenCommonKeys.has(message.commonkey)) {
+          seenCommonKeys.add(message.commonkey); // Add the commonkey to the set if it's unseen and unique
+          return true;
+        }
+        return false;
+      }).length;
 
-			const lastMessage =
-				userMessages.length > 0
-					? userMessages[0]
-					: {
-						messageText: "New Contact form submitted",
-						seen: false,
-						commonkey: null,
-						createdAt: user.createdAt,
-					};
-			const seenCommonKeys = new Set();
-			const totalUnseenMessage = userMessages.filter((message) => {
-				if (!message.seen && !seenCommonKeys.has(message.commonkey)) {
-					seenCommonKeys.add(message.commonkey); // Add the commonkey to the set if it's unseen and unique
-					return true;
-				}
-				return false;
-			}).length;
+      const status = user.totalOrder === 0 ? 'New Client' : 'Repeated Client';
 
+      return {
+        fullName: user.fullName,
+        image: user.image,
 
+        createdAt: user.createdAt,
+        contactForChat: user.contactForChat,
+        totalOrder: user.totalOrder,
+        userName: user.userName,
+        id: user.id,
+        status: status,
+        isBlocked: user.block_for_chat,
+        isArchived: user.archive,
+        isBookMarked: user.book_mark,
+        lastmessageinfo: {
+          timeAndDate: userMessages[0]?.timeAndDate,
+          totalUnseenMessage,
+          ...lastMessage,
+        },
+      };
+    }),
+  );
 
-			const status = user.totalOrder === 0 ? "New Client" : "Repeated Client";
+  const totalUser = filteredUsers.length;
 
-			return {
-				fullName: user.fullName,
-				image: user.image,
+  if (totalUser === 0) {
+    return sendResponse<any>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'There is no user available for chat',
+      data: null,
+    });
+  }
 
-				createdAt: user.createdAt,
-				contactForChat: user.contactForChat,
-				totalOrder: user.totalOrder,
-				userName: user.userName,
-				id: user.id,
-				status: status,
-				isBlocked: user.block_for_chat,
-				isArchived: user.archive,
-				isBookMarked: user.book_mark,
-				lastmessageinfo: {
-					timeAndDate: userMessages[0].timeAndDate,
-					totalUnseenMessage,
-					...lastMessage,
-				}
-			};
-		})
-	);
+  // sort by last message timestamp
+  const sortedUsers = filteredUsers.sort((a, b) => {
+    const dateA = a.lastmessageinfo.createdAt
+      ? new Date(a.lastmessageinfo.createdAt).getTime()
+      : 0;
+    const dateB = b.lastmessageinfo.createdAt
+      ? new Date(b.lastmessageinfo.createdAt).getTime()
+      : 0;
 
-	const totalUser = filteredUsers.length;
+    return dateB - dateA;
+  });
 
-
-	if (totalUser === 0) {
-		return sendResponse<any>(res, {
-			statusCode: httpStatus.OK,
-			success: true,
-			message: "There is no user available for chat",
-			data: null,
-		});
-	}
-
-	// Custom sorting logic
-	const sortedUsers = filteredUsers.sort((a, b) => {
-		// First, prioritize users with unseen messages
-		if (a.lastmessageinfo.totalUnseenMessage > 0 && b.lastmessageinfo.totalUnseenMessage === 0) {
-			return -1; // a comes first
-		}
-		if (b.lastmessageinfo.totalUnseenMessage > 0 && a.lastmessageinfo.totalUnseenMessage === 0) {
-			return 1; // b comes first
-		}
-
-		// If both have unseen messages or both have no unseen messages, 
-		// sort by the most recent new message (non-default message)
-		const isANewMessage = a.lastmessageinfo.messageText !== "New Contact form submitted";
-		const isBNewMessage = b.lastmessageinfo.messageText !== "New Contact form submitted";
-
-		if (isANewMessage && !isBNewMessage) {
-			return -1; // a comes first
-		}
-		if (isBNewMessage && !isANewMessage) {
-			return 1; // b comes first
-		}
-
-		// If both have the same message status, maintain original order
-		return 0;
-	});
-
-	return sendResponse<any>(res, {
-		statusCode: httpStatus.OK,
-		success: true,
-		message: "Users with contactForChat retrieved successfully",
-		data: sortedUsers,
-	});
+  return sendResponse<any>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Users with contactForChat retrieved successfully',
+    data: sortedUsers,
+  });
 });
 
 export const chating = {
-	AvaiableForChat,
+  AvaiableForChat,
 };
