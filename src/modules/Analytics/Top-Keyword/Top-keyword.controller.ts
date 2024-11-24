@@ -9,13 +9,19 @@ import httpStatus from "http-status";
 const udpateImpressionRate = catchAsync(async (req: Request, res: Response) => {
     const { keywords } = req.query;
 
+    // Ensure `keywords` is an array. If it's a string, split it into an array.
     if (!keywords) {
-        throw new AppError(400, "Keyword is required");
+        throw new AppError(400, "Keywords are required");
     }
 
-    // Split the keyword string into an array
-    const keywordList = (keywords as string).split(',').map(k => k.trim());
+    let keywordList: string[];
 
+    // If `keywords` is a string, split by commas into an array.
+    if (typeof keywords === 'string') {
+        keywordList = keywords.split(',').map(i => i.trim()); // `trim` to remove any surrounding whitespace
+    } else {
+        throw new AppError(400, "Invalid format for keywords");
+    }
     const keywordData = await prisma.tags.findMany({
         where: {
             name: {
@@ -80,7 +86,9 @@ const getOrderByKey = catchAsync(async (req: Request, res: Response) => {
     const tags = await prisma.tags.findMany({
         include: {
             order: {
-
+                select: {
+                    totalPrice: true,
+                }
             }
         }
     });

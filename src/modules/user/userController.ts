@@ -90,7 +90,6 @@ const SignUp = async (
     // Create the token
     const token = createToken({ role, user_id: id, email: Useremail });
 
-    console.log(createUser, 'User created');
 
     return sendResponse<any>(res, {
       statusCode: httpStatus.CREATED,
