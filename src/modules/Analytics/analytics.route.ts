@@ -29,6 +29,7 @@ analyticsRouter.get('/project-details/avg-selling', ProjectDetailsController.Avg
 analyticsRouter.get('/project-details/getProjectAnalytics', getProjectAnalytics);
 
 
-analyticsRouter.get('/top-keyword', TopKeywordController.getTopKeywords);
+analyticsRouter.get('/top-keyword', TopKeywordController.udpateImpressionRate);
+analyticsRouter.put('/top-keyword/:keyword', TopKeywordController.updateClickRate);
 analyticsRouter.get('/top-keyword/order', TopKeywordController.getOrderByKey);
 export default analyticsRouter;

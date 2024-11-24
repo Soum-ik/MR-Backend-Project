@@ -38,34 +38,45 @@ const adminMessageHandler = (socket: Socket, io: any) => {
     socket.on("delete-message", (message) => {
         const onlineUsers = socketStore.getOnlineUsers();
 
-        // Find the target user's socket by userId
+        // Get the target user's socket
         const targetUserSocket = onlineUsers.find(user => user.userId === message.userId);
 
-        // Find all admin user sockets, excluding the current admin
-        const adminUserSockets = onlineUsers.filter(
-            user => ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(user.role) && user.socketId !== socket.id
+        // Get all admin user sockets
+        const adminUserSockets = onlineUsers.filter(user =>
+            ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(user.role)
         );
 
-        // Send the message to the targeted user if found
-        if (targetUserSocket) {
-            io.to(targetUserSocket.socketId).emit("delete-message", {
-                from: "ADMIN",
-                ...message
-            });
-        }
-
-        // Notify all other admins about the action
-        adminUserSockets.forEach(adminSocket => {
-            if (adminSocket.socketId !== socket.id) { //
+        if (message.role === 'USER') {
+            // If the sender is a user, notify all admins
+            adminUserSockets.forEach(adminSocket => {
                 io.to(adminSocket.socketId).emit("delete-message", {
-                    text: `Message sent to user ${message.userId}: ${message.text}`,
+                    text: `Message deleted by user ${message.userId}: ${message.text}`,
+                    from: "USER",
+                    ...message
+                });
+            });
+        } else if (['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(message.role)) {
+            // If the sender is an admin, send the message to the target user and notify all admins
+            if (targetUserSocket) {
+                io.to(targetUserSocket.socketId).emit("delete-message", {
                     from: "ADMIN",
-                    targetUser: { userId: targetUserSocket?.userId || null },
                     ...message
                 });
             }
-        });
+
+            adminUserSockets.forEach(adminSocket => {
+                if (adminSocket.socketId !== socket.id) {
+                    io.to(adminSocket.socketId).emit("delete-message", {
+                        text: `Message sent to user ${message.userId}: ${message.text}`,
+                        from: "ADMIN",
+                        targetUser: { userId: targetUserSocket?.userId || null },
+                        ...message
+                    });
+                }
+            });
+        }
     });
+
 
     // Handle typing indication
     socket.on("typing", (isTyping, userId) => {

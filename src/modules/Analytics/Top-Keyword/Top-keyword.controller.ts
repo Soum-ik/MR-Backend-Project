@@ -4,23 +4,22 @@ import { prisma } from "../../../libs/prismaHelper";
 import AppError from "../../../errors/AppError";
 import sendResponse from "../../../libs/sendResponse";
 import httpStatus from "http-status";
-import { ProjectStatus } from "../../Order_page/Order_page.constant";
 
 
-const getTopKeywords = catchAsync(async (req: Request, res: Response) => {
-    const { keyword } = req.query;
+const udpateImpressionRate = catchAsync(async (req: Request, res: Response) => {
+    const { keywords } = req.query;
 
-    if (!keyword) {
+    if (!keywords) {
         throw new AppError(400, "Keyword is required");
     }
 
     // Split the keyword string into an array
-    const keywords = (keyword as string).split(',').map(k => k.trim());
+    const keywordList = (keywords as string).split(',').map(k => k.trim());
 
     const keywordData = await prisma.tags.findMany({
         where: {
             name: {
-                in: keywords
+                in: keywordList
             }
         }
     });
@@ -29,12 +28,11 @@ const getTopKeywords = catchAsync(async (req: Request, res: Response) => {
         await prisma.tags.updateMany({
             where: {
                 name: {
-                    in: keywords
+                    in: keywordList
                 }
             },
             data: {
                 impressions: { increment: 1 },
-                clicks: { increment: 1 }
             }
         });
     }
@@ -48,6 +46,34 @@ const getTopKeywords = catchAsync(async (req: Request, res: Response) => {
 
 });
 
+
+const updateClickRate = catchAsync(async (req: Request, res: Response) => {
+    const { keyword } = req.params;
+
+    const updateKeyword = await prisma.tags.update({
+        where: {
+            name: keyword
+        },
+        data: {
+            clicks: { increment: 1 }
+        }
+    })
+
+    if (updateKeyword) {
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: `${keyword} update the click rate`
+
+        })
+    } else {
+        return sendResponse(res, {
+            statusCode: httpStatus.NOT_FOUND,
+            success: false,
+            message: `${keyword} not found`
+        });
+    }
+})
 
 const getOrderByKey = catchAsync(async (req: Request, res: Response) => {
     // Get all tags with their order details
@@ -104,8 +130,9 @@ const getOrderByKey = catchAsync(async (req: Request, res: Response) => {
 
 
 export const TopKeywordController = {
-    getTopKeywords,
-    getOrderByKey
+    getOrderByKey,
+    updateClickRate,
+    udpateImpressionRate
 }
 
 

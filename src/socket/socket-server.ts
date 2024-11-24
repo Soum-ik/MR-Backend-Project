@@ -49,6 +49,8 @@ const registerSocketServer = (server: Server) => {
     adminViewUsersHandler(socket, io)
     userMessageHandler(socket, io)
 
+    adminMessageHandler(socket, io)
+
     // order-chat
     orderChatHandler(socket, io)
 
