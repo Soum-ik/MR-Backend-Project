@@ -295,17 +295,15 @@ model UploadDesign {
   createdAt      DateTime @default(now())
   updateAt       DateTime @updatedAt
 
-  folder String?
+  folder String
 
-  subFolder String?
+  subFolder String
 
   industrys String[]
 
   designs  String[]
   designId String   @unique
 }
-
- 
 
 model FeatureAllFolder {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
@@ -315,11 +313,19 @@ model FeatureAllFolder {
 }
 
 model AllSubFolder {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  slug      String
-  subFolder String
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  slug       String
+  subFolder  String
   folderName String
-  order     Int
+  order      Int
+}
+
+model AllDesignsByFolderSubFolder {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  folderName    String
+  subFolderName String
+  order         Int
+  designId      String @unique
 }
 
 model AllDesigns {
