@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import socketStore from "../socket-store";
 
-const availableForChat = (socket: Socket, io: any) => {
+const inboxCount = (socket: Socket, io: any) => {
     socket.on("available-for-chat", (message) => {
         const onlineUsers = socketStore.getOnlineUsers();
 
@@ -18,7 +18,9 @@ const availableForChat = (socket: Socket, io: any) => {
             // Send to all admins
             const adminUserSockets = onlineUsers.filter(user => ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(user.role));
             adminUserSockets.forEach(adminSocket => {
-                io.to(adminSocket.socketId).emit("newChatMessage", message);
+                if (adminSocket.socketId !== socket.id) { // Don't send back to the sender
+                    io.to(adminSocket.socketId).emit("newChatMessage", message);
+                }
             });
             const targetUserSocket = onlineUsers.find(user => user.userId === message.userId);
             if (targetUserSocket) {
@@ -28,10 +30,12 @@ const availableForChat = (socket: Socket, io: any) => {
             // If the sender is a user, send the message to the target user
             const adminUserSockets = onlineUsers.filter(user => ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(user.role));
             adminUserSockets.forEach(adminSocket => {
-                io.to(adminSocket.socketId).emit("newChatMessage", message);
+                if (adminSocket.socketId !== socket.id) { // Don't send back to the sender
+                    io.to(adminSocket.socketId).emit("newChatMessage", message);
+                }
             });
         }
     });
 };
 
-export default availableForChat;
+export default inboxCount;
