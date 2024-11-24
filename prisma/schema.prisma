@@ -152,27 +152,27 @@ model Notification {
 }
 
 model Message {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  userImage      String?
-  senderName     String?
-  senderUserName String?
-  senderId       String   @db.ObjectId
-  recipientId    String   @db.ObjectId
-  messageText    String?
-  attachment     Json[]   @default([])
-  createdAt      DateTime @default(now())
-  isFromAdmin    Role?
-  customOffer    Json?
-  timeAndDate    String
-  contactForm    Json?
-  commonkey      String
-  seen           Boolean  @default(false)
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userImage       String?
+  senderName      String?
+  senderUserName  String?
+  senderId        String   @db.ObjectId
+  recipientId     String   @db.ObjectId
+  messageText     String?
+  attachment      Json[]   @default([])
+  createdAt       DateTime @default(now())
+  isFromAdmin     Role?
+  customOffer     Json?
+  timeAndDate     String
+  contactForm     Json?
+  commonkey       String
+  seen            Boolean  @default(false)
   // new added
-  replyTo        Json?
+  replyTo         Json?
   // New field to track if the message has been read
-  read           Boolean  @default(false)
-
-  hiddenFromAdmin Boolean @default(false)
+  read            Boolean  @default(false)
+  seenBy          String[] @default([])
+  hiddenFromAdmin Boolean  @default(false)
 
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])
   recipient    User          @relation("ReceivedMessages", fields: [recipientId], references: [id])

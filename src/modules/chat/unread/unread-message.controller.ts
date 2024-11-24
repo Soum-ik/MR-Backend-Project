@@ -6,6 +6,7 @@ import { Role } from "@prisma/client";
 import { TokenCredential } from "../../../libs/authHelper";
 import catchAsync from "../../../libs/utlitys/catchSynch";
 import AppError from "../../../errors/AppError";
+import { USER_ROLE } from "../../user/user.constant";
 
 
 const getUnseenMessageController = catchAsync(async (req: Request, res: Response) => {

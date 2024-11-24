@@ -70,6 +70,7 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 			return {
 				fullName: user.fullName,
 				image: user.image,
+
 				createdAt: user.createdAt,
 				contactForChat: user.contactForChat,
 				totalOrder: user.totalOrder,
@@ -80,8 +81,9 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
 				isArchived: user.archive,
 				isBookMarked: user.book_mark,
 				lastmessageinfo: {
-					...lastMessage,
+					timeAndDate: userMessages[0].timeAndDate,
 					totalUnseenMessage,
+					...lastMessage,
 				}
 			};
 		})
