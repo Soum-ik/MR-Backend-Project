@@ -11,7 +11,7 @@ const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 const stripeWebhook = async (req: Request, res: Response) => {
   const event = req.body;
-  console.log('all event', event);
+  // console.log('all event', event);
 
   // try {
   //     event = stripe.webhooks.constructEvent(

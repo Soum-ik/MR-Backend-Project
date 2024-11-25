@@ -23,7 +23,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
 
   const { data, tags } = req.body;
   console.log(req.body, 'req.body');
- 
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: data?.items.map((item: any) => ({
@@ -57,9 +57,9 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   });
 
 
-  console.log(
-    "Payment successfully recorded in the database. but it's still pending now",
-  );
+  // console.log(
+  //   "Payment successfully recorded in the database. but it's still pending now",
+  // );
 
   // Create an order linked to the payment and user
   if (!payment) {
@@ -71,27 +71,29 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   const order = await prisma.order.create({
     data: {
       id: payment.orderId,
-      stripeId: session.id.split('_').join(''),
-      userId: data?.userId,
-      projectName: data?.title,
+      stripeId: session.id.replace(/_/g, ''),
+      userId: data?.userId || '',
+      projectName: data?.title || '',
       projectNumber: projectNumber || '',
-      items: data?.originalItems,
+      items: data?.originalItems || [],
       projectType: data?.projectType || '',
       projectImage: data?.projectImage || '',
-      duration: data?.deliveryDuration?.toString(),
-      durationHours: data?.durationHours?.toString(),
-      from: data?.from,
-      totalPrice: data?.totalAmount.toString(),
+      duration: data?.deliveryDuration?.toString() || '',
+      durationHours: data?.durationHours?.toString() || '',
+      from: data?.from || '',
+      totalPrice: data?.totalAmount?.toString() || '0',
       paymentStatus: PaymentStatus.PENDING,
-      totalQuantity: data?.totalQuantity.toString(),
+      totalQuantity: data?.totalQuantity?.toString() || '0',
       trackProjectStatus: OrderStatus.PROJECT_PLACED,
       projectStatus: ProjectStatus.WAITING,
-      requirements: data?.requirements,
-      bulletPoints: data?.bulletPoints,
+      requirements: data?.requirements || [],
+      bulletPoints: data?.bulletPoints || [],
       OrderToken: orderToken,
-      orderFrom: data?.orderFrom,
+      orderFrom: data?.orderFrom || '',
     },
   });
+
+  console.log('Order created:', order);
 
   // Only create tags that don't already exist
   const existingTags = await prisma.tags.findMany({
@@ -102,18 +104,28 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
     }
   });
 
+
+  console.log(  'tags', existingTags);
+  
   const existingTagNames = new Set(existingTags.map(tag => tag.name));
 
   const newTags = tags?.filter((tag: string) => !existingTagNames.has(tag.trim()));
 
+  console.log(newTags);
+
+
   if (newTags?.length) {
-    await prisma.tags.createMany({
+    const created = await prisma.tags.createMany({
       data: newTags.map((tag: string) => ({
         name: tag.trim(),
-        // orderId: order.id,
+        orderId: order.id,
       }))
     });
+
+    console.log(created, 'created');
+    
   }
+
 
   if (!order) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull');
