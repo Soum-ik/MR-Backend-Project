@@ -30,7 +30,7 @@ const authSocket = async (socket: CustomSocket, next: (err?: any) => void) => {
                 });
             }
             // Attach the decoded token data (user) to the socket object
-            socket.user = decoded
+            socket.user = decoded as JwtPayload
             next(); // Continue to the next middleware or handler
         } else {
             return sendSocketResponse(socket, {

@@ -97,7 +97,12 @@ const updateUnseenMessageController = catchAsync(async (req: Request, res: Respo
         }
     })
     if (findMessage.length === 0) {
-        throw new AppError(httpStatus.BAD_REQUEST, "No message found")
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "No message found!",
+            data: null
+        });
     }
 
 
