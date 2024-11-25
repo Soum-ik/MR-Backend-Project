@@ -103,10 +103,10 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
   const sortedUsers = filteredUsers.sort((a, b) => {
     const dateA = a.lastmessageinfo.createdAt
       ? new Date(a.lastmessageinfo.createdAt).getTime()
-      : 0;
+      : new Date(a.createdAt).getTime();
     const dateB = b.lastmessageinfo.createdAt
       ? new Date(b.lastmessageinfo.createdAt).getTime()
-      : 0;
+      : new Date(b.createdAt).getTime();
 
     return dateB - dateA;
   });
