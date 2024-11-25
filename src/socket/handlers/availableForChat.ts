@@ -8,11 +8,11 @@ const availableForChat = (socket: Socket, io: any) => {
 
 
         // Get the target user's socket
-        const targetUserSocket = onlineUsers.find(user => user.userId === message.userId);
-        if (!targetUserSocket) {
-            // If sender is not found in the online users, return
-            return;
-        }
+        // const targetUserSocket = onlineUsers.find(user => user.userId === message.userId);
+        // if (!targetUserSocket) {
+        //     // If sender is not found in the online users, return
+        //     return;
+        // }
 
         // If the sender is an admin (role check)
         if (['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
