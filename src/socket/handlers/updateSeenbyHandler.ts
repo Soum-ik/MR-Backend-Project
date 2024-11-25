@@ -1,52 +1,45 @@
-import { Socket } from "socket.io";
-import { prisma } from "../../libs/prismaHelper";
+import { Socket } from 'socket.io';
+import { prisma } from '../../libs/prismaHelper';
+import socketStore from '../socket-store';
 
 const updateSeenBy = (socket: Socket, io: any) => {
-    socket.on('seen', async (data) => {
-        try {
-            // Validate `data.userId` exists
-            if (!data?.userId) {
-                throw new Error("User ID is required");
-            }
+  socket.on('seen', async (data) => {
+    const onlineUsers = socketStore.getOnlineUsers();
 
-            // Find messages that need to be updated
-            const messagesToUpdate = await prisma.message.findMany({
-                where: {
-                    OR: [
-                        { recipientId: data.userId as string },
-                        { senderId: data.userId as string },
-                    ],
-                },
-            });
+    const targetUserSocket = onlineUsers.find(
+      (user) => user.userId === data.userId,
+    );
 
-            // Filter messages where `data.userId` is not already in `seenBy`
-            const messagesNeedingUpdate = messagesToUpdate.filter(
-                (message) => !message.seenBy.includes(data.userId)
-            );
+    console.log('targetUserSocket', targetUserSocket);
 
-            // Update `seenBy` field for the filtered messages
-            if (messagesNeedingUpdate.length > 0) {
-                await Promise.all(
-                    messagesNeedingUpdate.map((message) =>
-                        prisma.message.update({
-                            where: { id: message.id },
-                            data: {
-                                seenBy: {
-                                    push: data.userId, // Adds userId to the seenBy array
-                                },
-                            },
-                        })
-                    )
-                );
-            }
-
-            // Emit the updated data back to the clients
-            io.emit('getSeenBy', { userId: data.userId, updatedMessages: messagesNeedingUpdate });
-        } catch (error) {
-            console.error("Error updating seenBy field:", error);
-            socket.emit('error', { message: "Failed to update seenBy field", error: error });
-        }
+    const message = await prisma.message.updateMany({
+      where: {
+        OR: [
+          { recipientId: data.userId as string },
+          { senderId: data.userId as string },
+        ],
+      },
+      data: {
+        seenBy: {
+          push: data.userId,
+        },
+        seen: true,
+      },
     });
-};
 
+    const messageData = await prisma.message.findMany({
+      where: {
+        OR: [
+          { recipientId: data?.recipientId as string },
+          { senderId: data?.recipientId as string },
+        ],
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    io.to(targetUserSocket?.socketId).emit('getSeenBy', messageData[0]);
+  });
+};
 export default updateSeenBy;
