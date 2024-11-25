@@ -32,6 +32,7 @@ const sendMessage = async (req: Request, res: Response) => {
     timeAndDate,
     recipientId,
     uniqueId,
+    seenBy
   } = req.body;
 
   // If the role is admin, recipientId is required
@@ -82,6 +83,7 @@ const sendMessage = async (req: Request, res: Response) => {
             timeAndDate: converString,
             commonkey,
             uniqueId,
+            seenBy,
           },
         });
 
@@ -117,6 +119,7 @@ const sendMessage = async (req: Request, res: Response) => {
           timeAndDate: converString,
           commonkey,
           uniqueId,
+          seenBy
         },
       });
 
@@ -149,6 +152,7 @@ const sendMessage = async (req: Request, res: Response) => {
               timeAndDate: converString,
               commonkey,
               uniqueId,
+              seenBy
             },
           });
 
