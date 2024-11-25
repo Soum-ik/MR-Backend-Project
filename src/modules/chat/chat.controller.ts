@@ -50,19 +50,14 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
         userMessages.length > 0
           ? userMessages[0]
           : {
-              messageText: '',
-              seen: true,
-              commonkey: null,
-              createdAt: null,
-            };
-      const seenCommonKeys = new Set();
-      const totalUnseenMessage = userMessages.filter((message) => {
-        if (!message.seen && !seenCommonKeys.has(message.commonkey)) {
-          seenCommonKeys.add(message.commonkey); // Add the commonkey to the set if it's unseen and unique
-          return true;
-        }
-        return false;
-      }).length;
+            messageText: '',
+            seen: true,
+            commonkey: null,
+            createdAt: null,
+          };
+      const totalUnseenMessage = userMessages.filter(message =>
+        !message.seen && message.seenBy && !message.seenBy.includes(user.id)
+      ).length;
 
       const status = user.totalOrder === 0 ? 'New Client' : 'Repeated Client';
 
