@@ -1,12 +1,12 @@
+import { Role } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
+import AppError from '../../../errors/AppError';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { USER_ROLE } from '../../user/user.constant';
-import AppError from '../../../errors/AppError';
-import { Role } from '@prisma/client';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -31,6 +31,7 @@ const sendMessage = async (req: Request, res: Response) => {
     customOffer,
     timeAndDate,
     recipientId,
+    uniqueId,
   } = req.body;
 
   // If the role is admin, recipientId is required
@@ -80,6 +81,7 @@ const sendMessage = async (req: Request, res: Response) => {
             customOffer,
             timeAndDate: converString,
             commonkey,
+            uniqueId,
           },
         });
 
@@ -114,6 +116,7 @@ const sendMessage = async (req: Request, res: Response) => {
           customOffer,
           timeAndDate: converString,
           commonkey,
+          uniqueId,
         },
       });
 
@@ -145,6 +148,7 @@ const sendMessage = async (req: Request, res: Response) => {
               customOffer,
               timeAndDate: converString,
               commonkey,
+              uniqueId,
             },
           });
 
@@ -179,7 +183,6 @@ const sendMessage = async (req: Request, res: Response) => {
   }
 };
 
-
 // Update message
 const updateMessage = async (req: Request, res: Response) => {
   const { user_id } = req.user as TokenCredential;
@@ -193,13 +196,8 @@ const updateMessage = async (req: Request, res: Response) => {
       message: 'Token are required!',
     });
   }
-  const {
-    messageText,
-    attachment,
-    replyTo,
-    customOffer,
-    timeAndDate,
-  } = req.body;
+  const { messageText, attachment, replyTo, customOffer, timeAndDate } =
+    req.body;
 
   const message = await prisma.message.update({
     where: {
@@ -228,7 +226,7 @@ const updateMessage = async (req: Request, res: Response) => {
     data: message,
     message: 'Message updated successfully',
   });
-}
+};
 
 // Reply to a message
 const replyToMessage = async (req: Request, res: Response) => {
@@ -486,18 +484,16 @@ const deleteMessage = async (req: Request, res: Response) => {
       },
     });
 
-
     if (!deleteMessage) {
-      throw new AppError(httpStatus.NOT_FOUND, "Message not found!");
+      throw new AppError(httpStatus.NOT_FOUND, 'Message not found!');
     }
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
       message: 'Message deleted successfully',
-      data: deleteMessage
+      data: deleteMessage,
     });
-
   } catch (error) {
     console.error(error);
     return sendResponse(res, {
@@ -568,8 +564,6 @@ const deleteConversation = async (req: Request, res: Response) => {
     });
   }
 };
-
-
 
 export const messageControlller = {
   getMessages,

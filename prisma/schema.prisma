@@ -166,6 +166,7 @@ model Message {
   timeAndDate     String
   contactForm     Json?
   commonkey       String
+  uniqueId        String
   seen            Boolean  @default(false)
   // new added
   replyTo         Json?
