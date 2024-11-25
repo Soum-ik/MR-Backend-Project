@@ -15,6 +15,7 @@ import adminMessageCheckerHandler from "./handlers/adminsMessageChecker";
 import availableForChat from "./handlers/availableForChat";
 import deleteMessage from "./handlers/deleteMessage.controller";
 import UpdateUnseen from "./handlers/updateSeen";
+import updateSeenBy from "./handlers/updateSeenbyHandler";
 
 const registerSocketServer = (server: Server) => {
   const io = require("socket.io")(server, {
@@ -56,6 +57,9 @@ const registerSocketServer = (server: Server) => {
 
     // order-chat
     orderChatHandler(socket, io)
+
+    // updateSeenBy
+    updateSeenBy(socket, io)
 
     //deleteMessage
     deleteMessage(socket, io)
