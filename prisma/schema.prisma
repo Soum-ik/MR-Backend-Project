@@ -166,6 +166,7 @@ model Message {
   timeAndDate     String
   contactForm     Json?
   commonkey       String
+  uniqueId        String
   seen            Boolean  @default(false)
   // new added
   replyTo         Json?
@@ -463,21 +464,22 @@ model Order {
   OrderExtensionRequest    OrderExtensionRequest[]
   designerName             String?                 @default("")
   projectTips              Json?
-  tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
-  tagsId                   String?                 @db.ObjectId
   review                   review[]
   projectThumbnail         String?
   deliveryAttempt          Int?                    @default(0)
+  tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
+  tagsId                   String?                 @db.ObjectId
 }
 
 model tags {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String   @unique
-  impressions Int      @default(0)
-  clicks      Int      @default(0)
-  order       Order[]  @relation("OrderToTags")
-  createdAt   DateTime @default(now())
-  updateAt    DateTime @updatedAt
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String  @unique
+  impressions Int     @default(0)
+  clicks      Int     @default(0)
+  order       Order[] @relation("OrderToTags")
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
 }
 
 model OrderExtensionRequest {

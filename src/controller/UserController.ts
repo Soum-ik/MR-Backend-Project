@@ -378,7 +378,7 @@ const updateUser = async (req: Request, res: Response) => {
             },
         });
 
-        console.log("User updated:", updatedUser);
+        
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,

@@ -31,7 +31,7 @@ const authenticateToken = (...requiredRole: TUserRole[]) => {
                 }
             })
 
-            console.log(user);
+  
             
 
             if (!user) {

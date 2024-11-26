@@ -56,6 +56,14 @@ export const UploadDesign = async (req: Request, res: Response) => {
                 }
             });
 
+            for (const tag of validatedData.tags) {
+                await prisma.tags.create({
+                    data: {
+                        name: tag,
+                    }
+                })
+            }
+
 
             const folder_check = await prisma.folders.findUnique({
                 where: {
