@@ -22,8 +22,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   const projectNumber = await projectNumberCreator();
 
   const { data, tags } = req.body;
-  console.log(req.body, 'req.body');
-
+ 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: data?.items.map((item: any) => ({
@@ -94,7 +93,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
     },
   });
 
-  console.log('Order created:', order);
+ 
 
   const existingTags = await prisma.tags.findMany({
     where: {
@@ -107,7 +106,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   const existingTagNames = new Set(existingTags.map((tag) => tag.name));
   const newTags = tags?.filter((tag: string) => !existingTagNames.has(tag.trim()));
 
-  console.log('New tags to create:', newTags);
+ 
 
   if (newTags?.length) {
     try {
@@ -130,7 +129,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   if (!order) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Payment not sucessfull');
   }
-  console.log("Order successfully created with status 'PENDING'.");
+ 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

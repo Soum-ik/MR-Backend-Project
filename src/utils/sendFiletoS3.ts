@@ -40,10 +40,7 @@ export const uploadFileToS3 = (
         s3Client
             .send(command)
             .then(() => {
-                console.log(
-                    `File uploaded successfully to ${bucketName}/${fileName}`,
-                );
-                // Delete the file asynchronously
+          
                 
                 resolve(`${bucketName}/${fileName}`);
             })
@@ -78,10 +75,7 @@ export const uploadMultipleFilesToS3 = (
                 s3Client
                     .send(command)
                     .then(() => {
-                        console.log(
-                            `File uploaded successfully to ${bucketName}/${fileName}`,
-                        );
-
+        
                         // Delete the file asynchronously
                         // fs.unlink(filePath, (err) => {
                         //     if (err) {

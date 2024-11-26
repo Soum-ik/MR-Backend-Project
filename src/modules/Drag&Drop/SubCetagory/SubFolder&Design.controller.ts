@@ -12,7 +12,7 @@ export const getAlldesignsSub_Folders = catchAsync(
       subFolderName?: string;
     };
 
-    console.log('design id');
+ 
 
     if (!folderName || !subFolderName) {
       throw new AppError(httpStatus.NOT_FOUND, 'Folders missing');
@@ -70,7 +70,7 @@ export const getAlldesignsSub_Folders = catchAsync(
               designId: design.designId,
             },
           });
-          console.log(`Created new folder: ${folderName}`);
+ 
           return newDesign;
         } catch (error) {
           console.error(`Error creating subfolder ${folderName}:`, error);

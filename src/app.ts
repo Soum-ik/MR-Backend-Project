@@ -48,7 +48,7 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 // Apply morganLogger before other middlewares
-app.use(morganLogger);
+// app.use(morganLogger);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());

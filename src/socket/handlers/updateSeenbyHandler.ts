@@ -1,11 +1,18 @@
 import { Socket } from 'socket.io';
 import { prisma } from '../../libs/prismaHelper';
 import socketStore from '../socket-store';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
+import { Role } from '@prisma/client';
 
 const updateSeenBy = (socket: Socket, io: any) => {
   socket.on('seen', async (data) => {
     try {
+
+      const user = socket.user;
+
       const onlineUsers = socketStore.getOnlineUsers();
+ 
 
       const targetUserSocket = onlineUsers.find(
         (user) => user.userId === data.userId,
@@ -21,27 +28,48 @@ const updateSeenBy = (socket: Socket, io: any) => {
         },
       });
 
-      const uniqueUpdates = [];
 
-      for (const message of messages) {
-        // Check if userId is already in seenBy
-        if (!message.seenBy.includes(data.userId)) {
-          uniqueUpdates.push(
-            prisma.message.update({
-              where: { id: message.uniqueId },
-              data: {
-                seenBy: {
-                  push: data.userId,
-                },
-                seen: true,
-              },
-            }),
-          );
-        }
+      if (messages.length === 0) {
+        return new AppError(httpStatus.NOT_FOUND, 'No messages')
       }
 
+      if (['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN'].includes(user.role)) {
+        await prisma.message.updateMany({
+          where: {
+            OR: [
+              { recipientId: data.userId, senderId: data.recipientId },
+              { recipientId: data.recipientId, senderId: data.userId },
+            ]
+          }, data: {
+            seenBy: {
+              push: data.userId
+            }
+          }
+        })
+
+      }
+
+      // const uniqueUpdates = [];
+
+      // for (const message of messages) {
+      //   // Check if userId is already in seenBy
+      //   if (!message.seenBy.includes(data.userId)) {
+      //     uniqueUpdates.push(
+      //       prisma.message.update({
+      //         where: { id: message. },
+      //         data: {
+      //           seenBy: {
+      //             push: data.userId,
+      //           },
+      //           seen: true,
+      //         },
+      //       }),
+      //     );
+      //   }
+      // }
+
       // Execute all updates in parallel
-      await prisma.$transaction(uniqueUpdates);
+      // await prisma.$transaction(uniqueUpdates);
 
       // Fetch the updated latest message for the recipient
       const messageData = await prisma.message.findMany({
@@ -64,3 +92,4 @@ const updateSeenBy = (socket: Socket, io: any) => {
 };
 
 export default updateSeenBy;
+  

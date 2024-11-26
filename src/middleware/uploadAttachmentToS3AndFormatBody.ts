@@ -37,7 +37,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 const inputPath = file.path;
                 const outputPath = path.join(processedDir, `${bucketNameWatermark}-${file.filename}`);
                 const fileName = `${bucketNameWatermark}-${file.filename}`;
-                console.log('fileName checking 1', fileName);
+ 
 
                 try {
 
@@ -86,7 +86,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 const file = files[0];
                 const originalFileName = `${bucketName}-${file.filename}`;
 
-                console.log(file.mimetype);
+        
                 await uploadFileToS3(bucketName, file.path, originalFileName, 'public-read');
 
                 if (file.mimetype.includes('image') && !file.mimetype.includes('.photoshop') && !file.mimetype.includes('.psd') && !file.mimetype.includes('.ai') && !file.mimetype.includes('.xd')) {
@@ -187,7 +187,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
             await fs.mkdir(uploads, { recursive: true });
 
             const uploadsFiles = await fs.readdir(uploads);
-            console.log(uploadsFiles, 'uploadsfiles');
+ 
 
             const processedFiles = await fs.readdir(processedDir);
 
@@ -198,8 +198,7 @@ export const uploadAttachmentToS3AndFormatBody = () => {
                 cleanupPromises.push(...uploadsFiles.map(async file => {
                     const filePath = path.join(uploads, file);
                     try {
-                        await fs.stat(filePath);
-                        console.log(file, 'file exists and attempting to remove');
+                        await fs.stat(filePath); 
                         await deleteFile(filePath);
                     } catch (error) {
                         console.log(file, 'file does not exist or cannot be accessed');

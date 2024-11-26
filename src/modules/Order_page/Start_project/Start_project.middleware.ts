@@ -11,7 +11,7 @@ import { PaymentStatus } from "../../payment/payment.constant";
 const authenticate_for_startProject = async (req: Request, res: Response, next: NextFunction) => {
     const { authorization: authHeader, ordertoken } = req.headers;
 
-    console.log(req.headers);
+ 
 
 
     if (!authHeader) {
@@ -37,7 +37,7 @@ const authenticate_for_startProject = async (req: Request, res: Response, next: 
             }
         });
         if (!order_status) {
-            console.log(order_status);
+ 
             return sendResponse(res, {
                 statusCode: httpStatus.NOT_FOUND,
                 success: false,

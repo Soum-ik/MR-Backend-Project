@@ -193,7 +193,7 @@ const deleteDesign = async (req: Request, res: Response) => {
     try {
         // Extract the design ID from the request parameters
         const { id } = req.params;
-        console.log(id);
+ 
 
         // Check if the design exists in the database
         const design = await prisma.uploadDesign.delete({

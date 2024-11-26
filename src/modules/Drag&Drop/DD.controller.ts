@@ -55,7 +55,7 @@ const getAllSubFolderByFolder = catchAsync(
     );
 
     if (foldersToCreate.length === 0) {
-      console.log('All folders already exist');
+ 
       const data = await prisma.allSubFolder.findMany({
         where: { folderName: getFolderName?.folder },
       });
@@ -82,7 +82,7 @@ const getAllSubFolderByFolder = catchAsync(
               folderName: getFolderName?.folder || '',
             },
           });
-          console.log(`Created new folder: ${folderName}`);
+ 
           return newFolder;
         } catch (error) {
           console.error(`Error creating subfolder ${folderName}:`, error);

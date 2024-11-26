@@ -13,6 +13,8 @@ const availableForChat = (socket: Socket, io: any) => {
         (user) => user.userId === message.userId,
       );
 
+      // await  
+
       if (targetUserSocket) {
         io.to(targetUserSocket.socketId).emit('newChatMessage', message);
       }

@@ -88,8 +88,7 @@ const startContact = async (req: Request, res: Response) => {
       }),
     ),
   );
-
-  console.log('Messages created:', newMessages);
+ 
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,

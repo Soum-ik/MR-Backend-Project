@@ -20,7 +20,7 @@ const uploadImage = async (req: MulterRequest, res: Response) => {
       });
     }
 
-    console.log(req.files);
+ 
     
 
     let filesArray: Express.Multer.File[] = [];
@@ -39,7 +39,7 @@ const uploadImage = async (req: MulterRequest, res: Response) => {
         folder: 'folder_name', // Customize your Cloudinary folder
       });
 
-      console.log(result);
+ 
 
 
       return {

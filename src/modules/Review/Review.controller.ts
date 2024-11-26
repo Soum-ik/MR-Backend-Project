@@ -70,7 +70,7 @@ const getReviewsByOrderId = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
-    console.log('reciving data');
+ 
 
     const reviews = await prisma.review.findMany({
         where: {
@@ -102,7 +102,7 @@ const getAllOwnerReviews = catchAsync(async (req: Request, res: Response) => {
         },
 
     });
-    console.log(reviews, 'review recived');
+ ;
 
 
     return sendResponse(res, {

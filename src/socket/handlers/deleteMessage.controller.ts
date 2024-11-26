@@ -5,7 +5,7 @@ const deleteMessage = (socket: Socket, io: any) => {
     socket.on("notifi:delete-message", (message) => {
         const onlineUsers = socketStore.getOnlineUsers();
         const user = socket.user
-        console.log(user);
+  
 
         // Get the target user's socket
         const targetUserSocket = onlineUsers.find(user => user.userId === message.userId);

@@ -66,7 +66,7 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
         return acc;
     }, {} as Record<string, number>);
 
-    console.log(paymentsByUser);
+ 
 
     const usersWithPayments = users.map(user => {
         return {

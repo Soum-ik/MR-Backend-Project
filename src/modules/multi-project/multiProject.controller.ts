@@ -11,7 +11,7 @@ const upsertMultiProject = async (req: Request, res: Response) => {
   try {
     // Check if the project already exists
     const existingProjects = await prisma.multiProject.findMany();
-    console.log("exist", existingProjects);
+
 
     if (existingProjects.length > 0 && id) {
       // Update the existing project

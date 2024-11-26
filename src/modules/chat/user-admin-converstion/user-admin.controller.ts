@@ -462,7 +462,7 @@ const getMessages = async (req: Request, res: Response) => {
 const deleteMessage = async (req: Request, res: Response) => {
   const { commonkey } = req.params;
   const { user_id, role } = req.user as TokenCredential;
-  console.log(commonkey, 'common key');
+ 
 
   try {
     // Fetch the message from the database
@@ -471,8 +471,7 @@ const deleteMessage = async (req: Request, res: Response) => {
         commonkey: commonkey as string,
       },
     });
-    console.log(message, 'delete console.log');
-
+ 
     // Check if message exists
     if (message.length === 0) {
       return sendResponse(res, {

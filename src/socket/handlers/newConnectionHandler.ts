@@ -6,8 +6,7 @@ const newConnectionHandler = async (socket: Socket, io: any) => {
   print.green("user connected 💥" + socket.id);
   const userDetails = socket.user;
 
-  socket.on("message", (msg) => {
-    console.log("Message received: " + JSON.stringify(msg));
+  socket.on("message", (msg) => { 
     io.emit("message", msg); // Broadcast message to all connected clients
   });
 

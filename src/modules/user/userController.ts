@@ -7,7 +7,7 @@ import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 
 import { SignupRequestBody } from './user.interface';
-
+import bcrypt from 'bcrypt'
 export interface User {
   user_id?: string;
   role?: string;
@@ -63,6 +63,8 @@ const SignUp = async (
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Create the new user
     const createUser = await prisma.user.create({
       data: {
@@ -70,7 +72,7 @@ const SignUp = async (
         fullName,
         userName,
         email,
-        password,
+        password: hashedPassword,
         affiliateId: affiliate_link
       },
     });
@@ -115,9 +117,9 @@ const SignIn = async (
   try {
     const { password, email } = req.body;
 
-    // Find user by email and password
+    // Find user by email
     const user = await prisma.user.findUnique({
-      where: { email, password },
+      where: { email },
       select: {
         address: true,
         city: true,
@@ -133,6 +135,7 @@ const SignIn = async (
         SocialMediaLinks: true,
         role: true,
         language: true,
+        password: true, // Include password for comparison
       },
     });
 
@@ -145,7 +148,20 @@ const SignIn = async (
       });
     }
 
-    const { role, id, email: Useremail } = user;
+    // Compare the hashed password with the provided password
+    const isPasswordValid = bcrypt.compare(password, user.password as string);
+
+    if (!isPasswordValid) {
+      return sendResponse(res, {
+        statusCode: httpStatus.UNAUTHORIZED,
+        success: false,
+        data: null,
+        message: 'Invalid password',
+      });
+    }
+
+    // Exclude password from the response
+    const { role, id, email: Useremail, password: _, ...rest } = user;
 
     // Create the token
     const token = createToken({ role, user_id: id, email: Useremail });
@@ -161,7 +177,7 @@ const SignIn = async (
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      data: { token, user },
+      data: { token, user: rest },
       message: 'User authenticated successfully',
     });
   } catch (error) {
@@ -236,7 +252,7 @@ const forgotPass = async (req: Request, res: Response) => {
   } else {
     const verfiyCode = Math.floor(1000000 + Math.random() * 9000000);
     const { fullName } = findByEmail;
-    console.log(fullName, 'check full');
+
     if (!fullName) {
       return console.log('full name need');
     }
@@ -403,11 +419,15 @@ const setNewPass = async (req: Request, res: Response) => {
         message: 'Your current password is wrong!',
       });
     } else {
+
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       const updateNewPass = await prisma.user.update({
         where: { email: email as string },
-        data: { password },
+        data: { password: hashedPassword },
       });
-      console.log(updateNewPass, 'update new password');
+
       return sendResponse<any>(res, {
         statusCode: httpStatus.OK,
         success: true,

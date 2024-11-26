@@ -3,8 +3,7 @@ import socketStore from "../socket-store";
 
 const userMessageHandler = (socket: Socket, io: any) => {
     // Listen for a user message event
-    socket.on("user-message", (message) => {
-        console.log(message, "check user message testing");
+    socket.on("user-message", (message) => { 
 
         const onlineUsers = socketStore.getOnlineUsers();
 

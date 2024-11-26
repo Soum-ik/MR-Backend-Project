@@ -167,18 +167,17 @@ model Message {
   contactForm     Json?
   commonkey       String
   uniqueId        String
-  seen            Boolean  @default(false)
-  // new added
-  replyTo         Json?
-  // New field to track if the message has been read
+  seen            Boolean  @default(false) 
+  replyTo         Json? 
   read            Boolean  @default(false)
   seenBy          String[] @default([])
   hiddenFromAdmin Boolean  @default(false)
-
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])
   recipient    User          @relation("ReceivedMessages", fields: [recipientId], references: [id])
   Notification Notification?
-
+  
+  isClientSeen  Boolean @default(false)
+  isAdminSeen  Boolean @default(false)
   @@map("Messages")
 }
 

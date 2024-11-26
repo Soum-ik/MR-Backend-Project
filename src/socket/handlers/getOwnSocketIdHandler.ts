@@ -11,7 +11,7 @@ const getOwnSocketIdHandler = (socket: Socket) => {
         console.log(user, "target socket");
         // Emit back the user's own socket ID
         socket.emit("your-socket-id", { socketId: socket.id, text: 'This is your own socket id', info: user });
-        console.log(`Socket ID sent to user: ${socket.id}`);
+        
     });
 };
 

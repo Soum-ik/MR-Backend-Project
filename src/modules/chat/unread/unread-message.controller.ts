@@ -5,8 +5,6 @@ import { prisma } from "../../../libs/prismaHelper";
 import { Role } from "@prisma/client";
 import { TokenCredential } from "../../../libs/authHelper";
 import catchAsync from "../../../libs/utlitys/catchSynch";
-import AppError from "../../../errors/AppError";
-import { USER_ROLE } from "../../user/user.constant";
 
 
 const getUnseenMessageController = catchAsync(async (req: Request, res: Response) => {
@@ -39,6 +37,7 @@ const getUnseenMessageController = catchAsync(async (req: Request, res: Response
 
             }
         });
+ 
 
         return sendResponse(res, {
             statusCode: httpStatus.OK,
@@ -74,69 +73,62 @@ const getUnseenMessageController = catchAsync(async (req: Request, res: Response
 
 
 const updateUnseenMessageController = catchAsync(async (req: Request, res: Response) => {
-    const { role } = req.user as TokenCredential
-
+    const { role, user_id: own_token } = req.user as TokenCredential
     const { userId } = req.params
 
-
-    const findMessage = await prisma.message.findMany({
-        where: {
-            seen: false,
-            OR: [
-                {
-                    senderId: userId,
-                },
-                {
-                    recipientId: userId
-                }
-
-            ]
-
-            // senderId: userId,
-            // recipientId :  userId
-        }
-    })
-    if (findMessage.length === 0) {
+    if (role === 'USER') {
+        const updateMessage = await prisma.message.updateMany({
+            where: {
+                OR: [
+                    {
+                        senderId: own_token, recipient: {
+                            role: {
+                                in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"]
+                            }
+                        }
+                    },
+                    {
+                        recipientId: userId, sender: {
+                            role: {
+                                in: ["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"]
+                            }
+                        }
+                    }
+                ]
+            }, data: {
+                isClientSeen: true,
+            }
+        })
         return sendResponse(res, {
             statusCode: httpStatus.OK,
-            success: true,
-            message: "No message found!",
-            data: null
+            success: false,
+            message: "User seen successfully",
+            data: updateMessage
+        });
+
+    } else if (["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"].includes(role)) {
+        const updateMessage = await prisma.message.updateMany({
+            where: {
+                OR: [
+                    {
+                        senderId: own_token,
+                    },
+                    {
+                        recipientId: own_token,
+                    }
+                ]
+            }, data: {
+                isAdminSeen: true,
+            }
+        })
+
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: false,
+            message: "admin seen successfully",
+            data: updateMessage
         });
     }
-
-
-    const update = await prisma.message.updateMany({
-        where: {
-            OR: [
-                {
-                    senderId: userId, recipient: {
-                        role: {
-                            in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
-                        }
-                    }
-                },
-                {
-                    recipientId: userId, sender: {
-                        role: {
-                            in: ['ADMIN', "SUB_ADMIN", 'SUPER_ADMIN']
-                        }
-                    }
-                },
-            ]
-        },
-        data: {
-            seen: true
-        }
-    })
-
-
-    return sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Unseen messages updated successfully",
-        data: update
-    });
 })
 
 const getUnseenMessageControllerList = catchAsync(async (req: Request, res: Response) => {

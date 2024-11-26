@@ -80,7 +80,7 @@ router.post(
   '/upload-attachment',
   uploadFile.array('files'),
   (req, res, next) => {
-    console.log('uploadAttachmentToS3AndFormatBody');
+ 
     next();
   },
   uploadAttachmentToS3AndFormatBody(),
@@ -222,7 +222,7 @@ router.post('/send-email', async (req, res) => {
 
     // Send the email
     const response = await AWS_SES.sendEmail(email, subject, body);
-    console.log(response, 'response');
+ 
     res.status(200).json({ message: 'Email sent successfully', response });
   } catch (error) {
     console.error('Error in /send-email:', error);

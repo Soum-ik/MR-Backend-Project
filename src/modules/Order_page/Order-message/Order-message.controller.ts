@@ -392,7 +392,6 @@ export const updateProjectMessage = catchAsync(
       },
     });
 
-    console.log(updateMessage);
 
 
     if (!updateMessage) {

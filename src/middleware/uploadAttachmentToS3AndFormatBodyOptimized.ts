@@ -35,7 +35,7 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
         `${bucketNameWatermark}-${file.filename}`,
       );
       const fileName = `${bucketNameWatermark}-${file.filename}`;
-      console.log('fileName checking 1', fileName);
+ 
 
       try {
         // Read dimensions of the main image with type safety
@@ -86,7 +86,7 @@ export const uploadAttachmentToS3AndFormatBodyOptimized = () => {
         `${bucketNameWatermark}-${file.filename}`,
       );
       const fileName = `${bucketNameWatermark}-resized-${file.filename}`;
-      console.log('fileName checking 1', fileName);
+ 
 
       try {
         // Process and compress the image
