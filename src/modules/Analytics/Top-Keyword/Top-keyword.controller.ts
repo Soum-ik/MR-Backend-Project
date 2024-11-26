@@ -5,6 +5,7 @@ import AppError from "../../../errors/AppError";
 import sendResponse from "../../../libs/sendResponse";
 import httpStatus from "http-status";
 import { ProjectStatus } from "@prisma/client";
+import { calculateDateRange, timeFilterSchema } from "../../../utils/calculateDateRange";
 
 
 const udpateImpressionRate = catchAsync(async (req: Request, res: Response) => {
@@ -81,9 +82,33 @@ const updateClickRate = catchAsync(async (req: Request, res: Response) => {
         });
     }
 })
+
 const getTagStatistics = catchAsync(async (req: Request, res: Response) => {
-    // Fetch all tags with their related orders
+    const parseResult = timeFilterSchema.safeParse(req.query.timeFilter);
+    if (!parseResult.success) {
+        sendResponse(res, {
+            statusCode: httpStatus.BAD_REQUEST,
+            success: false,
+            message: 'Invalid time filter',
+            data: null,
+        });
+        return;
+    }
+
+    const timeFilter = parseResult.data;
+    const { startDate, endDate } = calculateDateRange(timeFilter);
+
+    const whereClause = startDate
+        ? {
+            createdAt: {
+                gte: startDate,
+                lte: endDate,
+            },
+        }
+        : {};
+
     const tags = await prisma.tags.findMany({
+        where: whereClause,
         include: {
             order: {
                 select: {
