@@ -4,42 +4,63 @@ import socketStore from '../socket-store';
 
 const updateSeenBy = (socket: Socket, io: any) => {
   socket.on('seen', async (data) => {
-    const onlineUsers = socketStore.getOnlineUsers();
+    try {
+      const onlineUsers = socketStore.getOnlineUsers();
 
-    const targetUserSocket = onlineUsers.find(
-      (user) => user.userId === data.userId,
-    );
+      const targetUserSocket = onlineUsers.find(
+        (user) => user.userId === data.userId,
+      );
 
-    console.log('targetUserSocket', targetUserSocket);
-
-    const message = await prisma.message.updateMany({
-      where: {
-        OR: [
-          { recipientId: data.userId as string },
-          { senderId: data.userId as string },
-        ],
-      },
-      data: {
-        seenBy: {
-          push: data.userId,
+      // Use a transaction for efficiency
+      const messages = await prisma.message.findMany({
+        where: {
+          OR: [
+            { recipientId: data.userId as string },
+            { senderId: data.userId as string },
+          ],
         },
-        seen: true,
-      },
-    });
+      });
 
-    const messageData = await prisma.message.findMany({
-      where: {
-        OR: [
-          { recipientId: data?.recipientId as string },
-          { senderId: data?.recipientId as string },
-        ],
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+      const uniqueUpdates = [];
 
-    io.to(targetUserSocket?.socketId).emit('getSeenBy', messageData[0]);
+      for (const message of messages) {
+        // Check if userId is already in seenBy
+        if (!message.seenBy.includes(data.userId)) {
+          uniqueUpdates.push(
+            prisma.message.update({
+              where: { id: message.uniqueId },
+              data: {
+                seenBy: {
+                  push: data.userId,
+                },
+                seen: true,
+              },
+            }),
+          );
+        }
+      }
+
+      // Execute all updates in parallel
+      await prisma.$transaction(uniqueUpdates);
+
+      // Fetch the updated latest message for the recipient
+      const messageData = await prisma.message.findMany({
+        where: {
+          OR: [
+            { recipientId: data?.recipientId as string },
+            { senderId: data?.recipientId as string },
+          ],
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      io.to(targetUserSocket?.socketId).emit('getSeenBy', messageData[0]);
+    } catch (error) {
+      console.error('Error updating seenBy:', error);
+    }
   });
 };
+
 export default updateSeenBy;
