@@ -4,6 +4,7 @@ import { prisma } from "../../../libs/prismaHelper";
 import AppError from "../../../errors/AppError";
 import sendResponse from "../../../libs/sendResponse";
 import httpStatus from "http-status";
+import { ProjectStatus } from "@prisma/client";
 
 
 const udpateImpressionRate = catchAsync(async (req: Request, res: Response) => {
@@ -80,65 +81,53 @@ const updateClickRate = catchAsync(async (req: Request, res: Response) => {
         });
     }
 })
-
-const getOrderByKey = catchAsync(async (req: Request, res: Response) => {
-    // Get all tags with their order details
+const getTagStatistics = catchAsync(async (req: Request, res: Response) => {
+    // Fetch all tags with their related orders
     const tags = await prisma.tags.findMany({
         include: {
             order: {
                 select: {
-                    totalPrice: true,
-                }
-            }
-        }
+                    projectStatus: true, // To determine completed orders
+                    totalPrice: true,    // To calculate total sales
+                },
+            },
+        },
     });
 
     // Calculate statistics for each tag
-    const tagStats = tags.reduce((acc, tag) => {
-        if (!acc[tag.name]) {
-            acc[tag.name] = {
-                name: tag.name,
-                totalOrders: 0,
-                totalIncome: 0,
-                impressions: tag.impressions,
-                clicks: tag.clicks
-            };
-        }
+    const tagStats = tags.map((tag) => {
+        // Check if the order is completed
+        const isCompletedOrder = tag.order?.projectStatus === "COMPLETED" as ProjectStatus;
 
-        // Since order is an array, we need to iterate through each order
-        tag.order.forEach(order => {
-            acc[tag.name].totalOrders++;
-            const price = parseFloat(order.totalPrice);
-            if (!isNaN(price)) {
-                acc[tag.name].totalIncome += price;
-            }
-        });
+        // Calculate total sales from the completed order
+        const totalSales = isCompletedOrder
+            ? parseFloat(tag.order?.totalPrice) || 0
+            : 0;
 
-        return acc;
-    }, {} as Record<string, {
-        name: string;
-        totalOrders: number;
-        totalIncome: number;
-        impressions: number;
-        clicks: number;
-    }>);
 
-    const results = Object.values(tagStats).map(stat => ({
-        ...stat,
-        totalIncome: stat.totalIncome.toFixed(2) // Format to 2 decimal places
-    }));
+        return {
+            name: tag.name,
+            // totalOrders: tag.order ? 1 : 0, // Total number of orders for the tag
+            totalOrders: isCompletedOrder ? 1 : 0, // Count completed orders
+            totalSales: totalSales, // Format sales to 2 decimal places
+            impressions: tag.impressions,
+            clicks: tag.clicks,
 
-    return sendResponse(res, ({
+        };
+    });
+
+    // Send response
+    return sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Tag statistics retrieved successfully",
-        data: results
-    }));
+        data: tagStats,
+    });
 });
 
 
 export const TopKeywordController = {
-    getOrderByKey,
+    getTagStatistics,
     updateClickRate,
     udpateImpressionRate
 }

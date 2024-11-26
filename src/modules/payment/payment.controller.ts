@@ -68,6 +68,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
 
   // Generate a session token
   const orderToken = uuidv4();
+
   const order = await prisma.order.create({
     data: {
       id: payment.orderId,
@@ -95,35 +96,34 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
 
   console.log('Order created:', order);
 
-  // Only create tags that don't already exist
   const existingTags = await prisma.tags.findMany({
     where: {
       name: {
-        in: tags?.map((tag: string) => tag.trim())
-      }
-    }
+        in: tags?.map((tag: string) => tag.trim()),
+      },
+    },
   });
 
-
-  console.log(  'tags', existingTags);
-  
-  const existingTagNames = new Set(existingTags.map(tag => tag.name));
-
+  const existingTagNames = new Set(existingTags.map((tag) => tag.name));
   const newTags = tags?.filter((tag: string) => !existingTagNames.has(tag.trim()));
 
-  console.log(newTags);
-
+  console.log('New tags to create:', newTags);
 
   if (newTags?.length) {
-    const created = await prisma.tags.createMany({
-      data: newTags.map((tag: string) => ({
-        name: tag.trim(),
-        orderId: order.id,
-      }))
-    });
-
-    console.log(created, 'created');
-    
+    try {
+      await Promise.all(
+        newTags.map(async (tag: string) => {
+          await prisma.tags.create({
+            data: {
+              name: tag.trim(),
+              orderId: new ObjectId(order.id).toString(),
+            },
+          });
+        })
+      );
+    } catch (error) {
+      console.error('Error creating tags:', error);
+    }
   }
 
 
