@@ -80,8 +80,6 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
         }
     );
 
-    console.log(findAll);
-    
 
     function extractNames(data: any[]) {
         const names = data.flatMap(item => item.industrys); // Flatten all 'name' arrays into one array

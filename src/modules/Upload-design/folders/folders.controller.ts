@@ -14,8 +14,6 @@ const getByname = async (req: Request, res: Response) => {
         // Validate the query using Zod
         const { name } = getByNameSchema.parse(req.query);
 
-        console.log(name, 'chekcing the name');
-
 
         const findByName = await prisma.uploadDesign.findMany({
             where: { folder: name },

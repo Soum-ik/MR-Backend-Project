@@ -467,19 +467,18 @@ model Order {
   review                   review[]
   projectThumbnail         String?
   deliveryAttempt          Int?                    @default(0)
-  tags                     tags?                   @relation("OrderToTags", fields: [tagsId], references: [id])
-  tagsId                   String?                 @db.ObjectId
+  tags                     tags[]
 }
 
 model tags {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String  @unique
-  impressions Int     @default(0)
-  clicks      Int     @default(0)
-  order       Order[] @relation("OrderToTags")
-
-  createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  orderId     String   @db.ObjectId
+  order       Order    @relation(fields: [orderId], references: [id])
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @updatedAt
 }
 
 model OrderExtensionRequest {

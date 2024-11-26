@@ -77,7 +77,7 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
     })
     function extractNames(data: any[]) {
         const names = data.flatMap(item => item.designs);
-        console.log(names);
+ 
         
          // Flatten all 'name' arrays into one array
         return [...new Set(names)]; // Remove duplicates using a Set and convert it back to an array

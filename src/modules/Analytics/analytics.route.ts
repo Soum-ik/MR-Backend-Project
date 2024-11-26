@@ -31,5 +31,5 @@ analyticsRouter.get('/project-details/getProjectAnalytics', getProjectAnalytics)
 
 analyticsRouter.get('/top-keyword', TopKeywordController.udpateImpressionRate);
 analyticsRouter.get('/top-keyword/:keyword', TopKeywordController.updateClickRate);
-analyticsRouter.get('/top-keyword/order', TopKeywordController.getOrderByKey);
+analyticsRouter.get('/top-keywords', TopKeywordController.getTagStatistics);
 export default analyticsRouter;
