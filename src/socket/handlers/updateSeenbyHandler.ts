@@ -1,18 +1,15 @@
+import httpStatus from 'http-status';
 import { Socket } from 'socket.io';
+import AppError from '../../errors/AppError';
 import { prisma } from '../../libs/prismaHelper';
 import socketStore from '../socket-store';
-import AppError from '../../errors/AppError';
-import httpStatus from 'http-status';
-import { Role } from '@prisma/client';
 
 const updateSeenBy = (socket: Socket, io: any) => {
   socket.on('seen', async (data) => {
     try {
-
       const user = socket.user;
 
       const onlineUsers = socketStore.getOnlineUsers();
- 
 
       const targetUserSocket = onlineUsers.find(
         (user) => user.userId === data.userId,
@@ -28,9 +25,8 @@ const updateSeenBy = (socket: Socket, io: any) => {
         },
       });
 
-
       if (messages.length === 0) {
-        return new AppError(httpStatus.NOT_FOUND, 'No messages')
+        return new AppError(httpStatus.NOT_FOUND, 'No messages');
       }
 
       if (['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN'].includes(user.role)) {
@@ -39,14 +35,12 @@ const updateSeenBy = (socket: Socket, io: any) => {
             OR: [
               { recipientId: data.userId, senderId: data.recipientId },
               { recipientId: data.recipientId, senderId: data.userId },
-            ]
-          }, data: {
-            seenBy: {
-              push: data.userId
-            }
-          }
-        })
-
+            ],
+          },
+          data: {
+            isAdminSeen: true,
+          },
+        });
       }
 
       // const uniqueUpdates = [];
@@ -92,4 +86,3 @@ const updateSeenBy = (socket: Socket, io: any) => {
 };
 
 export default updateSeenBy;
-  

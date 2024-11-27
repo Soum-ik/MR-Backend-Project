@@ -4,6 +4,7 @@ import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 import catchAsync from '../../libs/utlitys/catchSynch';
 const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
   // Fetch all users with contactForChat relationships
   const listOfUser = await prisma.user.findMany({
     include: {
@@ -50,13 +51,16 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
         userMessages.length > 0
           ? userMessages[0]
           : {
-            messageText: '',
-            seen: true,
-            commonkey: null,
-            createdAt: null,
-          };
-      const totalUnseenMessage = userMessages.filter(message =>
-        !message.seen && message.seenBy && !message.seenBy.includes(user.id)
+              messageText: '',
+              seen: true,
+              commonkey: null,
+              createdAt: null,
+            };
+      // const totalUnseenMessage = userMessages.filter(message =>
+      //   !message.seen && message.seenBy && !message.seenBy.includes(user.id)
+      // ).length;
+      const totalUnseenMessage = userMessages.filter(
+        (message) => message.recipientId === id && !message.isAdminSeen,
       ).length;
 
       const status = user.totalOrder === 0 ? 'New Client' : 'Repeated Client';
@@ -64,7 +68,6 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
       return {
         fullName: user.fullName,
         image: user.image,
-
         createdAt: user.createdAt,
         contactForChat: user.contactForChat,
         totalOrder: user.totalOrder,
