@@ -22,17 +22,14 @@ const authenticateToken = (...requiredRole: TUserRole[]) => {
                 throw new AppError(httpStatus.UNAUTHORIZED, 'Token is invalid');
             }
 
-            const { role, email, id } = decoded as JwtPayload
+            const { role, email, user_id } = decoded as JwtPayload
 
             const user = await prisma.user.findUnique({
                 where: {
                     email,
-                    id
+                    id : user_id
                 }
             })
-
-  
-            
 
             if (!user) {
                 throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized Access... User not found!');
