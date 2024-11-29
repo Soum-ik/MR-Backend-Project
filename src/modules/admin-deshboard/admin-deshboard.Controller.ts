@@ -14,6 +14,7 @@ import { PaymentStatus } from '../payment/payment.constant';
 
 const findOrder = catchAsync(async (req: Request, res: Response) => {
   const { projectNumber, userName, projectStatus, search } = req.query;
+  const PRIORITY_ORDER = ['revision', 'ongoing', 'waiting', 'delivered', 'dispute'];
 
   // Check if order exists
   const order = await prisma.order.findMany({
@@ -72,7 +73,14 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
-  if (!order) {
+  const sortedOrders = order.sort((a, b) => {
+    const aPriority = PRIORITY_ORDER.indexOf(a.projectStatus.toLowerCase());
+    const bPriority = PRIORITY_ORDER.indexOf(b.projectStatus.toLowerCase());
+    return aPriority - bPriority;
+  });
+
+
+  if (!sortedOrders) {
     throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
   }
 
@@ -238,8 +246,8 @@ const projectStatus = catchAsync(async (req: Request, res: Response) => {
     Waiting: { count: 0, totalPrice: 0 },
     Ongoing: { count: 0, totalPrice: 0 },
     Revision: { count: 0, totalPrice: 0 },
-    Dispute: { count: 0, totalPrice: 0 },
     Delivered: { count: 0, totalPrice: 0 },
+    Dispute: { count: 0, totalPrice: 0 },
     Canceled: { count: 0, totalPrice: 0 },
     Completed: { count: 0, totalPrice: 0 },
   };
