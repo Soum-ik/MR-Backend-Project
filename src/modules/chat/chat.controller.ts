@@ -47,15 +47,27 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
         },
       });
 
+      const totalMessageForUser = userMessages.length;
+      if (totalMessageForUser >= 1) {
+        await prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            isNewMessage: false,
+          },
+        })
+      }
+
       const lastMessage =
         userMessages.length > 0
           ? userMessages[0]
           : {
-              messageText: '',
-              seen: true,
-              commonkey: null,
-              createdAt: null,
-            };
+            messageText: '',
+            seen: true,
+            commonkey: null,
+            createdAt: null,
+          };
       // const totalUnseenMessage = userMessages.filter(message =>
       //   !message.seen && message.seenBy && !message.seenBy.includes(user.id)
       // ).length;
@@ -74,6 +86,7 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
         userName: user.userName,
         id: user.id,
         status: status,
+        isNewMessage: user.isNewMessage,
         isBlocked: user.block_for_chat,
         isArchived: user.archive,
         isBookMarked: user.book_mark,

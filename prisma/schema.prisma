@@ -47,14 +47,14 @@ model User {
   archive               Boolean           @default(false)
   block_for_chat        Boolean           @default(false)
   affiliateId           String?
-
-  sentMessages     Message[]      @relation("SentMessages")
-  receivedMessages Message[]      @relation("ReceivedMessages")
-  contactForChatId String?        @db.ObjectId
-  Notification     Notification[]
-  Order            Order[]
-  Note             Note[]
-  Payment          Payment[]
+  isNewMessage          Boolean           @default(true)
+  sentMessages          Message[]         @relation("SentMessages")
+  receivedMessages      Message[]         @relation("ReceivedMessages")
+  contactForChatId      String?           @db.ObjectId
+  Notification          Notification[]
+  Order                 Order[]
+  Note                  Note[]
+  Payment               Payment[]
 
   OrderMessageSent     OrderMessage[]  @relation("OrderMessageSent")
   OrderMessageReceived OrderMessage[]  @relation("OrderMessageReceived")
@@ -152,32 +152,33 @@ model Notification {
 }
 
 model Message {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
   userImage       String?
   senderName      String?
   senderUserName  String?
-  senderId        String   @db.ObjectId
-  recipientId     String   @db.ObjectId
+  senderId        String        @db.ObjectId
+  recipientId     String        @db.ObjectId
   messageText     String?
-  attachment      Json[]   @default([])
-  createdAt       DateTime @default(now())
+  attachment      Json[]        @default([])
+  createdAt       DateTime      @default(now())
   isFromAdmin     Role?
   customOffer     Json?
   timeAndDate     String
   contactForm     Json?
   commonkey       String
   uniqueId        String
-  seen            Boolean  @default(false) 
-  replyTo         Json? 
-  read            Boolean  @default(false)
-  seenBy          String[] @default([])
-  hiddenFromAdmin Boolean  @default(false)
-  sender       User          @relation("SentMessages", fields: [senderId], references: [id])
-  recipient    User          @relation("ReceivedMessages", fields: [recipientId], references: [id])
-  Notification Notification?
-  
-  isClientSeen  Boolean @default(false)
+  seen            Boolean       @default(false)
+  replyTo         Json?
+  read            Boolean       @default(false)
+  seenBy          String[]      @default([])
+  hiddenFromAdmin Boolean       @default(false)
+  sender          User          @relation("SentMessages", fields: [senderId], references: [id])
+  recipient       User          @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  Notification    Notification?
+
+  isClientSeen Boolean @default(false)
   isAdminSeen  Boolean @default(false)
+
   @@map("Messages")
 }
 
