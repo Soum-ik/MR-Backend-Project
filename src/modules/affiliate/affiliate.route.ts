@@ -23,4 +23,17 @@ affiliateRouter.get('/find-affiliate',
     authenticateToken(USER_ROLE.USER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
     AffiliateController.usersAffiliate);
 
+affiliateRouter.get('/withdrawRequests',
+    authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
+    AffiliateController.requestPaymentList
+)
+affiliateRouter.post('/paymentMethod-setUp',
+    authenticateToken(USER_ROLE.ADMIN),
+    AffiliateController.paymentMethod
+)
+affiliateRouter.post('/withdrawRequest',
+    authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
+    AffiliateController.withDrawRequest
+)
+
 export default affiliateRouter;

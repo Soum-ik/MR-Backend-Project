@@ -32,3 +32,13 @@ export const projectSerialGenerator = (serial: number = 0): string => {
     .join("");
   return `MR${modifiedSerial}PN`;
 };
+
+export const affiliateSerialGenerator = (serial: number = 0): string => {
+  const modifiedSerial = serial
+    .toString()
+    .split("")
+    .map((num) => statement(num))
+    .join("");
+  return `${modifiedSerial}`;
+};
+

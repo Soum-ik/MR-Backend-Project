@@ -56,13 +56,41 @@ model User {
   Note                  Note[]
   Payment               Payment[]
 
-  OrderMessageSent     OrderMessage[]  @relation("OrderMessageSent")
-  OrderMessageReceived OrderMessage[]  @relation("OrderMessageReceived")
+  OrderMessageSent     OrderMessage[]      @relation("OrderMessageSent")
+  OrderMessageReceived OrderMessage[]      @relation("OrderMessageReceived")
   Affiliate            Affiliate[]
   review               review[]
   AffiliateJoin        AffiliateJoin[]
+  affiliateProfile     affiliateProfile[]
+  affiliateWithdraw    affiliateWithdraw[]
 
   @@map("Users")
+}
+
+model affiliateProfile {
+  id                String              @id @default(auto()) @map("_id") @db.ObjectId
+  fullname          String
+  email             String
+  accountHolderName String
+  bankName          String
+  accountNumber     String
+  SWIFTCode         String
+  bankAddress       String
+  userId            String              @db.ObjectId
+  user              User                @relation(fields: [userId], references: [id])
+  recipientAddress  String
+  affiliateWithdraw affiliateWithdraw[]
+}
+
+model affiliateWithdraw {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  affiliateProfileId String           @db.ObjectId
+  AffiliateProfile   affiliateProfile @relation(fields: [affiliateProfileId], references: [id])
+  ammount            Int?
+  status affiliateWithdrawType @default(PENDING)
 }
 
 model Affiliate {
@@ -386,6 +414,13 @@ model projectSerialNumberGenerator {
   updateAt     DateTime @updatedAt
 }
 
+model affiliateNumberGenerator {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  serialnumber String?  @unique
+  createdAt    DateTime @default(now())
+  updateAt     DateTime @updatedAt
+}
+
 model MultiProject {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   projectTitle String
@@ -574,4 +609,10 @@ enum senderType {
 enum paymentType {
   AdditionalOffer
   ExtendDelivery
+}
+
+enum affiliateWithdrawType {
+  PENDING
+  APPROVED
+  REJECTED
 }

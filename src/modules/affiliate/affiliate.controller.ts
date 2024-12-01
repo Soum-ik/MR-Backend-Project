@@ -1,17 +1,18 @@
+import { WEB_CACHE } from './../../config/config';
 import { Request, Response } from "express";
 import { prisma } from "../../libs/prismaHelper";
 import catchAsync from "../../libs/utlitys/catchSynch";
 import sendResponse from "../../libs/sendResponse";
-import { AFFILIATE_DEFAULT, AFFILIATE_ERRORS, AFFILIATE_SUCCESS } from "./affiliate.constant";
+import { AFFILIATE_ERRORS, AFFILIATE_SUCCESS } from "./affiliate.constant";
 import { TokenCredential } from "../../libs/authHelper";
 import AppError from "../../errors/AppError";
 import { PaymentStatus, ProjectStatus } from "@prisma/client";
-import { calculateDateRange, timeFilterSchema } from "../../utils/calculateDateRange";
-import httpStatus from "http-status";
+import affiliateNumberCreator from "../Order_page/projectNumberGenarator.ts/affiliateNumberCreator";
+import httpStatus from 'http-status';
 
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
-
+    const affiliateNumber = await affiliateNumberCreator();
     const { link }: { link: string } = req.body;
     const user = await prisma.user.findUnique({
         where: { id: user_id }
@@ -40,7 +41,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const affiliate = await prisma.affiliate.create({
         data: {
             userId: user_id,
-            link: trimLink
+            link: trimLink + affiliateNumber
         }
     });
 
@@ -186,7 +187,7 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
 });
 
 const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
-     
+
     const { user_id } = req.user as TokenCredential;
 
     const affiliates = await prisma.affiliate.findMany({
@@ -245,10 +246,118 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const paymentMethod = catchAsync(async (req: Request, res: Response) => {
+    const { user_id } = req.user as TokenCredential;
+    const {
+        fullname,
+        email,
+        accountHolderName,
+        bankName,
+        accountNumber,
+        SWIFTCode,
+        bankAddress,
+        recipientAddress,
+
+    } = req.body;
+
+    const newAffiliateProfile = await prisma.affiliateProfile.create({
+        data: {
+            fullname,
+            email,
+            accountHolderName,
+            bankName,
+            accountNumber,
+            SWIFTCode,
+            bankAddress,
+            recipientAddress,
+            userId: user_id
+        },
+    });
+
+    return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Affile paymnet method added successfully',
+        data: newAffiliateProfile,
+    });
+})
+
+const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
+    const { user_id } = req.user as TokenCredential;
+    const { ammount } = req.body;
+    if (!user_id) {
+        throw new AppError(httpStatus.NOT_ACCEPTABLE, 'user_id is required');
+    }
+
+    if (!ammount || ammount <= 0) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'A valid withdrawal amount is required');
+    }
+
+    // Query the affiliate record for the user
+    const findingUser = await prisma.affiliate.findFirst({
+        where: {
+            userId: user_id,
+        },
+    });
+
+    if (!findingUser) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Affiliate user not found');
+    }
+
+    if (findingUser.amount < ammount) {
+        throw new AppError(httpStatus.FORBIDDEN, 'Insufficient balance to withdraw the requested amount');
+    }
+
+    // Deduct the amount and update the record
+    const updatedAffiliate = await prisma.affiliate.update({
+        where: {
+            id: findingUser.id,
+        },
+        data: {
+            amount: {
+                decrement: ammount,
+            },
+        },
+    })
+
+    await prisma.affiliateWithdraw.create({
+        data: {
+            affiliateProfileId: updatedAffiliate.id,
+            userId: user_id,
+            ammount: ammount
+        }
+    })
+
+    return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Withdrawal request processed successfully',
+        data: updatedAffiliate,
+    });
+})
+
+const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
+    const findList = await prisma.affiliateProfile.findMany({
+        include: {
+            affiliateWithdraw: true,
+        }
+    })
+
+    return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Withdrawal request processed successfully',
+        data: findList,
+    }); 
+})
+
 export const AffiliateController = {
     createAffiliate,
     deleteAffiliate,
     updateAffiliateClicks,
     getAllAffiliates,
-    usersAffiliate
+    usersAffiliate,
+    paymentMethod,
+    withDrawRequest,
+    requestPaymentList
 };
