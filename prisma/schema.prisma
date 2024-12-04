@@ -87,10 +87,10 @@ model affiliateWithdraw {
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
 
-  affiliateProfileId String           @db.ObjectId
-  AffiliateProfile   affiliateProfile @relation(fields: [affiliateProfileId], references: [id])
+  affiliateProfileId String                @db.ObjectId
+  AffiliateProfile   affiliateProfile      @relation(fields: [affiliateProfileId], references: [id])
   ammount            Int?
-  status affiliateWithdrawType @default(PENDING)
+  status             affiliateWithdrawType @default(PENDING)
 }
 
 model Affiliate {
@@ -330,6 +330,7 @@ model UploadDesign {
 
   industrys String[]
 
+  // onlyTemplate Boolean? @default(false)
   designs  String[]
   designId String   @unique
 }

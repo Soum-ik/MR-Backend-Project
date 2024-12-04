@@ -28,11 +28,11 @@ affiliateRouter.get('/withdrawRequests',
     AffiliateController.requestPaymentList
 )
 affiliateRouter.post('/paymentMethod-setUp',
-    authenticateToken(USER_ROLE.ADMIN),
+    authenticateToken(USER_ROLE.USER),
     AffiliateController.paymentMethod
 )
 affiliateRouter.post('/withdrawRequest',
-    authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
+    authenticateToken(USER_ROLE.USER),
     AffiliateController.withDrawRequest
 )
 

@@ -340,6 +340,11 @@ const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
     const findList = await prisma.affiliateProfile.findMany({
         include: {
             affiliateWithdraw: true,
+            user: {
+                select: {
+                    Affiliate: true
+                }
+            }
         }
     })
 
@@ -348,7 +353,7 @@ const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: 'Withdrawal request processed successfully',
         data: findList,
-    }); 
+    });
 })
 
 export const AffiliateController = {
