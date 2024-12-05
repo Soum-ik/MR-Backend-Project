@@ -174,7 +174,7 @@ const SignIn = async (req: Request<object, object, SignupRequestBody>, res: Resp
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      data: { token, user: rest },
+      data: { token, user: { role, ...rest } },
       message: 'User authenticated successfully',
     });
   } catch (error) {
