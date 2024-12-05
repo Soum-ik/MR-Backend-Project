@@ -110,12 +110,9 @@ const SignUp = async (
   }
 };
 
-const SignIn = async (
-  req: Request<object, object, SignupRequestBody>,
-  res: Response,
-) => {
+const SignIn = async (req: Request<object, object, SignupRequestBody>, res: Response) => {
   try {
-    const { password, email } = req.body;
+    const { email, password } = req.body;
 
     // Find user by email
     const user = await prisma.user.findUnique({
@@ -149,7 +146,7 @@ const SignIn = async (
     }
 
     // Compare the hashed password with the provided password
-    const isPasswordValid = bcrypt.compare(password, user.password as string);
+    const isPasswordValid = await bcrypt.compare(password, user.password as string);
 
     if (!isPasswordValid) {
       return sendResponse(res, {
@@ -160,11 +157,11 @@ const SignIn = async (
       });
     }
 
-    // Exclude password from the response
-    const { role, id, email: Useremail, password: _, ...rest } = user;
+    // Exclude password from the response data
+    const { role, id, email: userEmail, password: _, ...rest } = user;
 
-    // Create the token
-    const token = createToken({ role, user_id: id, email: Useremail });
+    // Create a JWT token
+    const token = createToken({ role, user_id: id, email: userEmail });
 
     // Set cookie with the token
     res.cookie('authToken', token, {
@@ -173,7 +170,7 @@ const SignIn = async (
       sameSite: 'strict', // CSRF protection
     });
 
-    // Return successful response with token and user data
+    // Return a successful response with token and user data
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
@@ -181,15 +178,18 @@ const SignIn = async (
       message: 'User authenticated successfully',
     });
   } catch (error) {
-    // Handle error
+    console.log('SignIn Error:', error);
+
+    // Return a generic error response
     return sendResponse(res, {
       statusCode: httpStatus.INTERNAL_SERVER_ERROR,
       success: false,
-      data: error,
-      message: 'An error occurred',
+      data: null,
+      message: 'An error occurred during sign-in',
     });
   }
 };
+
 
 const getUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
