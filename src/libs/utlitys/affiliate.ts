@@ -17,7 +17,7 @@ export async function getLastAffiliateSerialNumber() {
         // Return the destructured object for further manipulation
         return { id, serialnumber };
     } else {
-        const number = 1 + ''
+        const number = 0 + ''
         // If no serial numbers exist, you might want to return a new serial number or handle it as needed 
         const { serialnumber, id } = await prisma.affiliateNumberGenerator.create({
             data: {
