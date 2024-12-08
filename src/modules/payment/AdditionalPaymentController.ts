@@ -1,10 +1,8 @@
 import { PaymentStatus } from '@prisma/client';
-import { ObjectId } from 'bson';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
-import AppError from '../../errors/AppError';
 import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 import catchAsync from '../../libs/utlitys/catchSynch';
@@ -21,7 +19,7 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
       {
         price_data: {
           currency: 'usd',
-          unit_amount: data?.amount * 100 || 0,
+          unit_amount: data?.totalAmount * 100 || 0,
           product_data: {
             name: data?.paymentType,
           },
@@ -36,7 +34,7 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
     cancel_url: 'http://localhost:5173/payment-failed',
   });
 
-  //   this is the payment controller it will handle all kind offer 
+  //   this is the payment controller it will handle all kind offer
   const payment = await prisma.payment.create({
     data: {
       userId: data?.userId,
@@ -44,8 +42,8 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
       status: PaymentStatus.PENDING,
       amount: data?.totalAmount.toString(),
       currency: session.currency as string,
-      orderId: data.orderId,
-      PaymentType : data.paymentType
+      orderId: data?.orderId,
+      PaymentType: data?.paymentType,
     },
   });
 
