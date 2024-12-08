@@ -116,24 +116,7 @@ const SignIn = async (req: Request<object, object, SignupRequestBody>, res: Resp
 
     // Find user by email
     const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        address: true,
-        city: true,
-        country: true,
-        description: true,
-        email: true,
-        fullName: true,
-        id: true,
-        image: true,
-        industryName: true,
-        userName: true,
-        number: true,
-        SocialMediaLinks: true,
-        role: true,
-        language: true,
-        password: true, // Include password for comparison
-      },
+      where: { email }
     });
 
     if (!user) {
@@ -174,7 +157,7 @@ const SignIn = async (req: Request<object, object, SignupRequestBody>, res: Resp
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      data: { token, user: { role, ...rest } },
+      data: { token, user: { id, role, ...rest } },
       message: 'User authenticated successfully',
     });
   } catch (error) {

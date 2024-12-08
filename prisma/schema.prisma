@@ -105,7 +105,7 @@ model Affiliate {
   paymentMethod String?
   paymentDate   DateTime?
 
-  createdAt     DateTime        @default(now())
+  createdAt     DateTime        @default(now())   
   updatedAt     DateTime        @updatedAt
   AffiliateJoin AffiliateJoin[]
 }
@@ -417,7 +417,7 @@ model projectSerialNumberGenerator {
 
 model affiliateNumberGenerator {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  serialnumber String?  @unique
+  serialnumber Int?     @unique
   createdAt    DateTime @default(now())
   updateAt     DateTime @updatedAt
 }

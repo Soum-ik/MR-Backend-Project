@@ -13,6 +13,8 @@ import httpStatus from 'http-status';
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
     const affiliateNumber = await affiliateNumberCreator();
+    console.log(affiliateNumber, 'affiliateNumber');
+    
     const { link }: { link: string } = req.body;
     const user = await prisma.user.findUnique({
         where: { id: user_id }
