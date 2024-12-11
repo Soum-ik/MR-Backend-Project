@@ -30,7 +30,17 @@ const stripeWebhook = async (req: Request, res: Response) => {
       console.log('session', session);
 
       if (session?.metadata?.paymentType === PaymentType.ADDITIONAL_OFFER) {
-        // Handle additional packages
+        const findOrder = await prisma.order.findUnique({
+          where: { stripeId: session.id.split('_').join('') },
+        });
+
+        if (!findOrder) {
+          throw new AppError(httpStatus.NOT_FOUND, 'Unfortunately, this order is not found.');
+        }
+
+        
+        
+
         console.log('Additional Offer payment completed:', session);
       } else if (session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY) {
         // Handle design order payment
@@ -84,13 +94,13 @@ const stripeWebhook = async (req: Request, res: Response) => {
 
         // same for addtitional offer based on the requirment just update few  things
         // const additional offer = await prisma.order.update({
-                //   where: {
-                //     projectNumber: event.projectNumber,
-                //     id: event.orderId
-                //   }, data: {
-                //     
-                //   }
-                // })
+        //   where: {
+        //     projectNumber: event.projectNumber,
+        //     id: event.orderId
+        //   }, data: {
+        //     
+        //   }
+        // })
 
 
 
