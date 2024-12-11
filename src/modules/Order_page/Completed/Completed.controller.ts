@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import { prisma } from '../../../libs/prismaHelper';
 import httpStatus from 'http-status';
+import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
 
@@ -47,7 +47,8 @@ export const CompletedProject = catchAsync(async (req: Request, res: Response) =
         }, data: {
             projectStatus: 'Completed',
             projectThumbnail,
-            trackProjectStatus: 'COMPLETE_PROJECT'
+            trackProjectStatus: 'COMPLETE_PROJECT',
+            finishedDate: new Date(),
         }
     })
 

@@ -465,7 +465,8 @@ model review {
 model Order {
   id                       String                  @id @map("_id") @db.ObjectId
   userId                   String                  @db.ObjectId
-  stripeId                 String                  @unique
+  stripeId                 String                  @unique 
+  piId                     String?
   user                     User                    @relation(fields: [userId], references: [id])
   projectName              String
   orderFrom                String?
@@ -504,6 +505,7 @@ model Order {
   projectThumbnail         String?
   deliveryAttempt          Int?                    @default(0)
   tags                     tags[]
+  finishedDate             DateTime? 
 }
 
 model tags {
@@ -537,6 +539,7 @@ model Payment {
   id        String        @id @default(auto()) @map("_id") @db.ObjectId
   userId    String        @db.ObjectId
   stripeId  String        @unique
+  piId      String?
   status    PaymentStatus @default(PENDING)
   amount    String
   currency  String
