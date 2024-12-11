@@ -1,4 +1,3 @@
-import { trackProjectStatus } from '@prisma/client';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import Stripe from 'stripe';
@@ -54,7 +53,6 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
     },
     data: {
       projectStatus: ProjectStatus.CANCELED,
-      trackProjectStatus: trackProjectStatus.CANCELLED,
       finishedDate: new Date(),
     },
   });

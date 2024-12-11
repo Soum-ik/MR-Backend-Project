@@ -76,7 +76,7 @@ model affiliateProfile {
   accountNumber     String
   SWIFTCode         String
   bankAddress       String
-  userId            String              @db.ObjectId
+  userId            String              @unique @db.ObjectId
   user              User                @relation(fields: [userId], references: [id])
   recipientAddress  String
   affiliateWithdraw affiliateWithdraw[]
@@ -91,6 +91,9 @@ model affiliateWithdraw {
   AffiliateProfile   affiliateProfile      @relation(fields: [affiliateProfileId], references: [id])
   ammount            Int?
   status             affiliateWithdrawType @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Affiliate {
@@ -105,7 +108,7 @@ model Affiliate {
   paymentMethod String?
   paymentDate   DateTime?
 
-  createdAt     DateTime        @default(now())   
+  createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   AffiliateJoin AffiliateJoin[]
 }
@@ -465,7 +468,7 @@ model review {
 model Order {
   id                       String                  @id @map("_id") @db.ObjectId
   userId                   String                  @db.ObjectId
-  stripeId                 String                  @unique 
+  stripeId                 String                  @unique
   piId                     String?
   user                     User                    @relation(fields: [userId], references: [id])
   projectName              String
@@ -505,7 +508,7 @@ model Order {
   projectThumbnail         String?
   deliveryAttempt          Int?                    @default(0)
   tags                     tags[]
-  finishedDate             DateTime? 
+  finishedDate             DateTime?
 }
 
 model tags {
