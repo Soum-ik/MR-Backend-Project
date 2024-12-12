@@ -63,6 +63,7 @@ model User {
   AffiliateJoin        AffiliateJoin[]
   affiliateProfile     affiliateProfile[]
   affiliateWithdraw    affiliateWithdraw[]
+  totalEaring          Int                 @default(0)
 
   @@map("Users")
 }
@@ -88,7 +89,7 @@ model affiliateWithdraw {
   user   User   @relation(fields: [userId], references: [id])
 
   affiliateProfileId String                @db.ObjectId
-  AffiliateProfile   affiliateProfile      @relation(fields: [affiliateProfileId], references: [id])
+  AffiliateProfile   affiliateProfile      @relation(fields: [affiliateProfileId], references: [userId])
   ammount            Int?
   status             affiliateWithdrawType @default(PENDING)
 

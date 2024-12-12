@@ -31,7 +31,7 @@ affiliateRouter.get('/withdrawRequests',
 
 affiliateRouter.put('/update-withdrawRequest',
     authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
-    AffiliateController.requestPaymentList
+    AffiliateController.withDrawRequestUpdateAction
 )
 
 affiliateRouter.post('/paymentMethod-setUp',

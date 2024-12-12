@@ -240,6 +240,16 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
     })
 
     const totalEarnings = totalAmount.reduce((acc, join) => acc + join.user.Order.length * 5, 0);
+
+    await prisma.user.update({
+        where: {
+            id: user_id as string
+        },
+        data: {
+            totalEaring: totalEarnings
+        }
+    })
+
     return sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -348,9 +358,9 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
     }
 
     // Query the affiliate record for the user
-    const findingUser = await prisma.affiliate.findFirst({
+    const findingUser = await prisma.user.findUnique({
         where: {
-            userId: user_id,
+            id: user_id,
         },
     });
 
@@ -358,8 +368,8 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
         throw new AppError(httpStatus.NOT_FOUND, 'Affiliate user not found');
     }
 
-    if (findingUser.amount < ammount) {
-        throw new AppError(httpStatus.FORBIDDEN, 'Insufficient balance to withdraw the requested amount');
+    if (findingUser.totalEaring < ammount) {
+        throw new AppError(httpStatus.FORBIDDEN, `Insufficient balance to withdraw the requested amount, your balance is ${findingUser.totalEaring} `);
     }
 
     const userProfile = await prisma.affiliateProfile.findUnique({
@@ -374,15 +384,18 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
 
 
     // Deduct the amount and update the record
-    const updatedAffiliate = await prisma.affiliate.update({
+    const updatedAffiliate = await prisma.user.update({
         where: {
             id: findingUser.id,
         },
         data: {
-            amount: {
-                decrement: ammount,
-            },
+            totalEaring: {
+                decrement: ammount
+            }
         },
+        select: {
+            id: true,
+        }
     })
 
     await prisma.affiliateWithdraw.create({
@@ -405,7 +418,10 @@ const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
     const findList = await prisma.affiliateWithdraw.findMany({
         select: {
             AffiliateProfile: true,
+            status: true,
             ammount: true,
+            id: true,
+            createdAt :true
         }
     })
 
@@ -435,6 +451,33 @@ const withDrawRequestUpdateAction = catchAsync(async (req: Request, res: Respons
             status: action as affiliateWithdrawType
         }
     });
+
+    if (action === 'REJECTED' && findWithdrawRequest) {
+
+        const userTotalAmmount = await prisma.user.findUnique({
+            where: {
+                id: findWithdrawRequest.userId as string
+            },
+            select: {
+                totalEaring: true
+            }
+        })
+
+        if (userTotalAmmount) {
+            const totalPrice = findWithdrawRequest.ammount as number + userTotalAmmount.totalEaring as number
+
+            await prisma.user.update({
+                where: {
+                    id: findWithdrawRequest.userId
+                },
+                data: {
+                    totalEaring: {
+                        set: totalPrice
+                    }
+                }
+            })
+        }
+    }
 
     return sendResponse(res, {
         statusCode: 200,
