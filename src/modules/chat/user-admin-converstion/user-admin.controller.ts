@@ -32,7 +32,9 @@ const sendMessage = async (req: Request, res: Response) => {
     timeAndDate,
     recipientId,
     uniqueId,
-    seenBy
+    seenBy,
+    isClientSeen,
+    isAdminSeen
   } = req.body;
 
   // If the role is admin, recipientId is required
@@ -84,6 +86,8 @@ const sendMessage = async (req: Request, res: Response) => {
             commonkey,
             uniqueId,
             seenBy,
+            isClientSeen,
+            isAdminSeen
           },
         });
 
@@ -119,7 +123,9 @@ const sendMessage = async (req: Request, res: Response) => {
           timeAndDate: converString,
           commonkey,
           uniqueId,
-          seenBy
+          seenBy,
+          isClientSeen,
+          isAdminSeen
         },
       });
 
@@ -152,7 +158,9 @@ const sendMessage = async (req: Request, res: Response) => {
               timeAndDate: converString,
               commonkey,
               uniqueId,
-              seenBy
+              seenBy,
+              isClientSeen,
+              isAdminSeen
             },
           });
 
@@ -462,7 +470,7 @@ const getMessages = async (req: Request, res: Response) => {
 const deleteMessage = async (req: Request, res: Response) => {
   const { commonkey } = req.params;
   const { user_id, role } = req.user as TokenCredential;
- 
+
 
   try {
     // Fetch the message from the database
@@ -471,7 +479,7 @@ const deleteMessage = async (req: Request, res: Response) => {
         commonkey: commonkey as string,
       },
     });
- 
+
     // Check if message exists
     if (message.length === 0) {
       return sendResponse(res, {
