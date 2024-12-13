@@ -4,7 +4,7 @@ import sendResponse from "../../libs/sendResponse";
 import httpStatus from "http-status";
 import { prisma } from "../../libs/prismaHelper";
 import { ProjectStatus } from "@prisma/client";
-import { Avg_Response_Time } from "../../scheduler_task/Avg_Response_Time";
+import { Avg_Response_Time } from "../../scheduler_task/avgResponseTime";
 import { formatDistanceToNow } from 'date-fns';
 
 const IndicatorController = catchAsync(async (req: Request, res: Response) => {

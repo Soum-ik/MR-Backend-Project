@@ -18,7 +18,7 @@ import globalError from './middleware/globalError';
 import moment from 'moment';
 import sendResponse from './libs/sendResponse';
 import './scheduler_task/scheduler';
-
+import './scheduler_task/scheduleCustomOfferUpdate'
 // const limiter = rateLimit({
 //   windowMs: 1 * 60 * 1000, // 1 minute
 //   max: 100, // Limit each IP to 100 requests per windowMs

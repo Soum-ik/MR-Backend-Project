@@ -7,6 +7,7 @@ import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { USER_ROLE } from '../../user/user.constant';
+import catchAsync from '../../../libs/utlitys/catchSynch';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -196,49 +197,35 @@ const sendMessage = async (req: Request, res: Response) => {
 };
 
 // Update message
-const updateMessage = async (req: Request, res: Response) => {
-  const { user_id } = req.user as TokenCredential;
-
-  const { messageId } = req.params;
-
-  if (!user_id) {
-    return sendResponse<any>(res, {
-      statusCode: httpStatus.NOT_FOUND,
+const updateMessage = catchAsync(async (req: Request, res: Response) => {
+  const { uniqueId, ...body } = req.body;
+  if (!uniqueId) {
+    return sendResponse(res, {
+      statusCode: httpStatus.BAD_REQUEST,
       success: false,
-      message: 'Token are required!',
+      message: 'UniqueId is required',
     });
   }
-  const { messageText, attachment, replyTo, customOffer, timeAndDate } =
-    req.body;
 
-  const message = await prisma.message.update({
-    where: {
-      id: messageId,
-    },
+  const updateMessage = await prisma.message.updateMany({
+    where: { uniqueId: uniqueId },
     data: {
-      messageText,
-      attachment,
-      replyTo,
-      customOffer,
-      timeAndDate,
+      ...body
     },
   });
 
-  if (!message) {
-    return sendResponse(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'Message not found!',
-    });
+  if (updateMessage.count === 0) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Message not found');
   }
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    data: message,
+    data: null,
     message: 'Message updated successfully',
   });
-};
+
+})
 
 // Reply to a message
 const replyToMessage = async (req: Request, res: Response) => {

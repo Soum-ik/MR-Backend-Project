@@ -12,7 +12,7 @@ router.post('/send', messageControlller.sendMessage);
 router.post('/reply', messageControlller.replyToMessage);
 
 // Route to update a message
-router.patch('/update/:messageId', messageControlller.updateMessage);
+router.patch('/customOfferUpdate', messageControlller.updateMessage);
 
 // Route to get messages between user and admin
 router.get('/get', messageControlller.getMessages);
