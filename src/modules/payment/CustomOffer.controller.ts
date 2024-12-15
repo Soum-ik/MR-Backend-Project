@@ -22,12 +22,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   const projectNumber = await projectNumberCreator();
 
   const { data, tags } = req.body;
-
-  console.log(data, 'checking data from custom offers before confirm');
-
-  const offer = data?.updatedMessage
-  const paymentType = offer ? 'CustomOffer' : null
-
+ 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: data?.items.map((item: any) => ({
@@ -43,10 +38,6 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
       },
       quantity: item?.quantity,
     })),
-    metadata: {
-      paymentType: paymentType,
-      updateMessageId: offer.uniqueId || null
-    },
     mode: 'payment',
     success_url: `http://localhost:5173/project-requirements/${projectNumber}`,
     cancel_url: 'http://localhost:5173/payment-failed',

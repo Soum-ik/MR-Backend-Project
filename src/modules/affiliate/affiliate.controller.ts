@@ -10,17 +10,59 @@ import { affiliateWithdrawType, PaymentStatus, ProjectStatus } from "@prisma/cli
 import affiliateNumberCreator from "../Order_page/projectNumberGenarator.ts/affiliateNumberCreator";
 import httpStatus from 'http-status';
 
-const createAffiliate = catchAsync(async (req: Request, res: Response) => {
-    const { user_id } = req.user as TokenCredential;
-    const affiliateNumber = await affiliateNumberCreator();
-    console.log(affiliateNumber, 'affiliateNumber');
-
-    const { link }: { link: string } = req.body;
+const autoGenerate = catchAsync(async (req: Request, res: Response) => {
+    const { user_id, } = req.user as TokenCredential;
     const user = await prisma.user.findUnique({
         where: { id: user_id }
     });
 
-    const trimLink = link.split(" ").join("-");
+
+    const links = await prisma.affiliate.findMany({
+        where: {
+            userId: user_id
+        },
+        select: {
+            link: true
+        }
+    })
+    // Check if any link starts with 'aff-auto'
+    const existingLink = links.some(link => link.link.startsWith('aff-auto'));
+
+    if (existingLink) {
+        return sendResponse(res, {
+            statusCode: 201,
+            success: true,
+            message: 'Already exists',
+            data: null,
+        });
+    }
+
+    const affiliate = await prisma.affiliate.create({
+        data: {
+            userId: user_id,
+            link: `aff-auto/${user?.userName}`
+        }
+    });
+
+    return sendResponse(res, {
+        statusCode: 201,
+        success: true,
+        message: AFFILIATE_SUCCESS.CREATED,
+        data: affiliate
+    });
+})
+
+const createAffiliate = catchAsync(async (req: Request, res: Response) => {
+    const { user_id, } = req.user as TokenCredential;
+    const affiliateNumber = await affiliateNumberCreator();
+    console.log(affiliateNumber, 'affiliateNumber');
+
+    const user = await prisma.user.findUnique({
+        where: { id: user_id }
+    });
+
+    const result = `aff-${affiliateNumber}/${user?.userName}`
+
 
     if (!user) {
         return sendResponse(res, {
@@ -32,7 +74,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
 
     const Link = await prisma.affiliate.findFirst({
         where: {
-            link: trimLink
+            link: result
         }
     })
 
@@ -43,7 +85,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const affiliate = await prisma.affiliate.create({
         data: {
             userId: user_id,
-            link: trimLink + affiliateNumber
+            link: result
         }
     });
 
@@ -219,6 +261,11 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
         sales: affiliate.AffiliateJoin.reduce((acc, join) => acc + join.user.Order.length, 0)
     }));
 
+    // Sorting logic: 'aff-auto' links first, then LIFO for the rest
+    const sortedAffiliates = [
+        ...formattedAffiliates.filter(a => a.links.includes('aff-auto')), // 'aff-auto' links at the top
+        ...formattedAffiliates.filter(a => !a.links.includes('aff-auto')).reverse() // LIFO for the rest
+    ];
     const totalAmount = await prisma.affiliateJoin.findMany({
         select: {
 
@@ -254,7 +301,7 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
         statusCode: 200,
         success: true,
         message: AFFILIATE_SUCCESS.FETCHED,
-        data: { totalEarnings, formattedAffiliates }
+        data: { totalEarnings, formattedAffiliates: sortedAffiliates }
     });
 });
 
@@ -421,7 +468,7 @@ const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
             status: true,
             ammount: true,
             id: true,
-            createdAt :true
+            createdAt: true
         }
     })
 
@@ -497,5 +544,6 @@ export const AffiliateController = {
     withDrawRequest,
     requestPaymentList,
     affiliateProfile,
-    withDrawRequestUpdateAction
+    withDrawRequestUpdateAction,
+    autoGenerate
 };

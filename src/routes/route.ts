@@ -192,11 +192,11 @@ router.use('/multi-project', multiProjectRoute);
 //payment route
 router.post('/api/checkout-session', payment.stripePayment);
 router.post('/payment/additional', stripePayment.additionalPayment);
-router.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  payment.stripePayment,
-);
+// router.post(
+//   '/webhook',
+//   express.raw({ type: 'application/json' }),
+//   payment.stripePayment,
+// );
 
 router.post('/verify-email', async (req, res) => {
   try {

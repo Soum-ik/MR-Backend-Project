@@ -214,6 +214,8 @@ model Message {
   @@map("Messages")
 }
 
+
+
 model contactForChat {
   id             String  @id @default(auto()) @map("_id") @db.ObjectId
   name           String?
@@ -617,6 +619,7 @@ enum senderType {
 enum paymentType {
   AdditionalOffer
   ExtendDelivery
+  CustomOffer
 }
 
 enum affiliateWithdrawType {

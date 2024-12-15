@@ -1,3 +1,5 @@
+
+import { unreadMessageController } from './../chat/unread/unread-message.controller';
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
@@ -7,8 +9,25 @@ import { PaymentStatus, PaymentType } from './payment.constant';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
+
+interface customOfferT {
+  thumbnail: string;
+  title: string;
+  deliveryCount: string;
+  price: string;
+  desc: string;
+  isAccepted: boolean;
+  isRejected: boolean;
+  isWithdrawn: boolean;
+  requirements: string[];
+}
+
+
+
 const stripeWebhook = async (req: Request, res: Response) => {
   const event = req.body;
+  // console.log(event, 'checking data from custom offer after confirm ');
+
   // console.log('all event', event);
 
   // try {
@@ -26,12 +45,53 @@ const stripeWebhook = async (req: Request, res: Response) => {
     case 'checkout.session.completed':
       {
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log('session', session);
+        const data = session.metadata
+
 
         if (session?.metadata?.paymentType === PaymentType.ADDITIONAL_OFFER) {
           // Handle additional packages
           console.log('Additional Offer payment completed:', session);
-        } else if (
+
+        } else if (session?.metadata?.paymentType === PaymentType.CUSTOM_OFFER) {
+          const findMessage = await prisma.message.findMany({
+            where: {
+              uniqueId: data?.updateMessageId
+            },
+            take: 1
+          })
+          const messageData = findMessage[0]
+          const { isAccepted, ...rest } = messageData?.customOffer as unknown as customOfferT
+          const updateMessage = {
+            isAccepted: true,
+            ...rest,
+          }
+          await prisma.message.updateMany({
+            where: {
+              uniqueId: data?.updateMessageId
+            }, data: {
+              customOffer: updateMessage
+            }
+          })
+
+          await prisma.payment.update({
+            where: { stripeId: session.id.split('_').join('') },
+            data: {
+              status: PaymentStatus.PAID,
+              piId: session?.payment_intent as string,
+            },
+          });
+          await prisma.order.update({
+            where: { stripeId: session.id.split('_').join('') },
+            data: {
+              trackProjectStatus: OrderStatus.PROJECT_PLACED,
+              projectStatus: ProjectStatus.WAITING,
+              paymentStatus: PaymentStatus.PAID,
+              piId: session?.payment_intent as string,
+            },
+          });
+
+        }
+        else if (
           session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY
         ) {
           // Handle design order payment
@@ -46,6 +106,22 @@ const stripeWebhook = async (req: Request, res: Response) => {
                 piId: session?.payment_intent as string,
               },
             });
+
+
+            // const updateMessage = data?.updatedMessage
+
+            // if (updateMessage) {
+
+            //   const { id, ...message } = updateMessage
+
+            //   await prisma.message.updateMany({
+            //     where: { uniqueId: updateMessage.uniqueId },
+            //     data: {
+            //       ...message
+            //     },
+            //   });
+            // }
+
 
             console.log('Payment successfully updated in the database.');
 
