@@ -113,10 +113,10 @@ const updateUnseenMessageController = catchAsync(
         where: {
           OR: [
             {
-              senderId: own_token,
+              senderId: userId,
             },
             {
-              recipientId: own_token,
+              recipientId: userId,
             },
           ],
         },
