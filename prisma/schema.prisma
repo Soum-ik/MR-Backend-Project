@@ -214,8 +214,6 @@ model Message {
   @@map("Messages")
 }
 
-
-
 model contactForChat {
   id             String  @id @default(auto()) @map("_id") @db.ObjectId
   name           String?
@@ -423,7 +421,8 @@ model projectSerialNumberGenerator {
 
 model affiliateNumberGenerator {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  serialnumber Int?     @unique
+  userId       String   @unique @db.ObjectId
+  serialnumber Int?     @default(0)
   createdAt    DateTime @default(now())
   updateAt     DateTime @updatedAt
 }

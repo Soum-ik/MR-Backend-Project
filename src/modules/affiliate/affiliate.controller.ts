@@ -53,49 +53,52 @@ const autoGenerate = catchAsync(async (req: Request, res: Response) => {
 })
 
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
-    const { user_id, } = req.user as TokenCredential;
-    const affiliateNumber = await affiliateNumberCreator();
-    console.log(affiliateNumber, 'affiliateNumber');
-
+    const { user_id } = req.user as TokenCredential;
+  
     const user = await prisma.user.findUnique({
-        where: { id: user_id }
+      where: { id: user_id },
     });
-
-    const result = `aff-${affiliateNumber}/${user?.userName}`
-
-
+  
     if (!user) {
-        return sendResponse(res, {
-            statusCode: 404,
-            success: false,
-            message: AFFILIATE_ERRORS.USER_NOT_FOUND
-        });
+      return sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "User not found",
+      });
     }
-
-    const Link = await prisma.affiliate.findFirst({
-        where: {
-            link: result
-        }
-    })
-
-    if (Link) {
-        throw new AppError(400, " This link is already used");
+  
+    // Generate the affiliate serial number
+    const affiliateNumber = await affiliateNumberCreator(user_id);
+  
+    // Construct the affiliate link
+    const affiliateLink = `aff-${affiliateNumber}/${user.userName}`;
+  
+    // Ensure the link is unique
+    const existingLink = await prisma.affiliate.findFirst({
+      where: { link: affiliateLink },
+    });
+  
+    if (existingLink) {
+      throw new AppError(400, "This link is already used");
     }
-
+  
+    // Create the affiliate record
     const affiliate = await prisma.affiliate.create({
-        data: {
-            userId: user_id,
-            link: result
-        }
+      data: {
+        userId: user_id,
+        link: affiliateLink,
+      },
     });
-
+  
+    // Send the response
     return sendResponse(res, {
-        statusCode: 201,
-        success: true,
-        message: AFFILIATE_SUCCESS.CREATED,
-        data: affiliate
+      statusCode: 201,
+      success: true,
+      message: "Affiliate created successfully",
+      data: affiliate,
     });
-});
+  });
+  
 
 const updateAffiliateClicks = catchAsync(async (req: Request, res: Response) => {
     const { link, affiliate_id } = req.query;
