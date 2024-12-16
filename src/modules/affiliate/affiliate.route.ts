@@ -5,7 +5,7 @@ import { USER_ROLE } from "../user/user.constant";
 
 const affiliateRouter = Router();
 
-affiliateRouter.get('/auto',
+affiliateRouter.post('/auto',
     authenticateToken(USER_ROLE.USER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
     AffiliateController.autoGenerate);
 
