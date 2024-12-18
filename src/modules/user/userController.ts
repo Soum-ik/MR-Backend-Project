@@ -8,6 +8,8 @@ import sendResponse from '../../libs/sendResponse';
 
 import { SignupRequestBody } from './user.interface';
 import bcrypt from 'bcrypt'
+import catchAsync from '../../libs/utlitys/catchSynch';
+import { promise } from 'zod';
 export interface User {
   user_id?: string;
   role?: string;
@@ -587,6 +589,87 @@ const getSingelUser = async (
   }
 };
 
+const profile = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as TokenCredential
+
+  const [CP, CR, ART, ARV, LP] = await Promise.all([
+    prisma.order.findMany({
+      where: {
+        userId: user_id,
+        paymentStatus: 'PAID',
+        projectStatus: 'Completed'
+      }
+    }),
+
+    prisma.order.findMany({
+      where: {
+        userId: user_id,
+      },
+      select: {
+        projectStatus: true
+      }
+    }),
+
+    prisma.review.aggregate({
+      where: {
+        order: {
+          userId: user_id, // Assuming the userId is part of the Order model and links to the order
+        },
+      },
+      _avg: {
+        rating: true, // Calculate the average of ratings received
+      },
+    }),
+
+    prisma.review.aggregate({
+      where: {
+        senderId: user_id, // Filter reviews where the user is the sender
+      },
+      _avg: {
+        rating: true, // Calculate the average of ratings given
+      },
+    }),
+
+    prisma.order.findMany({
+      where: {
+        userId: user_id,
+        projectStatus: 'Completed'
+      },
+      take: 1,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      select: {
+        createdAt: true
+      }
+    })
+
+  ]);
+
+
+  const totalProjects = CR.length;
+  const completedProjects = CR.filter(project => project.projectStatus === 'Completed').length;
+  const ProjectCompletedRate = (completedProjects / totalProjects) * 100;
+
+
+  const result = {
+    CompletedProjects: CP.length,
+    ProjectCompletedRate: ProjectCompletedRate,
+    AvgRatingTaken: ART,
+    AvgRatingGiven: ARV,
+    LastProjectOn: LP
+  }
+
+
+  return sendResponse<any>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    data: result,
+    message: 'User profile successfully fetched',
+  });
+
+})
+
 export const User = {
   SignUp,
   SignIn,
@@ -598,4 +681,5 @@ export const User = {
   getAllUser,
   updateUser,
   getSingelUser,
+  profile
 };
