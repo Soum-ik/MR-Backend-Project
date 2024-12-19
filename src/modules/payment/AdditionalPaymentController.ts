@@ -12,6 +12,9 @@ const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 const additionalPayment = catchAsync(async (req: Request, res: any) => {
   const { data } = req.body;
 
+  const offer = data?.updatedMessage
+  
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
@@ -28,7 +31,10 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
       },
     ],
     metadata: {
-      paymentType: data?.paymentType,
+      paymentType: data.paymentType,
+      updateMessageId: offer?.uniqueId || null,
+      duration: data?.duration,
+      orderId: data?.orderId
     },
     success_url: `http://localhost:5173/order/${data?.projectNumber}`,
     cancel_url: 'http://localhost:5173/payment-failed',

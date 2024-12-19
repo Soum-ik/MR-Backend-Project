@@ -6,6 +6,7 @@ import { STRIPE_SECRET_KEY } from '../../config/config';
 import { prisma } from '../../libs/prismaHelper';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
 import { PaymentStatus, PaymentType } from './payment.constant';
+import { daysToHours } from '../../utils/dayToHours';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -22,6 +23,14 @@ interface customOfferT {
   requirements: string[];
 }
 
+interface additionalOfferT {
+  text: string
+  price: string;
+  duration: string;
+  isWithdrawn: boolean;
+  isAccepted: boolean;
+  isRejected: boolean;
+}
 
 
 const stripeWebhook = async (req: Request, res: Response) => {
@@ -49,8 +58,56 @@ const stripeWebhook = async (req: Request, res: Response) => {
 
 
         if (session?.metadata?.paymentType === PaymentType.ADDITIONAL_OFFER) {
-          // Handle additional packages
-          console.log('Additional Offer payment completed:', session);
+          const findMessage = await prisma.orderMessage.findMany({
+            where: {
+              uniqueId: data?.updateMessageId
+            },
+            take: 1
+          })
+          const messageData = findMessage[0]
+          const { isAccepted, ...rest } = messageData?.additionalOffer as unknown as additionalOfferT
+
+          const updateMessage = {
+            isAccepted: true,
+            ...rest,
+          }
+
+          await prisma.orderMessage.updateMany({
+            where: {
+              uniqueId: data?.updateMessageId
+            }, data: {
+              additionalOffer: updateMessage
+            }
+          })
+
+          await prisma.payment.update({
+            where: { stripeId: session.id.split('_').join('') },
+            data: {
+              status: PaymentStatus.PAID,
+              piId: session?.payment_intent as string,
+            },
+          });
+
+          const orderData = await prisma.order.findUnique({
+            where: {
+              stripeId: session.id.split('_').join(''),
+            },
+          })
+
+
+          const duration = parseInt(orderData?.duration || '0') + parseInt(data?.duration || '0')
+          const durationHours = parseInt(orderData?.durationHours || '0') + daysToHours(data?.duration || '0')
+
+          await prisma.order.update({
+            where: {
+              stripeId: session.id.split('_').join(''),
+            },
+            data: {
+              piId: session?.payment_intent as string,
+              duration: orderData?.duration ? duration.toString() : '',
+              durationHours: orderData?.durationHours ? durationHours.toString() : '',
+            },
+          });
 
         } else if (session?.metadata?.paymentType === PaymentType.CUSTOM_OFFER) {
           const findMessage = await prisma.message.findMany({

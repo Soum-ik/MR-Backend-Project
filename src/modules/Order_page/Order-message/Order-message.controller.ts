@@ -38,7 +38,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     additionalOffer,
     deliverProject,
     extendDeliveryTime,
-    cancelProject
+    cancelProject,
+    uniqueId,
   } = req.body;
 
   // If the role is admin, recipientId is required
@@ -92,6 +93,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           extendDeliveryTime,
           additionalOffer,
           cancelProject,
+          uniqueId
         },
 
       });
@@ -133,6 +135,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         extendDeliveryTime,
         additionalOffer,
         cancelProject,
+        uniqueId
       },
     });
 
@@ -170,6 +173,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             extendDeliveryTime,
             additionalOffer,
             cancelProject,
+            uniqueId
           },
         });
 
