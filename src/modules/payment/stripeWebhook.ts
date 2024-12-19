@@ -107,6 +107,16 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           console.log(durationHours, 'durationHours checking ');
 
 
+          let UpdatedDeliveryDate;
+
+          if (orderData?.deliveryDate && orderData?.durationHours) {
+            UpdatedDeliveryDate = new Date(orderData?.deliveryDate);//+
+            UpdatedDeliveryDate.setHours(UpdatedDeliveryDate.getHours() + durationHours);//+ 
+          } else if (orderData?.deliveryDate && orderData?.duration) {
+            UpdatedDeliveryDate = new Date(orderData?.deliveryDate);//+
+            UpdatedDeliveryDate.setDate(UpdatedDeliveryDate.getDate() + duration);//+
+          }
+
 
           await prisma.order.update({
             where: {
@@ -116,6 +126,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               piId: session?.payment_intent as string,
               duration: orderData?.duration ? duration.toString() : '',
               durationHours: orderData?.durationHours ? durationHours.toString() : '',
+              deliveryDate: UpdatedDeliveryDate
             },
           });
 
