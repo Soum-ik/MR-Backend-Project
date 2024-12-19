@@ -16,10 +16,11 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
     payment_intent: piId, // Refund by piId
   });
 
-  const findMessagee = await prisma.orderMessage.findUnique({
+  const findMessagee = await prisma.orderMessage.findMany({
     where: {
-      id: orderMessageId,
+      uniqueId: orderMessageId,
     },
+    take: 1,
   });
 
   if (!findMessagee) {
@@ -30,9 +31,9 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-  const cancelMessage = await prisma.orderMessage.update({
+  const cancelMessage = await prisma.orderMessage.updateMany({
     where: {
-      id: orderMessageId,
+      uniqueId: orderMessageId,
     },
     data: {
       isCancelled: true,
