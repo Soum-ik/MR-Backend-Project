@@ -7,6 +7,7 @@ import { prisma } from '../../libs/prismaHelper';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
 import { PaymentStatus, PaymentType } from './payment.constant';
 import { daysToHours } from '../../utils/dayToHours';
+import catchAsync from '../../libs/utlitys/catchSynch';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -33,7 +34,7 @@ interface additionalOfferT {
 }
 
 
-const stripeWebhook = async (req: Request, res: Response) => {
+const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
   const event = req.body;
   // console.log(event, 'checking data from custom offer after confirm ');
 
@@ -90,17 +91,26 @@ const stripeWebhook = async (req: Request, res: Response) => {
 
           const orderData = await prisma.order.findUnique({
             where: {
-              stripeId: session.id.split('_').join(''),
+              id: data?.orderId
             },
           })
 
 
+          console.log(orderData, 'order data checking');
+
+
+          const hours = daysToHours(data?.duration || '0')
+
           const duration = parseInt(orderData?.duration || '0') + parseInt(data?.duration || '0')
-          const durationHours = parseInt(orderData?.durationHours || '0') + daysToHours(data?.duration || '0')
+          const durationHours = parseInt(orderData?.durationHours || '0') + hours
+
+          console.log(durationHours, 'durationHours checking ');
+
+
 
           await prisma.order.update({
             where: {
-              stripeId: session.id.split('_').join(''),
+              id: data?.orderId
             },
             data: {
               piId: session?.payment_intent as string,
@@ -154,90 +164,87 @@ const stripeWebhook = async (req: Request, res: Response) => {
           // Handle design order payment
           console.log('Tips payment completed:', session);
         } else {
-          try {
-            // Save payment info in the database
-            await prisma.payment.update({
-              where: { stripeId: session.id.split('_').join('') },
-              data: {
-                status: PaymentStatus.PAID,
-                piId: session?.payment_intent as string,
-              },
-            });
+          // Save payment info in the database
+          await prisma.payment.update({
+            where: { stripeId: session.id.split('_').join('') },
+            data: {
+              status: PaymentStatus.PAID,
+              piId: session?.payment_intent as string,
+            },
+          });
 
 
-            // const updateMessage = data?.updatedMessage
+          // const updateMessage = data?.updatedMessage
 
-            // if (updateMessage) {
+          // if (updateMessage) {
 
-            //   const { id, ...message } = updateMessage
+          //   const { id, ...message } = updateMessage
 
-            //   await prisma.message.updateMany({
-            //     where: { uniqueId: updateMessage.uniqueId },
-            //     data: {
-            //       ...message
-            //     },
-            //   });
-            // }
+          //   await prisma.message.updateMany({
+          //     where: { uniqueId: updateMessage.uniqueId },
+          //     data: {
+          //       ...message
+          //     },
+          //   });
+          // }
 
 
-            console.log('Payment successfully updated in the database.');
+          console.log('Payment successfully updated in the database.');
 
-            // Create an order linked to the payment and user
-            const order = await prisma.order.update({
-              where: { stripeId: session.id.split('_').join('') },
-              data: {
-                trackProjectStatus: OrderStatus.PROJECT_PLACED,
-                projectStatus: ProjectStatus.WAITING,
-                paymentStatus: PaymentStatus.PAID,
-                piId: session?.payment_intent as string,
-              },
-            });
+          // Create an order linked to the payment and user
+          const order = await prisma.order.update({
+            where: { stripeId: session.id.split('_').join('') },
+            data: {
+              trackProjectStatus: OrderStatus.PROJECT_PLACED,
+              projectStatus: ProjectStatus.WAITING,
+              paymentStatus: PaymentStatus.PAID,
+              piId: session?.payment_intent as string,
+            },
+          });
 
-            // for extendard delivary   just update what you want
-            // const findOrder = await prisma.order.findUnique({
-            //   where: {
-            //     projectNumber: event.projectNumber,
-            //     id: event.orderId
-            //   }, select: {
-            //     totalPrice: true
-            //   }
-            // })
+          // for extendard delivary   just update what you want
+          // const findOrder = await prisma.order.findUnique({
+          //   where: {
+          //     projectNumber: event.projectNumber,
+          //     id: event.orderId
+          //   }, select: {
+          //     totalPrice: true
+          //   }
+          // })
 
-            // if (!findOrder) {
-            //   throw new AppError(httpStatus.NOT_FOUND, 'Unfortunately, this order is not found.')
-            // }
+          // if (!findOrder) {
+          //   throw new AppError(httpStatus.NOT_FOUND, 'Unfortunately, this order is not found.')
+          // }
 
-            // const extendard_delivart = await prisma.order.update({
-            //   where: {
-            //     projectNumber: event.projectNumber,
-            //     id: event.orderId
-            //   }, data: {
-            //     totalPrice: (Number(findOrder?.totalPrice) + Number(event?.totalAmount)).toString(),
+          // const extendard_delivart = await prisma.order.update({
+          //   where: {
+          //     projectNumber: event.projectNumber,
+          //     id: event.orderId
+          //   }, data: {
+          //     totalPrice: (Number(findOrder?.totalPrice) + Number(event?.totalAmount)).toString(),
 
-            //   }
-            // })
+          //   }
+          // })
 
-            // same for addtitional offer based on the requirment just update few  things
-            // const additional offer = await prisma.order.update({
-            //   where: {
-            //     projectNumber: event.projectNumber,
-            //     id: event.orderId
-            //   }, data: {
-            //
-            //   }
-            // })
+          // same for addtitional offer based on the requirment just update few  things
+          // const additional offer = await prisma.order.update({
+          //   where: {
+          //     projectNumber: event.projectNumber,
+          //     id: event.orderId
+          //   }, data: {
+          //
+          //   }
+          // })
 
-            console.log('order', order);
-            console.log("Order successfully updated with status 'PLACED'.");
-          } catch (error) {
-            console.error('Error updating status:', error);
-          }
+          console.log('order', order);
+          console.log("Order successfully updated with status 'PLACED'.");
+
         }
       }
       break;
   }
 
   res.json({ received: true });
-};
+});
 
 export { stripeWebhook };
