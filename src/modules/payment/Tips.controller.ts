@@ -27,7 +27,7 @@ const Tips = catchAsync(async (req: Request, res: any) => {
             },
         ],
         metadata: {
-            paymentType: data.paymentType,
+            paymentType: data?.paymentType,
             ammount: data?.totalAmount,
             projectNumber: data?.projectNumber,
         },
