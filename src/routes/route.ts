@@ -51,6 +51,7 @@ import uploadImage from '../modules/uploadImage/uploadController';
 import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
 import DeliveredRoute from '../modules/Order_page/Delivard/Order-delivar.route';
+import Tips from '../modules/payment/Tips.controller';
 
 
 const router = express.Router();
@@ -194,6 +195,8 @@ router.use('/multi-project', multiProjectRoute);
 //payment route
 router.post('/api/checkout-session', payment.stripePayment);
 router.post('/payment/additional', stripePayment.additionalPayment);
+router.post('/payment/tip', Tips);
+
 // router.post(
 //   '/webhook',
 //   express.raw({ type: 'application/json' }),

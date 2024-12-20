@@ -13,7 +13,7 @@ const additionalPayment = catchAsync(async (req: Request, res: any) => {
   const { data } = req.body;
 
   const offer = data?.updatedMessage
-  
+
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],

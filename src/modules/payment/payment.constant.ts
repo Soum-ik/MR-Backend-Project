@@ -8,5 +8,6 @@ export enum PaymentStatus {
 export enum PaymentType {
     ADDITIONAL_OFFER = 'AdditionalOffer',
     EXTEND_DELIVERY = 'ExtendDelivery',
-    CUSTOM_OFFER = 'CustomOffer'
+    CUSTOM_OFFER = 'CustomOffer',
+    TIPS = 'TipsOffer'
 }

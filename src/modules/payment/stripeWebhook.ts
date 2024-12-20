@@ -8,30 +8,11 @@ import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
 import { PaymentStatus, PaymentType } from './payment.constant';
 import { daysToHours } from '../../utils/dayToHours';
 import catchAsync from '../../libs/utlitys/catchSynch';
+import { additionalOfferT, customOfferT, extendDeliveryTimeT } from './payment.interface';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 
-interface customOfferT {
-  thumbnail: string;
-  title: string;
-  deliveryCount: string;
-  price: string;
-  desc: string;
-  isAccepted: boolean;
-  isRejected: boolean;
-  isWithdrawn: boolean;
-  requirements: string[];
-}
-
-interface additionalOfferT {
-  text: string
-  price: string;
-  duration: string;
-  isWithdrawn: boolean;
-  isAccepted: boolean;
-  isRejected: boolean;
-}
 
 
 const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
@@ -168,14 +149,63 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-        }
-        else if (
-          session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY
-        ) {
-          // Handle design order payment
-          console.log('Tips payment completed:', session);
-        } else {
-          // Save payment info in the database
+        } else if (session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY) {
+          const findMessage = await prisma.orderMessage.findMany({
+            where: {
+              uniqueId: data?.updateMessageId
+            },
+            take: 1
+          })
+          const messageData = findMessage[0]
+          const { isAccepted, ...rest } = messageData?.extendDeliveryTime as unknown as extendDeliveryTimeT
+
+          const { days } = rest
+
+          const orderData = await prisma.order.findUnique({
+            where: {
+              id: data?.orderId
+            },
+          })
+          const hours = daysToHours(data?.days || '0')
+
+          const duration = parseInt(orderData?.duration || '0') + days
+          const durationHours = parseInt(orderData?.durationHours || '0') + hours
+
+          let UpdatedDeliveryDate;
+          if (orderData?.deliveryDate && orderData?.durationHours) {
+            UpdatedDeliveryDate = new Date(orderData?.deliveryDate);//+
+            UpdatedDeliveryDate.setDate(UpdatedDeliveryDate.getDate() + duration);//+ 
+          } else if (orderData?.deliveryDate && orderData?.duration) {
+            UpdatedDeliveryDate = new Date(orderData?.deliveryDate);//+
+            UpdatedDeliveryDate.setDate(UpdatedDeliveryDate.getDate() + duration);//+
+          }
+
+
+          const updateMessage = {
+            isAccepted: true,
+            ...rest,
+          }
+
+          await prisma.orderMessage.updateMany({
+            where: {
+              uniqueId: data?.updateMessageId
+            }, data: {
+              extendDeliveryTime: updateMessage
+            }
+          })
+
+          await prisma.order.update({
+            where: {
+              id: data?.orderId
+            },
+            data: {
+              duration: orderData?.duration ? duration.toString() : '',
+              durationHours: orderData?.durationHours ? durationHours.toString() : '',
+              deliveryDate: UpdatedDeliveryDate
+            },
+
+          })
+
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
             data: {
@@ -184,21 +214,46 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
+        } else if (session?.metadata?.paymentType === PaymentType.TIPS) {
+          // paymentType: data.paymentType,
+          // ammount: data?.totalAmount,
+          // projectNumber: data?.projectNumber,
 
-          // const updateMessage = data?.updatedMessage
+          await prisma.order.update({
+            where: {
+              projectNumber: data?.projectNumber
+            },
+            data: {
+              projectTips: {
+                toJSON() {
+                  return { ammount: data?.totalAmount };
+                },
+              }
+            }
+          })
 
-          // if (updateMessage) {
+          await prisma.payment.update({
+            where: { stripeId: session.id.split('_').join('') },
+            data: {
+              status: PaymentStatus.PAID,
+              piId: session?.payment_intent as string,
+            },
+          });
 
-          //   const { id, ...message } = updateMessage
+          console.log('Tips payment successfully updated in the database.');
 
-          //   await prisma.message.updateMany({
-          //     where: { uniqueId: updateMessage.uniqueId },
-          //     data: {
-          //       ...message
-          //     },
-          //   });
-          // }
 
+
+        }
+        else {
+          // Save payment info in the database
+          await prisma.payment.update({
+            where: { stripeId: session.id.split('_').join('') },
+            data: {
+              status: PaymentStatus.PAID,
+              piId: session?.payment_intent as string,
+            },
+          });
 
           console.log('Payment successfully updated in the database.');
 
@@ -213,39 +268,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-          // for extendard delivary   just update what you want
-          // const findOrder = await prisma.order.findUnique({
-          //   where: {
-          //     projectNumber: event.projectNumber,
-          //     id: event.orderId
-          //   }, select: {
-          //     totalPrice: true
-          //   }
-          // })
-
-          // if (!findOrder) {
-          //   throw new AppError(httpStatus.NOT_FOUND, 'Unfortunately, this order is not found.')
-          // }
-
-          // const extendard_delivart = await prisma.order.update({
-          //   where: {
-          //     projectNumber: event.projectNumber,
-          //     id: event.orderId
-          //   }, data: {
-          //     totalPrice: (Number(findOrder?.totalPrice) + Number(event?.totalAmount)).toString(),
-
-          //   }
-          // })
-
-          // same for addtitional offer based on the requirment just update few  things
-          // const additional offer = await prisma.order.update({
-          //   where: {
-          //     projectNumber: event.projectNumber,
-          //     id: event.orderId
-          //   }, data: {
-          //
-          //   }
-          // })
 
           console.log('order', order);
           console.log("Order successfully updated with status 'PLACED'.");

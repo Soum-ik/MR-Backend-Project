@@ -41,6 +41,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
                 submittedData: updatedMessage,
                 deliveryAttempt: 2,
                 projectThumbnail: updatedMessage?.deliverProject?.thumbnailImage?.url,
+                completedDate: new Date()
             }
         });
 

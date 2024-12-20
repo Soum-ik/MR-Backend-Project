@@ -620,6 +620,7 @@ enum paymentType {
   AdditionalOffer
   ExtendDelivery
   CustomOffer
+  TipsOffer
 }
 
 enum affiliateWithdrawType {
