@@ -10,7 +10,7 @@ import httpStatus from "http-status";
 
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
-    const { message, rating, orderId, userName } = req.body;
+    const { message, rating, orderId, userName, ...rest } = req.body;
     const { role, user_id } = req.user as TokenCredential;
 
     const senderType = role === USER_ROLE.USER ? "CLIENT" : "OWNER";

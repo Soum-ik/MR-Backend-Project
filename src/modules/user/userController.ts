@@ -655,9 +655,9 @@ const profile = catchAsync(async (req: Request, res: Response) => {
   const result = {
     CompletedProjects: CP.length,
     ProjectCompletedRate: ProjectCompletedRate,
-    AvgRatingTaken: ART,
-    AvgRatingGiven: ARV,
-    LastProjectOn: LP
+    AvgRatingTaken: ART._avg.rating || 0,
+    AvgRatingGiven: ARV._avg.rating || 0,
+    LastProjectOn: LP[0]?.createdAt
   }
 
 
