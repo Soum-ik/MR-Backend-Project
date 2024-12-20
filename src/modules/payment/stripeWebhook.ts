@@ -219,7 +219,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           // ammount: data?.totalAmount,
           // projectNumber: data?.projectNumber,
 
-          const updateTips = { amount: data?.totalAmount || 0 }
+          const updateTips = { amount: data?.ammount || 0 }
           await prisma.order.update({
             where: {
               projectNumber: data?.projectNumber
