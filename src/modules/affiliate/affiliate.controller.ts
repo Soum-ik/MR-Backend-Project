@@ -1,32 +1,34 @@
-import { WEB_CACHE } from './../../config/config';
-import { Request, Response } from "express";
-import { prisma } from "../../libs/prismaHelper";
-import catchAsync from "../../libs/utlitys/catchSynch";
-import sendResponse from "../../libs/sendResponse";
-import { AFFILIATE_ERRORS, AFFILIATE_SUCCESS } from "./affiliate.constant";
-import { TokenCredential } from "../../libs/authHelper";
-import AppError from "../../errors/AppError";
-import { affiliateWithdrawType, PaymentStatus, ProjectStatus } from "@prisma/client";
-import affiliateNumberCreator from "../Order_page/projectNumberGenarator.ts/affiliateNumberCreator";
+import {
+    affiliateWithdrawType,
+    PaymentStatus,
+    ProjectStatus,
+} from '@prisma/client';
+import { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
+import { TokenCredential } from '../../libs/authHelper';
+import { prisma } from '../../libs/prismaHelper';
+import sendResponse from '../../libs/sendResponse';
+import catchAsync from '../../libs/utlitys/catchSynch';
+import affiliateNumberCreator from '../Order_page/projectNumberGenarator.ts/affiliateNumberCreator';
+import { AFFILIATE_SUCCESS } from './affiliate.constant';
 
 const autoGenerate = catchAsync(async (req: Request, res: Response) => {
-    const { user_id, } = req.user as TokenCredential;
+    const { user_id } = req.user as TokenCredential;
     const user = await prisma.user.findUnique({
-        where: { id: user_id }
+        where: { id: user_id },
     });
-
 
     const links = await prisma.affiliate.findMany({
         where: {
-            userId: user_id
+            userId: user_id,
         },
         select: {
-            link: true
-        }
-    })
+            link: true,
+        },
+    });
     // Check if any link starts with 'aff-auto'
-    const existingLink = links.some(link => link.link.startsWith('aff-auto'));
+    const existingLink = links.some((link) => link.link.startsWith('aff-auto'));
 
     if (existingLink) {
         return sendResponse(res, {
@@ -40,123 +42,129 @@ const autoGenerate = catchAsync(async (req: Request, res: Response) => {
     const affiliate = await prisma.affiliate.create({
         data: {
             userId: user_id,
-            link: `aff-auto/${user?.userName}`
-        }
+            link: `aff-auto/${user?.userName}`,
+        },
     });
 
     return sendResponse(res, {
         statusCode: 201,
         success: true,
         message: AFFILIATE_SUCCESS.CREATED,
-        data: affiliate
+        data: affiliate,
     });
-})
+});
 
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
-  
+
     const user = await prisma.user.findUnique({
-      where: { id: user_id },
+        where: { id: user_id },
     });
-  
+
     if (!user) {
-      return sendResponse(res, {
-        statusCode: 404,
-        success: false,
-        message: "User not found",
-      });
+        return sendResponse(res, {
+            statusCode: 404,
+            success: false,
+            message: 'User not found',
+        });
     }
-  
+
     // Generate the affiliate serial number
     const affiliateNumber = await affiliateNumberCreator(user_id);
-  
+
     // Construct the affiliate link
     const affiliateLink = `aff-${affiliateNumber}/${user.userName}`;
-  
+
     // Ensure the link is unique
     const existingLink = await prisma.affiliate.findFirst({
-      where: { link: affiliateLink },
+        where: { link: affiliateLink },
     });
-  
+
     if (existingLink) {
-      throw new AppError(400, "This link is already used");
+        throw new AppError(400, 'This link is already used');
     }
-  
+
     // Create the affiliate record
     const affiliate = await prisma.affiliate.create({
-      data: {
-        userId: user_id,
-        link: affiliateLink,
-      },
+        data: {
+            userId: user_id,
+            link: affiliateLink,
+        },
     });
-  
+
     // Send the response
     return sendResponse(res, {
-      statusCode: 201,
-      success: true,
-      message: "Affiliate created successfully",
-      data: affiliate,
-    });
-  });
-  
-
-const updateAffiliateClicks = catchAsync(async (req: Request, res: Response) => {
-    const { link, affiliate_id } = req.query;
-
-
-    if (!affiliate_id && !link) {
-        throw new AppError(400, "At least one of Affiliate ID or Link is required");
-    }
-
-    // First find the affiliate
-    const existingAffiliate = await prisma.affiliate.findFirst({
-        where: {
-            OR: [
-                { id: affiliate_id?.toString() },
-                { link: link?.toString() }
-            ]
-        }
-    });
-
-    if (!existingAffiliate) {
-        throw new AppError(404, "Affiliate not found");
-    }
-
-    // Then update using the found ID
-    const affiliate = await prisma.affiliate.update({
-        where: {
-            id: existingAffiliate.id
-        },
-        data: {
-            clicks: {
-                increment: 1
-            }
-        }
-    });
-
-    return sendResponse(res, {
-        statusCode: 200,
+        statusCode: 201,
         success: true,
-        message: AFFILIATE_SUCCESS.UPDATED,
-        data: affiliate
+        message: 'Affiliate created successfully',
+        data: affiliate,
     });
 });
+
+const updateAffiliateClicks = catchAsync(
+    async (req: Request, res: Response) => {
+        const { link, affiliate_id } = req.query;
+
+        if (!affiliate_id && !link) {
+            throw new AppError(
+                400,
+                'At least one of Affiliate ID or Link is required',
+            );
+        }
+
+        // First find the affiliate
+        const existingAffiliate = await prisma.affiliate.findFirst({
+            where: {
+                OR: [
+                    { id: affiliate_id?.toString() },
+                    { link: link?.toString() },
+                ],
+            },
+        });
+
+        if (!existingAffiliate) {
+            throw new AppError(404, 'Affiliate not found');
+        }
+
+        // Then update using the found ID
+        const affiliate = await prisma.affiliate.update({
+            where: {
+                id: existingAffiliate.id,
+            },
+            data: {
+                clicks: {
+                    increment: 1,
+                },
+            },
+        });
+
+        return sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: AFFILIATE_SUCCESS.UPDATED,
+            data: affiliate,
+        });
+    },
+);
 
 const deleteAffiliate = catchAsync(async (req: Request, res: Response) => {
     const { affiliate_link, user_id } = req.query;
 
     if (!affiliate_link || !user_id) {
-        throw new AppError(400, "Affiliate ID and User ID are required");
+        throw new AppError(400, 'Affiliate ID and User ID are required');
     }
 
     await prisma.affiliate.delete({
-        where: { link: affiliate_link?.toString(), userId: user_id?.toString() }
+        where: {
+            link: affiliate_link?.toString(),
+            userId: user_id?.toString(),
+        },
     });
 
     return sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: AFFILIATE_SUCCESS.DELETED
+        message: AFFILIATE_SUCCESS.DELETED,
     });
 });
 
@@ -172,12 +180,12 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
                         select: {
                             Order: {
                                 select: {
-                                    totalPrice: true
-                                }
-                            }
-                        }
-                    }
-                }
+                                    totalPrice: true,
+                                },
+                            },
+                        },
+                    },
+                },
             },
             user: {
                 select: {
@@ -188,57 +196,63 @@ const getAllAffiliates = catchAsync(async (req: Request, res: Response) => {
                     totalOrder: true,
                     Order: {
                         select: {
-                            totalPrice: true
+                            totalPrice: true,
                         },
                         where: {
-                            projectStatus: "Completed",
-                        }
-                    }
-                }
-            }
-        }
+                            projectStatus: 'Completed',
+                        },
+                    },
+                },
+            },
+        },
     });
     async function getUserName(user_id: string) {
         const user = await prisma.user.findUnique({
-            where: { id: user_id }
+            where: { id: user_id },
         });
         return user?.userName;
     }
 
     // Transform data to show who joined with whom
-    const formattedAffiliates = await Promise.all(affiliates.map(async affiliate => ({
-        affiliateOwner: {
-            id: affiliate.user.id,
-            fullName: affiliate.user.fullName,
-            email: affiliate.user.email,
-            userName: affiliate.user.userName,
-        },
-        affiliateLink: affiliate.link,
-        clicks: affiliate.clicks,
-        amount: affiliate.amount,
-        joinedUsers: await Promise.all(affiliate.AffiliateJoin.map(async join => ({
-            joinId: join.userId,
-            createdAt: join.createdAt,
-            userName: await getUserName(join.userId),
-            totalOrders: join.user.Order.length,
-            totalAmount: join.user.Order.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0)
-        })))
-    })));
+    const formattedAffiliates = await Promise.all(
+        affiliates.map(async (affiliate) => ({
+            affiliateOwner: {
+                id: affiliate.user.id,
+                fullName: affiliate.user.fullName,
+                email: affiliate.user.email,
+                userName: affiliate.user.userName,
+            },
+            affiliateLink: affiliate.link,
+            clicks: affiliate.clicks,
+            amount: affiliate.amount,
+            joinedUsers: await Promise.all(
+                affiliate.AffiliateJoin.map(async (join) => ({
+                    joinId: join.userId,
+                    createdAt: join.createdAt,
+                    userName: await getUserName(join.userId),
+                    totalOrders: join.user.Order.length,
+                    totalAmount: join.user.Order.reduce(
+                        (sum, order) => sum + Number(order.totalPrice || 0),
+                        0,
+                    ),
+                })),
+            ),
+        })),
+    );
 
     return sendResponse(res, {
         statusCode: 200,
         success: true,
         message: AFFILIATE_SUCCESS.FETCHED,
-        data: formattedAffiliates
+        data: formattedAffiliates,
     });
 });
 
 const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
-
     const { user_id } = req.user as TokenCredential;
 
     const affiliates = await prisma.affiliate.findMany({
-        where: { userId: user_id, },
+        where: { userId: user_id },
         include: {
             AffiliateJoin: {
                 include: {
@@ -246,65 +260,80 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
                         select: {
                             Order: {
                                 where: {
+                                    projectStatus: 'Completed',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });    
 
-                                    projectStatus: "Completed"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    const formattedAffiliates = affiliates.map(affiliate => ({
+    const formattedAffiliates = affiliates.map((affiliate) => ({
         links: affiliate.link,
         totalClicks: affiliate.clicks,
         join: affiliate.AffiliateJoin.length,
-        sales: affiliate.AffiliateJoin.reduce((acc, join) => acc + join.user.Order.length, 0)
+        sales: affiliate.AffiliateJoin.reduce(
+            (acc, join) => acc + join.user.Order.length,
+            0,
+        ),
     }));
 
     // Sorting logic: 'aff-auto' links first, then LIFO for the rest
     const sortedAffiliates = [
-        ...formattedAffiliates.filter(a => a.links.includes('aff-auto')), // 'aff-auto' links at the top
-        ...formattedAffiliates.filter(a => !a.links.includes('aff-auto')).reverse() // LIFO for the rest
+        ...formattedAffiliates.filter((a) => a.links.includes('aff-auto')), // 'aff-auto' links at the top
+        ...formattedAffiliates
+            .filter((a) => !a.links.includes('aff-auto'))
+            .reverse(), // LIFO for the rest
     ];
+
     const totalAmount = await prisma.affiliateJoin.findMany({
         select: {
-
             user: {
                 include: {
                     Order: {
                         where: {
-
                             projectStatus: ProjectStatus.Completed,
-                            paymentStatus: PaymentStatus.PAID
+                            paymentStatus: PaymentStatus.PAID,
                         },
                         select: {
-                            totalPrice: true
-                        }
-                    }
-                }
-            }
-        }
-    })
-
-    const totalEarnings = totalAmount.reduce((acc, join) => acc + join.user.Order.length * 5, 0);
+                            createdAt : true
+                        },
+                    },
+                },
+            },
+        },
+    });
+    const totalEarnings = totalAmount.reduce((total, affiliate) => {
+        const userCreatedAt = new Date(affiliate.user.createdAt);
+      
+        // Check if any order completed within 30 days
+        const hasQualifyingOrder = affiliate.user.Order.some((order) => {
+          const orderCreatedAt = new Date(order.createdAt);
+          const diffInDays = (orderCreatedAt.getTime() - userCreatedAt.getTime()) / (1000 * 60 * 60 * 24);
+          return diffInDays >= 0 && diffInDays <= 30;
+        });
+      
+        // Count user if they have at least one completed order
+        return hasQualifyingOrder ? total + 5 : total;
+      }, 0);
+      
 
     await prisma.user.update({
         where: {
-            id: user_id as string
+            id: user_id as string,
         },
         data: {
-            totalEaring: totalEarnings
-        }
-    })
+            totalEaring: totalEarnings,
+        },
+    });
 
     return sendResponse(res, {
         statusCode: 200,
         success: true,
         message: AFFILIATE_SUCCESS.FETCHED,
-        data: { totalEarnings, formattedAffiliates: sortedAffiliates }
+        data: { totalEarnings, formattedAffiliates: sortedAffiliates },
     });
 });
 
@@ -374,9 +403,9 @@ const affiliateProfile = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
     const profile = await prisma.affiliateProfile.findUnique({
         where: {
-            userId: user_id
-        }
-    })
+            userId: user_id,
+        },
+    });
 
     if (!profile) {
         throw new AppError(httpStatus.NOT_FOUND, 'Affiliate profile not found');
@@ -385,12 +414,10 @@ const affiliateProfile = catchAsync(async (req: Request, res: Response) => {
     return sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Profile get successfully",
-        data: profile
+        message: 'Profile get successfully',
+        data: profile,
     });
-
-})
-
+});
 
 const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
     const { user_id } = req.user as TokenCredential;
@@ -400,11 +427,17 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
     }
 
     if (ammount < 10) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Withdrawal amount must be greater than or equal to 10');
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'Withdrawal amount must be greater than or equal to 10',
+        );
     }
 
     if (!ammount || ammount <= 0) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'A valid withdrawal amount is required');
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'A valid withdrawal amount is required',
+        );
     }
 
     // Query the affiliate record for the user
@@ -419,19 +452,24 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
     }
 
     if (findingUser.totalEaring < ammount) {
-        throw new AppError(httpStatus.FORBIDDEN, `Insufficient balance to withdraw the requested amount, your balance is ${findingUser.totalEaring} `);
+        throw new AppError(
+            httpStatus.FORBIDDEN,
+            `Insufficient balance to withdraw the requested amount, your balance is ${findingUser.totalEaring} `,
+        );
     }
 
     const userProfile = await prisma.affiliateProfile.findUnique({
         where: {
-            userId: user_id
-        }
-    })
+            userId: user_id,
+        },
+    });
 
     if (!userProfile) {
-        throw new AppError(httpStatus.NOT_ACCEPTABLE, 'User must be have there affilete profile before withdraw');
+        throw new AppError(
+            httpStatus.NOT_ACCEPTABLE,
+            'User must be have there affilete profile before withdraw',
+        );
     }
-
 
     // Deduct the amount and update the record
     const updatedAffiliate = await prisma.user.update({
@@ -440,21 +478,21 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
         },
         data: {
             totalEaring: {
-                decrement: ammount
-            }
+                decrement: ammount,
+            },
         },
         select: {
             id: true,
-        }
-    })
+        },
+    });
 
     await prisma.affiliateWithdraw.create({
         data: {
             affiliateProfileId: updatedAffiliate.id,
             userId: user_id,
-            ammount: ammount
-        }
-    })
+            ammount: ammount,
+        },
+    });
 
     return sendResponse(res, {
         statusCode: 200,
@@ -462,7 +500,7 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
         message: 'Withdrawal request processed successfully',
         data: updatedAffiliate,
     });
-})
+});
 
 const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
     const findList = await prisma.affiliateWithdraw.findMany({
@@ -471,9 +509,9 @@ const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
             status: true,
             ammount: true,
             id: true,
-            createdAt: true
-        }
-    })
+            createdAt: true,
+        },
+    });
 
     return sendResponse(res, {
         statusCode: 200,
@@ -481,61 +519,74 @@ const requestPaymentList = catchAsync(async (req: Request, res: Response) => {
         message: 'Withdrawal request processed successfully',
         data: findList,
     });
-})
+});
 
-const withDrawRequestUpdateAction = catchAsync(async (req: Request, res: Response) => {
-    const { id, action } = req.body;
+const withDrawRequestUpdateAction = catchAsync(
+    async (req: Request, res: Response) => {
+        const { id, action } = req.body;
 
-    if (!id || !action) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Both id and action are required');
-    }
-    if (![affiliateWithdrawType.APPROVED, affiliateWithdrawType.REJECTED].includes(action)) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Invalid action, should be either "APPROVED" or "REJECTED"');
-    }
-
-    const findWithdrawRequest = await prisma.affiliateWithdraw.update({
-        where: {
-            id,
-        },
-        data: {
-            status: action as affiliateWithdrawType
+        if (!id || !action) {
+            throw new AppError(
+                httpStatus.BAD_REQUEST,
+                'Both id and action are required',
+            );
         }
-    });
+        if (
+            ![
+                affiliateWithdrawType.APPROVED,
+                affiliateWithdrawType.REJECTED,
+            ].includes(action)
+        ) {
+            throw new AppError(
+                httpStatus.BAD_REQUEST,
+                'Invalid action, should be either "APPROVED" or "REJECTED"',
+            );
+        }
 
-    if (action === 'REJECTED' && findWithdrawRequest) {
-
-        const userTotalAmmount = await prisma.user.findUnique({
+        const findWithdrawRequest = await prisma.affiliateWithdraw.update({
             where: {
-                id: findWithdrawRequest.userId as string
+                id,
             },
-            select: {
-                totalEaring: true
-            }
-        })
+            data: {
+                status: action as affiliateWithdrawType,
+            },
+        });
 
-        if (userTotalAmmount) {
-            const totalPrice = findWithdrawRequest.ammount as number + userTotalAmmount.totalEaring as number
-
-            await prisma.user.update({
+        if (action === 'REJECTED' && findWithdrawRequest) {
+            const userTotalAmmount = await prisma.user.findUnique({
                 where: {
-                    id: findWithdrawRequest.userId
+                    id: findWithdrawRequest.userId as string,
                 },
-                data: {
-                    totalEaring: {
-                        set: totalPrice
-                    }
-                }
-            })
-        }
-    }
+                select: {
+                    totalEaring: true,
+                },
+            });
 
-    return sendResponse(res, {
-        statusCode: 200,
-        success: true,
-        message: `Withdrawal request with ID ${id} ${action}d successfully`,
-        data: findWithdrawRequest,
-    });
-})
+            if (userTotalAmmount) {
+                const totalPrice = ((findWithdrawRequest.ammount as number) +
+                    userTotalAmmount.totalEaring) as number;
+
+                await prisma.user.update({
+                    where: {
+                        id: findWithdrawRequest.userId,
+                    },
+                    data: {
+                        totalEaring: {
+                            set: totalPrice,
+                        },
+                    },
+                });
+            }
+        }
+
+        return sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: `Withdrawal request with ID ${id} ${action}d successfully`,
+            data: findWithdrawRequest,
+        });
+    },
+);
 
 export const AffiliateController = {
     createAffiliate,
@@ -548,5 +599,5 @@ export const AffiliateController = {
     requestPaymentList,
     affiliateProfile,
     withDrawRequestUpdateAction,
-    autoGenerate
+    autoGenerate,
 };
