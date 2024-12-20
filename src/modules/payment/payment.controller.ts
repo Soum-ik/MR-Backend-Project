@@ -26,7 +26,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
   console.log(data, 'checking data from custom offers before confirm');
 
   const offer = data?.updatedMessage
-  const paymentType = offer ? 'CustomOffer' : null
+  const paymentType = offer ? 'CustomOffer' : null;
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -45,7 +45,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
     })),
     metadata: {
       paymentType: paymentType,
-      updateMessageId: offer.uniqueId || null
+      updateMessageId: offer?.uniqueId || null
     },
     mode: 'payment',
     success_url: `http://localhost:5173/project-requirements/${projectNumber}`,

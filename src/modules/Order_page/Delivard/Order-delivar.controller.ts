@@ -6,154 +6,134 @@ import httpStatus from 'http-status';
 import sendResponse from '../../../libs/sendResponse';
 import { ProjectStatus } from '../Order_page.constant';
 import { OrderStatus } from '../Order_page.constant';
+import catchAsync from '../../../libs/utlitys/catchSynch';
+import { affiliateWithdrawType } from '@prisma/client';
 
-const DeliveredOrders = async (req: Request, res: Response) => {
-    try {
-        const { orderId } = req.params;
-        const requestBody = req.body;
 
-        // Find the order
+interface deliverProjectT {
+    isRevision: boolean;
+    isAccepted: boolean;
+    thumbnailImage: object;
+    attachments: Array<object>;
+}
+
+const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
+    const { projectNumber, uniqueId, ...rest } = req.body;
+
+    const result = await prisma.$transaction(async (prisma) => {
         const order = await prisma.order.findUnique({
             where: {
-                id: orderId
+                projectNumber
             }
         });
 
         if (!order) {
-            return sendResponse(res, {
-                statusCode: httpStatus.NOT_FOUND,
-                success: false,
-                data: null,
-                message: "Order not found"
-            });
+            throw new Error("Order not found");
         }
 
         // Update order with delivery request
-        const updatedOrder = await prisma.order.update({
+        await prisma.order.update({
             where: {
-                id: orderId
+                projectNumber
             },
             data: {
                 adminDeliveryRequest: true,
+                clientApproval: true,
                 projectStatus: ProjectStatus.DELIVERED,
-                trackProjectStatus: OrderStatus.REVIEW_DELIVERY,
-                submittedData: requestBody
+                trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
+                submittedData: rest,
+                deliveryAttempt: 2
             }
         });
 
-        return sendResponse(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            data: updatedOrder,
-            message: "Delivery request sent successfully"
+        const { isAccepted, ...other } = rest?.deliverProject as unknown as deliverProjectT;
+
+        // Update order with delivered data
+        const updateMessage = {
+            isAccepted: true,
+            other
+        };
+
+        // Update all messages with the same uniqueId
+        await prisma.orderMessage.updateMany({
+            where: {
+                uniqueId: uniqueId
+            },
+            data: {
+                deliverProject: updateMessage
+            }
         });
 
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.BAD_REQUEST,
-                success: false,
-                data: null,
-                message: `${error.message}`,
-            });
-        }
+        return order;
+    });
 
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            data: null,
-            message: `Internal server error`,
-        });
-    }
-};
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: result,
+        message: "Delivery accepted successfully"
+    });
+});
 
-const handleDeliveryResponse = async (req: Request, res: Response) => {
-    try {
-        const { orderId } = req.params;
-        const { status } = req.body; // status should be 'accept' or 'reject'
+const handleDeliveryResponse = catchAsync(async (req: Request, res: Response) => {
+    const { projectNumber, uniqueId, ...rest } = req.body;
 
-        // Find the order
+    const result = await prisma.$transaction(async (prisma) => {
         const order = await prisma.order.findUnique({
             where: {
-                id: orderId
+                projectNumber
             }
         });
 
         if (!order) {
-            return sendResponse(res, {
-                statusCode: httpStatus.NOT_FOUND,
-                success: false,
-                data: null,
-                message: "Order not found"
-            });
+            throw new Error("Order not found");
         }
 
-        let updateData;
-        if (status === 'accept') {
-            updateData = {
-                projectStatus: ProjectStatus.COMPLETED,
-                trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
-                clientApproval: true
-            };
-        } else if (status === 'reject') {
-            updateData = {
-                projectStatus: ProjectStatus.REVISION,
-                trackProjectStatus: OrderStatus.PROJECT_RUNNING,
-                adminDeliveryRequest: false
-            };
-        } else {
-            return sendResponse(res, {
-                statusCode: httpStatus.BAD_REQUEST,
-                success: false,
-                data: null,
-                message: "Invalid status. Must be 'accept' or 'reject'"
-            });
-        }
-
-        // Update order based on response
-        const updatedOrder = await prisma.order.update({
+        // Update order with delivery request
+        await prisma.order.update({
             where: {
-                id: orderId
+                projectNumber
             },
             data: {
-                projectStatus: status === 'accept' ? ProjectStatus.COMPLETED : ProjectStatus.REVISION,
-                trackProjectStatus: status === 'accept' ? OrderStatus.COMPLETE_PROJECT : OrderStatus.PROJECT_RUNNING,
-                clientApproval: status === 'accept' ? true : undefined,
-                adminDeliveryRequest: status === 'reject' ? false : undefined
+                adminDeliveryRequest: true,
+                projectStatus: ProjectStatus.REVISION,
+                trackProjectStatus: OrderStatus.REVIEW_DELIVERY,
+                submittedData: rest,
+                deliveryAttempt: 1
             }
         });
 
-        const message = status === 'accept' ? 
-            "Delivery accepted successfully" : 
-            "Delivery rejected and sent for revision";
+        const { isRevision, ...other } = rest?.deliverProject as unknown as deliverProjectT;
 
-        return sendResponse(res, {
-            statusCode: httpStatus.OK,
-            success: true,
-            data: updatedOrder,
-            message
+        // Update order with delivered data
+        const updateMessage = {
+            isRevision: true,
+            other
+        };
+
+        // Update all messages with the same uniqueId
+        await prisma.orderMessage.updateMany({
+            where: {
+                uniqueId: uniqueId
+            },
+            data: {
+                deliverProject: updateMessage
+            }
         });
 
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return sendResponse<any>(res, {
-                statusCode: httpStatus.BAD_REQUEST,
-                success: false,
-                data: null,
-                message: `${error.message}`,
-            });
-        }
+        return order;
+    });
 
-        return sendResponse<any>(res, {
-            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-            success: false,
-            data: null,
-            message: `Internal server error`,
-        });
-    }
-};
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: result,
+        message: "Delivery accepted successfully"
+    });
+});
 
 export const OrderDelivarController = {
     DeliveredOrders,
     handleDeliveryResponse
 };
+

@@ -50,6 +50,7 @@ import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessa
 import uploadImage from '../modules/uploadImage/uploadController';
 import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
+import DeliveredRoute from '../modules/Order_page/Delivard/Order-delivar.route';
 
 
 const router = express.Router();
@@ -119,8 +120,9 @@ router.get(
 );
 
 
-router.use('/dd', DDroute)
 router.get('/profile-indicator', Indicator.IndicatorController)
+router.use('/dd', DDroute);
+router.use('/delivery', DeliveredRoute);
 router.use('/review', reviewRouter);
 router.use('/image', ImageStoreRouter)
 router.use('/search', searchProjectsRouter);
