@@ -1,5 +1,5 @@
-import type { Request, Response } from 'express'; 
-import { prisma } from '../../../libs/prismaHelper'; 
+import type { Request, Response } from 'express';
+import { prisma } from '../../../libs/prismaHelper';
 import httpStatus from 'http-status';
 import sendResponse from '../../../libs/sendResponse';
 import { ProjectStatus } from '../Order_page.constant';
@@ -39,7 +39,8 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
                 projectStatus: ProjectStatus.DELIVERED,
                 trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
                 submittedData: updatedMessage,
-                deliveryAttempt: 2
+                deliveryAttempt: 2,
+                projectThumbnail: updatedMessage?.deliverProject?.thumbnailImage?.url,
             }
         });
 
