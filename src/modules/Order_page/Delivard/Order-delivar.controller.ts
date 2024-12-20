@@ -36,7 +36,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
             data: {
                 adminDeliveryRequest: true,
                 clientApproval: true,
-                projectStatus: ProjectStatus.DELIVERED,
+                projectStatus: ProjectStatus.COMPLETED,
                 trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
                 submittedData: updatedMessage,
                 deliveryAttempt: 2,
@@ -49,7 +49,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         // Update order with delivered data
         const updateMessage = {
             isAccepted: true,
-            other
+            ...other
         };
 
         // Update all messages with the same uniqueId
