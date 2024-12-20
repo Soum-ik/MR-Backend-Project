@@ -590,7 +590,7 @@ const getSingelUser = async (
 };
 
 const profile = catchAsync(async (req: Request, res: Response) => {
-  const { user_id } = req.user as TokenCredential
+  const { user_id } = req.params
 
   const [CP, CR, ART, ARV, LP] = await Promise.all([
     prisma.order.findMany({
