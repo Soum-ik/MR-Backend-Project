@@ -107,7 +107,7 @@ const handleDeliveryResponse = catchAsync(async (req: Request, res: Response) =>
         // Update order with delivered data
         const updateMessage = {
             isRevision: true,
-            other
+            ...other
         };
 
         // Update all messages with the same uniqueId
