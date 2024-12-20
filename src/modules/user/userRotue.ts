@@ -24,8 +24,7 @@ router.put(
 router.get('/all-user/', User.getAllUser);
 router.post('/update-user/', User.updateUser);
 router.get('/getUserById/:id', User.getUserById);
-router.get('/profile',
-  authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER),
+router.get('/profile/:user_id',
   User.profile)
 
 export const UserRoute = router;

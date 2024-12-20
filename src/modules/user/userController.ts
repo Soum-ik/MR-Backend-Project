@@ -590,7 +590,7 @@ const getSingelUser = async (
 };
 
 const profile = catchAsync(async (req: Request, res: Response) => {
-  const { user_id } = req.user as TokenCredential
+  const { user_id } = req.params;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 
   const [CP, CR, ART, ARV, LP] = await Promise.all([
     prisma.order.findMany({
@@ -655,9 +655,9 @@ const profile = catchAsync(async (req: Request, res: Response) => {
   const result = {
     CompletedProjects: CP.length,
     ProjectCompletedRate: ProjectCompletedRate,
-    AvgRatingTaken: ART,
-    AvgRatingGiven: ARV,
-    LastProjectOn: LP
+    AvgRatingTaken: ART._avg.rating || 0,
+    AvgRatingGiven: ARV._avg.rating || 0,
+    LastProjectOn: LP[0]?.createdAt
   }
 
 

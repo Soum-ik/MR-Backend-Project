@@ -16,19 +16,15 @@ import availableForChat from "./handlers/availableForChat";
 import deleteMessage from "./handlers/deleteMessage.controller";
 import UpdateUnseen from "./handlers/updateSeen";
 import updateSeenBy from "./handlers/updateSeenbyHandler";
+import PublicMessageHandler from "./handlers/PublicMessageHandler";
+
+
+let io: any; // Define io at a top-level scope
 
 const registerSocketServer = (server: Server) => {
-  const io = require("socket.io")(server, {
+  io = require("socket.io")(server, {
     cors: {
-      origin: [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://mr-project-fiverr-system.vercel.app",
-        "https://mahfujurrahm535.com/",
-        "https://dev.mahfujurrahm535.com/",
-        "wss://dev.mahfujurrahm535.com/",
-        "https://www.mahfujurrahm535.com/",
-      ],
+      origin: "*",
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -87,6 +83,13 @@ const registerSocketServer = (server: Server) => {
       const user = onlineUsers[i];
     }
   }, 8000);
+};
+
+export const getIO = () => {
+  if (!io) {
+    throw new Error("Socket.IO server has not been initialized!");
+  }
+  return io;
 };
 
 const socketServer = {

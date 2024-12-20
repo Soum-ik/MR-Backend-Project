@@ -45,6 +45,8 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
             }
         });
 
+        // Emit a socket event for notifications
+        // io.to(user_id).emit("send:notification", notifications);
         const { isAccepted, ...other } = updatedMessage?.deliverProject as unknown as deliverProjectT;
 
         // Update order with delivered data
