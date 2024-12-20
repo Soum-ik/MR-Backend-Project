@@ -132,8 +132,29 @@ const handleDeliveryResponse = catchAsync(async (req: Request, res: Response) =>
     });
 });
 
+const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
+    const { projectNumber } = req.body;
+
+    const order = await prisma.order.update({
+        where: {
+            projectNumber
+        },
+        data: {
+            projectStatus: 'Delivered'
+        }
+    });
+
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: order,
+        message: "Delivery accepted successfully"
+    });
+})
+
 export const OrderDelivarController = {
     DeliveredOrders,
-    handleDeliveryResponse
+    handleDeliveryResponse,
+    OrderDelivardStatus
 };
 
