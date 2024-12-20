@@ -29,7 +29,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         }
 
         // Update order with delivery request
-        await prisma.order.update({
+        const updateOrder = await prisma.order.update({
             where: {
                 projectNumber
             },
@@ -63,7 +63,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
             }
         });
 
-        return order;
+        return updateOrder;
     });
 
     return sendResponse(res, {
