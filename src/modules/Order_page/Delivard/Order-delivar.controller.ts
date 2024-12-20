@@ -1,13 +1,10 @@
-import type { Request, Response } from 'express';
-import { getPrismaFilter } from '../../../middleware/filterData';
-import { prisma } from '../../../libs/prismaHelper';
-import { z } from 'zod';
+import type { Request, Response } from 'express'; 
+import { prisma } from '../../../libs/prismaHelper'; 
 import httpStatus from 'http-status';
 import sendResponse from '../../../libs/sendResponse';
 import { ProjectStatus } from '../Order_page.constant';
 import { OrderStatus } from '../Order_page.constant';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import { affiliateWithdrawType } from '@prisma/client';
 
 
 interface deliverProjectT {
@@ -18,7 +15,7 @@ interface deliverProjectT {
 }
 
 const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
-    const { projectNumber, uniqueId, ...rest } = req.body;
+    const { projectNumber, uniqueId, updatedMessage } = req.body;
 
     const result = await prisma.$transaction(async (prisma) => {
         const order = await prisma.order.findUnique({
@@ -41,12 +38,12 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
                 clientApproval: true,
                 projectStatus: ProjectStatus.DELIVERED,
                 trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
-                submittedData: rest,
+                submittedData: updatedMessage,
                 deliveryAttempt: 2
             }
         });
 
-        const { isAccepted, ...other } = rest?.deliverProject as unknown as deliverProjectT;
+        const { isAccepted, ...other } = updatedMessage?.deliverProject as unknown as deliverProjectT;
 
         // Update order with delivered data
         const updateMessage = {
@@ -76,7 +73,9 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
 });
 
 const handleDeliveryResponse = catchAsync(async (req: Request, res: Response) => {
-    const { projectNumber, uniqueId, ...rest } = req.body;
+    const { projectNumber, uniqueId, updatedMessage } = req.body;
+
+    console.log(req.body);
 
     const result = await prisma.$transaction(async (prisma) => {
         const order = await prisma.order.findUnique({
@@ -98,12 +97,12 @@ const handleDeliveryResponse = catchAsync(async (req: Request, res: Response) =>
                 adminDeliveryRequest: true,
                 projectStatus: ProjectStatus.REVISION,
                 trackProjectStatus: OrderStatus.REVIEW_DELIVERY,
-                submittedData: rest,
+                submittedData: updatedMessage,
                 deliveryAttempt: 1
             }
         });
 
-        const { isRevision, ...other } = rest?.deliverProject as unknown as deliverProjectT;
+        const { isRevision, ...other } = updatedMessage?.deliverProject as unknown as deliverProjectT;
 
         // Update order with delivered data
         const updateMessage = {
@@ -128,7 +127,7 @@ const handleDeliveryResponse = catchAsync(async (req: Request, res: Response) =>
         statusCode: httpStatus.OK,
         success: true,
         data: result,
-        message: "Delivery accepted successfully"
+        message: "Revision accepted successfully"
     });
 });
 
