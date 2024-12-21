@@ -1,8 +1,4 @@
-import {
-  affiliateWithdrawType,
-  PaymentStatus,
-  ProjectStatus,
-} from '@prisma/client';
+import { affiliateWithdrawType } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
@@ -285,51 +281,12 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
       .reverse(), // LIFO for the rest
   ];
 
-  const totalAmount = await prisma.affiliateJoin.findMany({
+  const user = await prisma.user.findUnique({
     where: {
-      affiliate: {
-        userId: user_id,
-      },
+      id: user_id,
     },
     select: {
-      user: {
-        include: {
-          Order: {
-            where: {
-              projectStatus: ProjectStatus.Completed,
-              paymentStatus: PaymentStatus.PAID,
-            },
-            select: {
-              createdAt: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  const totalEarnings = totalAmount.reduce((total, affiliate) => {
-    const userCreatedAt = new Date(affiliate.user.createdAt);
-
-    // Check if any order completed within 30 days
-    const hasQualifyingOrder = affiliate.user.Order.some((order) => {
-      const orderCreatedAt = new Date(order.createdAt);
-      const diffInDays =
-        (orderCreatedAt.getTime() - userCreatedAt.getTime()) /
-        (1000 * 60 * 60 * 24);
-      return diffInDays >= 0 && diffInDays <= 30;
-    });
-
-    // Count user if they have at least one completed order
-    return hasQualifyingOrder ? total + 5 : total;
-  }, 0);
-
-  await prisma.user.update({
-    where: {
-      id: user_id as string,
-    },
-    data: {
-      totalEaring: totalEarnings,
+      totalEaring: true,
     },
   });
 
@@ -337,7 +294,10 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: AFFILIATE_SUCCESS.FETCHED,
-    data: { totalEarnings, formattedAffiliates: sortedAffiliates },
+    data: {
+      totalEarnings: user?.totalEaring,
+      formattedAffiliates: sortedAffiliates,
+    },
   });
 });
 
