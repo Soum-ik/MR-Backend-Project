@@ -547,10 +547,11 @@ model OrderExtensionRequest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orderMessageId String       @db.ObjectId @unique
-  orderMessage   OrderMessage @relation(fields: [orderMessageId], references: [id])
+  uniqueMessageId String @unique
   // relationships
-  order          Order        @relation(fields: [orderId], references: [id])
+  order           Order         @relation(fields: [orderId], references: [id])
+  OrderMessage    OrderMessage? @relation(fields: [orderMessageId], references: [id])
+  orderMessageId  String?       @db.ObjectId
 }
 
 model Payment {

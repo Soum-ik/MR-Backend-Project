@@ -163,7 +163,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
         } else if (
           session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY
         ) {
-
+          console.log('extend_delivery is working')
           const paymentStats = await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
             data: {
@@ -172,16 +172,32 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-          await prisma.orderExtensionRequest.create({
-            data: {
-              piId: session?.payment_intent as string,
-              orderId: data?.orderId as string,
-              requestJSON: data,
-              orderMessageId: data?.updateMessageId as string,
-              requestedByClient: data?.requestedByClient as unknown as boolean,
-              paymentStatus: paymentStats.status
-            }
-          })
+          console.log(paymentStats, 'payment status checking');
+
+          console.log(data, 'data checking');
+
+
+          try {
+            const request = await prisma.orderExtensionRequest.create({
+              data: {
+                piId: session?.payment_intent as string,
+                uniqueMessageId: data?.updateMessageId as string,
+                orderId: data?.orderId as string,
+                requestedByClient: Boolean(data?.requestedByClient),
+                requestJSON: data,
+                paymentStatus: paymentStats.status
+              }
+            })
+
+            console.log(request, 'request checking ');
+
+          } catch (error) {
+            console.log(error);
+
+          }
+
+
+
 
           if (!data?.requestedByClient) {
 

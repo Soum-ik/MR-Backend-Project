@@ -15,7 +15,7 @@ const approveExtensionRequest = catchAsync(async (req: Request, res: Response) =
     const { orderMessageId, approvedByAdmin, orderId } = req.body;
 
     const extensionRequest = await prisma.orderExtensionRequest.findUnique({
-        where: { orderId, orderMessageId },
+        where: { uniqueMessageId: orderMessageId },
     });
 
     if (!extensionRequest) {

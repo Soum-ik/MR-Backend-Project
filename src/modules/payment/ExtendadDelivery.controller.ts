@@ -35,8 +35,8 @@ const ExtendDelivery = catchAsync(async (req: Request, res: any) => {
       updateMessageId: offer?.uniqueId || null,
       duration: data?.duration,
       orderId: data?.orderId,
-      requestedByClient: data?.requestedByClient,  // as boolean
-      offer
+      requestedByClient: data?.requestedByClient,
+      // offer
     },
     success_url: `http://localhost:5173/order/${data?.projectNumber}`,
     cancel_url: 'http://localhost:5173/payment-failed',
