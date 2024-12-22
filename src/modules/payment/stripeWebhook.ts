@@ -11,6 +11,7 @@ import {
   customOfferT,
   extendDeliveryTimeT,
 } from './payment.interface';
+import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 

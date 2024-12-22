@@ -8,6 +8,9 @@ import AppError from "../../../errors/AppError";
 import { ExtendDeliveryMessage } from "./ExtendDelivary.constant";
 import { TokenCredential } from "../../../libs/authHelper";
 import { PaymentStatus } from "@prisma/client";
+import catchAsync from "../../../libs/utlitys/catchSynch";
+import { extendDeliveryTimeT } from "../../payment/payment.interface";
+import { daysToHours } from "../../../utils/dayToHours";
 
 /*
 test postman request
@@ -221,4 +224,81 @@ const approveExtensionRequest = async (req: Request, res: Response) => {
     }
 };
 
-export { extendDelivery, approveExtensionRequest };
+const ExtendDeliveryMessageOption = catchAsync(async (req: Request, res: Response) => {
+    const data = req.body;
+
+    const updated = await prisma.$transaction(async (prisma) => {
+        const findMessage = await prisma.orderMessage.findMany({
+            where: {
+                uniqueId: data?.updateMessageId,
+            },
+            take: 1,
+        });
+        const messageData = findMessage[0];
+        const { isAccepted, ...rest } =
+            messageData?.extendDeliveryTime as unknown as extendDeliveryTimeT;
+
+        const { days } = rest;
+
+        const orderData = await prisma.order.findUnique({
+            where: {
+                id: data?.orderId,
+            },
+        });
+        const hours = daysToHours(data?.days || '0');
+
+        const duration = parseInt(orderData?.duration || '0') + days;
+        const durationHours =
+            parseInt(orderData?.durationHours || '0') + hours;
+
+        let UpdatedDeliveryDate;
+        if (orderData?.deliveryDate && orderData?.durationHours) {
+            UpdatedDeliveryDate = new Date(orderData?.deliveryDate);
+            UpdatedDeliveryDate.setDate(
+                UpdatedDeliveryDate.getDate() + duration,
+            );
+        } else if (orderData?.deliveryDate && orderData?.duration) {
+            UpdatedDeliveryDate = new Date(orderData?.deliveryDate);
+            UpdatedDeliveryDate.setDate(
+                UpdatedDeliveryDate.getDate() + duration,
+            );
+        }
+
+        const updateMessage = {
+            isAccepted: true,
+            ...rest,
+        };
+
+        await prisma.orderMessage.updateMany({
+            where: {
+                uniqueId: data?.updateMessageId,
+            },
+            data: {
+                extendDeliveryTime: updateMessage,
+            },
+        });
+
+        await prisma.order.update({
+            where: {
+                id: data?.orderId,
+            },
+            data: {
+                duration: orderData?.duration ? duration.toString() : '',
+                durationHours: orderData?.durationHours
+                    ? durationHours.toString()
+                    : '',
+                deliveryDate: UpdatedDeliveryDate,
+            },
+        });
+    });
+
+    return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: updated,
+        message: 'Delivery date extended successfully',
+    });
+});
+
+
+export { extendDelivery, approveExtensionRequest, ExtendDeliveryMessageOption };
