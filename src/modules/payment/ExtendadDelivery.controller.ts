@@ -63,4 +63,4 @@ const ExtendDelivery = catchAsync(async (req: Request, res: any) => {
   });
 });
 
-export const stripePayment = { ExtendDelivery };
+export { ExtendDelivery };

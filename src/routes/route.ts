@@ -52,7 +52,7 @@ import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
 import DeliveredRoute from '../modules/Order_page/Delivard/Order-delivar.route';
 import Tips from '../modules/payment/Tips.controller';
-
+import { ExtendDelivery } from '../modules/payment/ExtendadDelivery.controller'
 
 const router = express.Router();
 router.get(
@@ -81,7 +81,7 @@ router.post(
   '/upload-attachment',
   uploadFile.array('files'),
   (req, res, next) => {
- 
+
     next();
   },
   uploadAttachmentToS3AndFormatBody(),
@@ -196,6 +196,7 @@ router.use('/multi-project', multiProjectRoute);
 router.post('/api/checkout-session', payment.stripePayment);
 router.post('/payment/additional', stripePayment.additionalPayment);
 router.post('/payment/tip', Tips);
+router.post('/payment/extendad-delivery', ExtendDelivery);
 
 // router.post(
 //   '/webhook',
@@ -226,7 +227,7 @@ router.post('/send-email', async (req, res) => {
 
     // Send the email
     const response = await AWS_SES.sendEmail(email, subject, body);
- 
+
     res.status(200).json({ message: 'Email sent successfully', response });
   } catch (error) {
     console.error('Error in /send-email:', error);
