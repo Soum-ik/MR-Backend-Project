@@ -2,11 +2,13 @@
 import socketStore from "../socket-store";
 import { JwtPayload } from "jsonwebtoken";
 
-const PublicMessageHandler = async (msg: any, user: JwtPayload) => {
+
+
+const PublicMessageHandler = async (msg: any, userData: JwtPayload) => {
     const onlineUsers = socketStore.getOnlineUsers();
     const socket = socketStore.getSocketServerInstance();
 
-    if (['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+    if (['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(userData.role)) {
         const targetUserSocket = onlineUsers.find(user => user.userId === msg.userId);
         if (targetUserSocket) {
             socket.to(targetUserSocket.socketId).emit('get:notification', msg)

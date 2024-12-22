@@ -69,8 +69,8 @@ const approveExtensionRequest = catchAsync(async (req: Request, res: Response) =
             await prisma.order.update({
                 where: { id: orderId },
                 data: {
-                    duration: duration.toString(),
-                    durationHours: durationHours.toString(),
+                    duration: orderData.duration ? duration.toString() : '',
+                    durationHours: orderData.durationHours ? durationHours.toString() : "",
                     deliveryDate: updatedDeliveryDate,
                 },
             });
