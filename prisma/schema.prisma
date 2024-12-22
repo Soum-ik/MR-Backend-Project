@@ -64,6 +64,7 @@ model User {
   affiliateProfile     affiliateProfile[]
   affiliateWithdraw    affiliateWithdraw[]
   totalEaring          Int                 @default(0)
+  isFirstOrderComplete Boolean             @default(false)
 
   @@map("Users")
 }

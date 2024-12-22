@@ -52,6 +52,15 @@ export const CompletedProject = catchAsync(async (req: Request, res: Response) =
         }
     })
 
+    // await prisma.user.update({
+    //     where: {
+    //       id: user_id as string,
+    //     },
+    //     data: {
+    //       totalEaring: totalEarnings,
+    //     },
+    //   });
+
     return sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
