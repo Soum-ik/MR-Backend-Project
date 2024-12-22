@@ -53,6 +53,7 @@ import { UserRoute } from '../modules/user/userRotue';
 import DeliveredRoute from '../modules/Order_page/Delivard/Order-delivar.route';
 import Tips from '../modules/payment/Tips.controller';
 import { ExtendDelivery } from '../modules/payment/ExtendadDelivery.controller'
+import { ExtendDeliveryRouter } from '../modules/Order_page/ExtendDelivery/ExtendDelivary.router';
 
 const router = express.Router();
 router.get(
@@ -121,7 +122,8 @@ router.get(
 );
 
 
-router.get('/profile-indicator', Indicator.IndicatorController)
+router.get('/profile-indicator', Indicator.IndicatorController);
+router.use('/extend', ExtendDeliveryRouter);
 router.use('/dd', DDroute);
 router.use('/delivery', DeliveredRoute);
 router.use('/review', reviewRouter);

@@ -18,18 +18,25 @@ const approveExtensionRequest = catchAsync(async (req: Request, res: Response) =
         where: { uniqueMessageId: orderMessageId },
     });
 
+    console.log(extensionRequest, 'Extension request');
+
+
     if (!extensionRequest) {
         throw new AppError(httpStatus.NOT_FOUND, 'Extended request not found');
     }
 
+    console.log(extensionRequest, 'Extension request');
     // Update approval status based on who is approving
     const updatedRequest = await prisma.orderExtensionRequest.update({
-        where: { id: orderMessageId },
+        where: { uniqueMessageId: orderMessageId },
         data: {
             adminApproved: approvedByAdmin,
             userApproved: !approvedByAdmin ? true : extensionRequest.userApproved
         }
     });
+
+    console.log(updatedRequest, 'Updated request');
+
 
     // Check if both approvals are done
     if (updatedRequest.adminApproved === true || updatedRequest.userApproved === true) {

@@ -171,7 +171,13 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-          console.log(data, 'checking data from extend delivery after confirm ');
+          const existingRequest = await prisma.orderExtensionRequest.findUnique({
+            where: { uniqueMessageId: data?.updateMessageId as string },
+          });
+
+          if (!existingRequest) {
+            return console.log('Request are already taken');
+          }
 
           try {
             const request = await prisma.orderExtensionRequest.create({
@@ -184,10 +190,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 paymentStatus: paymentStats.status,
               },
             });
-
-            console.log(request, 'checking request data from extend delivery after confirm ');
           } catch (error) {
-            console.log('error', error);
+            console.log('Error in extend delivery', error);
           }
 
           console.log('Extend delivery payment successfully updated in the database.', data?.requestedByClient);
