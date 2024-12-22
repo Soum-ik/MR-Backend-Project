@@ -34,14 +34,16 @@ const ExtendDelivery = catchAsync(async (req: Request, res: any) => {
       paymentType: data.paymentType,
       updateMessageId: offer?.uniqueId || null,
       duration: data?.duration,
-      orderId: data?.orderId
+      orderId: data?.orderId,
+      requestedByClient: data?.requestedByClient,  // as boolean
+      offer
     },
     success_url: `http://localhost:5173/order/${data?.projectNumber}`,
     cancel_url: 'http://localhost:5173/payment-failed',
   });
 
   //   this is the payment controller it will handle all kind offer
-  const payment = await prisma.payment.create({
+  await prisma.payment.create({
     data: {
       userId: data?.userId,
       stripeId: session.id.split('_').join(''),

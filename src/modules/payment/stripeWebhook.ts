@@ -12,6 +12,9 @@ import {
   extendDeliveryTimeT,
 } from './payment.interface';
 import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
+import { updateDeliveryDate } from '../Order_page/ExtendDelivery/ExtendDelivary.utils';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -160,76 +163,76 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
         } else if (
           session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY
         ) {
-          const findMessage = await prisma.orderMessage.findMany({
-            where: {
-              uniqueId: data?.updateMessageId,
-            },
-            take: 1,
-          });
-          const messageData = findMessage[0];
-          const { isAccepted, ...rest } =
-            messageData?.extendDeliveryTime as unknown as extendDeliveryTimeT;
 
-          const { days } = rest;
-
-          const orderData = await prisma.order.findUnique({
-            where: {
-              id: data?.orderId,
-            },
-          });
-          const hours = daysToHours(data?.days || '0');
-
-          const duration = parseInt(orderData?.duration || '0') + days;
-          const durationHours =
-            parseInt(orderData?.durationHours || '0') + hours;
-
-          let UpdatedDeliveryDate;
-          if (orderData?.deliveryDate && orderData?.durationHours) {
-            UpdatedDeliveryDate = new Date(orderData?.deliveryDate); //+
-            UpdatedDeliveryDate.setDate(
-              UpdatedDeliveryDate.getDate() + duration,
-            ); //+
-          } else if (orderData?.deliveryDate && orderData?.duration) {
-            UpdatedDeliveryDate = new Date(orderData?.deliveryDate); //+
-            UpdatedDeliveryDate.setDate(
-              UpdatedDeliveryDate.getDate() + duration,
-            ); //+
-          }
-
-          const updateMessage = {
-            isAccepted: true,
-            ...rest,
-          };
-
-          await prisma.orderMessage.updateMany({
-            where: {
-              uniqueId: data?.updateMessageId,
-            },
-            data: {
-              extendDeliveryTime: updateMessage,
-            },
-          });
-
-          await prisma.order.update({
-            where: {
-              id: data?.orderId,
-            },
-            data: {
-              duration: orderData?.duration ? duration.toString() : '',
-              durationHours: orderData?.durationHours
-                ? durationHours.toString()
-                : '',
-              deliveryDate: UpdatedDeliveryDate,
-            },
-          });
-
-          await prisma.payment.update({
+          const paymentStats = await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
             data: {
               status: PaymentStatus.PAID,
               piId: session?.payment_intent as string,
             },
           });
+
+          await prisma.orderExtensionRequest.create({
+            data: {
+              piId: session?.payment_intent as string,
+              orderId: data?.orderId as string,
+              requestJSON: data,
+              orderMessageId: data?.updateMessageId as string,
+              requestedByClient: data?.requestedByClient as unknown as boolean,
+              paymentStatus: paymentStats.status
+            }
+          })
+
+          if (!data?.requestedByClient) {
+
+            const findMessage = await prisma.orderMessage.findMany({
+              where: {
+                uniqueId: data?.updateMessageId,
+              },
+              take: 1,
+            });
+            const messageData = findMessage[0];
+            const { isAccepted, ...rest } =
+              messageData?.extendDeliveryTime as unknown as extendDeliveryTimeT;
+
+            const { days } = rest;
+
+            const orderData = await prisma.order.findUnique({
+              where: { id: data?.orderId },
+            });
+
+            if (orderData) {
+              const { duration, durationHours, updatedDeliveryDate } = await updateDeliveryDate(orderData, days);
+              const updateMessage = {
+                isAccepted: true,
+                ...rest,
+              };
+
+              await prisma.orderMessage.updateMany({
+                where: {
+                  uniqueId: data?.updateMessageId,
+                },
+                data: {
+                  extendDeliveryTime: updateMessage,
+                },
+              });
+
+
+              await prisma.order.update({
+                where: { id: data?.orderId },
+                data: {
+                  duration: duration.toString(),
+                  durationHours: durationHours.toString(),
+                  deliveryDate: updatedDeliveryDate,
+                },
+              });
+
+            } else {
+              throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
+            }
+          }
+          console.log("Extend delivery payment successfully updated in the database.");
+
         } else if (session?.metadata?.paymentType === PaymentType.TIPS) {
           // paymentType: data.paymentType,
           // ammount: data?.totalAmount,
