@@ -1,52 +1,47 @@
-import { SendEmailCommand, SESClient, VerifyEmailIdentityCommand, } from '@aws-sdk/client-ses';
-import { AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } from '../../config/config';
+import httpStatus from 'http-status';
+import nodemailer, { SendMailOptions } from 'nodemailer';
+import { mailServer } from '../../config/config';
+
+
+
+
+
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { print } from '../colorConsolePrint.ts/colorizedConsole';
 import AppError from '../../errors/AppError';
 
-const sesClient = new SESClient({
-    region: AWS_REGION,
-    credentials: {
-        accessKeyId: AWS_ACCESS_KEY_ID as string,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY as string,
-    },
-});
-const verifyEmailIdentity = async (email: string) => {
+export const sendMail = async (options: SendMailOptions) => {
     try {
-        const command = new VerifyEmailIdentityCommand({
-            EmailAddress: email,
-        });
-        return await sesClient.send(command);
-    } catch (error) {
-        throw new AppError(500, 'Failed to verify email identity');
-    }
-};
-
-
-
-// Email sending function
-const sendEmail = async (email: string, subject: string, body: string) => {
-    const command = new SendEmailCommand({
-        Source: 'mrproject321@gmail.com', // Ensure this email is verified in SES
-        Destination: {
-            ToAddresses: [email],
-        },
-        Message: {
-            Subject: { Data: subject },
-            Body: {
-                Text: { Data: body },
+        const nodeMailerOptions: SMTPTransport | SMTPTransport.Options | string = {
+            host: mailServer.host,
+            port: parseInt(mailServer.port),
+            auth: {
+                user: mailServer.auth.user,
+                pass: mailServer.auth.pass,
             },
-        },
-    });
+            secure: false,
+            // Add these options to ignore certificate errors
+            tls: {
+                rejectUnauthorized: false,
+            },
+        };
 
-    try {
-        const response = await sesClient.send(command);
-        return response;
+        // 1. create transporter
+        const transporter = nodemailer.createTransport(nodeMailerOptions);
+
+        // 2. define email options
+        const mailOptions = {
+            from: mailServer.sendingEmail,
+            ...options,
+        };
+
+        // 3. send email
+        await transporter.sendMail(mailOptions);
     } catch (error) {
-        console.error("AWS SES Error:", error); // Log detailed error information
-        throw new AppError(500, "Failed to send email");
+        print.red('err', error);
+        throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            'There was an error sending the email. Try again later!',
+        );
     }
-};
-
-export const AWS_SES = {
-    verifyEmailIdentity,
-    sendEmail,
 };

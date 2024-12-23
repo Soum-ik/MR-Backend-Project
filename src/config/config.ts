@@ -31,7 +31,7 @@ export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 export const NODE_ENV = "development";
 
 
-export const mail_server = {
+export const mailServer = {
     host: process.env.SMTP_HOST || '',
     port: process.env.SMTP_PORT || '',
     auth: {

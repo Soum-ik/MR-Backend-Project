@@ -2,6 +2,14 @@
 import socketStore from "../socket-store";
 import { JwtPayload } from "jsonwebtoken";
 
+interface Message {
+    userId: string;
+    content: string;
+    timestamp: Date;
+    type: string;
+}
+
+
 
 
 const PublicMessageHandler = async (msg: any, userData: JwtPayload) => {
