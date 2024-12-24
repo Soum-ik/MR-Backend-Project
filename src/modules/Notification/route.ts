@@ -10,4 +10,8 @@ router.get('/inbox', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USE
     InboxNotification.getMessages
 )
 
+router.get('/notification', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.USER),
+    InboxNotification.getNotifications
+)
+
 export const NotificationInbox = router 

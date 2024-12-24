@@ -1,3 +1,4 @@
+
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { TokenCredential } from '../../libs/authHelper';
@@ -87,7 +88,45 @@ const getMessages = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getNotifications = catchAsync(async (req: Request, res: Response) => {
+  const { user_id, role } = req.user as TokenCredential;
+
+  const admins = ["ADMIN", "SUPER_ADMIN", "SUB_ADMIN"].includes(role);
+  if (admins) {
+    const allNotifications = await prisma.notification.findMany({
+      where: {
+        recipient: 'ADMIN',
+      },
+    })
+
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      data: { allNotifications },
+      message: 'allNotifications',
+    });
+  }
+  else if (role === USER_ROLE.USER) {
+
+    const allNotifications = await prisma.notification.findMany({
+      where: {
+        recipient: 'USER',
+        recipientId: user_id,
+      },
+    })
+
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      data: { allNotifications },
+      message: 'allNotifications',
+    });
+  }
+
+});
+
 
 export const InboxNotification = {
   getMessages,
+  getNotifications
 };
