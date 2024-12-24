@@ -62,30 +62,70 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         if (user_id) {
             const userData = await userFinder(user_id) as User;
 
-            await prisma.notification.create({
-                data: {
-                    recipient: "ADMIN",
-                    message: `You have a new <b>order</b> and instructions from  <b>${userData.userName} </b> . Get Started.`,
-                    senderId: userData?.id as string,
-                }
-            })
-            PublicMessageHandler({
-                msg: `You have a new <b>order</b> and instructions from  <b>${userData.userName} </b> . Get Started.`,
-                avatar: userData.image,
-            }, userData.role);
-
+            const payload = {
+                avatar: userData?.image,
+                userId: userData?.id,
+                userName: userData?.userName,
+                thumbnailUrl: order?.projectImage,
+            }
 
             await prisma.notification.create({
                 data: {
                     recipient: "ADMIN",
-                    message: `Your order has started! The designer is now working on your order.`,
+                    message: `<div className = "flex-1" >
+        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3" >
+            { 'You have a new'}
+            < span className = "font-bold" > order </>
+{ ' and instructions from' }
+<span className="font-bold" > ${userData.userName} </span>
+{ ". Get Started." }
+</p>
+    </div>`,
                     senderId: userData?.id as string,
+                    payload: payload
                 }
             })
             PublicMessageHandler({
-                msg: `Your order has started! The designer is now working on your order.`,
+                msg: `<div className = "flex-1" >
+        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3" >
+            { 'You have a new '}
+            < span className = "font-bold" > order </>
+{ ' and instructions from' }
+<span className="font-bold" > ${userData.userName} </span>
+{ ". Get Started." }
+</p>
+    </div>`,
                 avatar: userData.image,
-            }, userData.role);
+                userId: userData.id,
+                userName: userData.userName,
+                thumbnailUrl: order.projectImage,
+            }, 'USER');
+
+
+            await prisma.notification.create({
+                data: {
+                    recipient: "USER",
+                    message: `<div className="flex-1">
+        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
+          {'Your order has started! The designer is now working on your order.'}
+        </p>
+      </div>`,
+                    senderId: userData?.id as string,
+                    recipientId: order.userId,
+
+                }
+            })
+            PublicMessageHandler({
+                msg: `<div className="flex-1">
+        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
+          {'Your order has started! The designer is now working on your order.'}
+        </p>
+      </div>`,
+                avatar: userData.image,
+                userId: order.userId,
+                userName: userData.userName,
+                thumbnailUrl: order.projectImage,
+            }, "ADMIN");
         }
 
         return sendResponse<any>(res, {

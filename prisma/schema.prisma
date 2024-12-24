@@ -175,7 +175,13 @@ model Notification {
 
   recipientId String?
 
-  recipient NotifyRole
+  isAdminSeen Boolean @default(false)
+  isClietSeen Boolean @default(false)
+
+  recipient   NotifyRole
+  isAdminSent Boolean?
+
+  payload Json?
 
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
