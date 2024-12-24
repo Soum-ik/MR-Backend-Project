@@ -20,4 +20,7 @@ export const NotificationTypes = {
     RevisionDateUpdated: 'RevisionDateUpdated',
     Feedback : 'Feedback',
     CompleteOrder: 'CompleteOrder',
+    OrderExtendUser: 'OrderExtendUser',
+    OrderExtendAdmin: 'OrderExtendAdmin',
+    
 };

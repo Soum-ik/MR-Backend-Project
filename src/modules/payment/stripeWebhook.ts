@@ -177,6 +177,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           );
 
+
+
           if (existingRequest) {
             return console.log('Request are already taken');
           }
@@ -231,6 +233,33 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   extendDeliveryTime: updateMessage,
                 },
               });
+
+              const payload = {
+                thumbnailUrl: orderData?.projectImage,
+                type: NotificationTypes.OrderExtendUser,
+                projectNumber: orderData.projectNumber,
+                days: orderData.duration,
+                hours: orderData.durationHours,
+                createdAt: new Date(),
+              }
+
+              await prisma.notification.create({ //
+                data: {
+                  recipient: 'ADMIN',
+                  message: ``,
+                  senderId: orderData.userId as string,
+                  payload: payload
+                }
+              })
+              PublicMessageHandler({
+                thumbnailUrl: orderData?.projectImage,
+                type: NotificationTypes.OrderExtendUser,
+                projectNumber: orderData.projectNumber,
+                days: orderData.duration,
+                hours: orderData.durationHours,
+                createdAt: new Date(),
+              }, 'USER');
+
 
               await prisma.order.update({
                 where: { id: data?.orderId },
