@@ -165,54 +165,51 @@ model OrderMessage {
 }
 
 model Notification {
-  id             String  @id @default(auto()) @map("_id") @db.ObjectId
-  senderLogo     String?
-  type           String
-  senderUserName String
-  isOnline       Boolean @default(false)
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  message String?
 
-  deletedForSender    Boolean @default(false)
-  deletedForRecipient Boolean @default(false)
+  connection String?
+
+  senderId String @db.ObjectId
+  sender   User   @relation(fields: [senderId], references: [id])
+
+  recipientId String?
+
+  recipient NotifyRole
 
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
-
-  recipientId String @db.ObjectId
-  recipient   User   @relation(fields: [recipientId], references: [id])
-
-  messageId String?  @unique @db.ObjectId
-  message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@map("Notifications")
 }
 
 model Message {
-  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userImage       String?
   senderName      String?
   senderUserName  String?
-  senderId        String        @db.ObjectId
-  recipientId     String        @db.ObjectId
+  senderId        String   @db.ObjectId
+  recipientId     String   @db.ObjectId
   messageText     String?
-  attachment      Json[]        @default([])
-  createdAt       DateTime      @default(now())
+  attachment      Json[]   @default([])
+  createdAt       DateTime @default(now())
   isFromAdmin     Role?
   customOffer     Json?
   timeAndDate     String
   contactForm     Json?
   commonkey       String
   uniqueId        String
-  seen            Boolean       @default(false)
+  seen            Boolean  @default(false)
   replyTo         Json?
-  read            Boolean       @default(false)
-  seenBy          String[]      @default([])
-  hiddenFromAdmin Boolean       @default(false)
-  sender          User          @relation("SentMessages", fields: [senderId], references: [id])
-  recipient       User          @relation("ReceivedMessages", fields: [recipientId], references: [id])
-  Notification    Notification?
+  read            Boolean  @default(false)
+  seenBy          String[] @default([])
+  hiddenFromAdmin Boolean  @default(false)
+  sender          User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipient       User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
 
-  isClientSeen Boolean @default(false)
-  isAdminSeen  Boolean @default(false)
+  isClientSeen   Boolean @default(false)
+  isAdminSeen    Boolean @default(false)
+  notificationId String? @db.ObjectId
 
   @@map("Messages")
 }
@@ -547,7 +544,7 @@ model OrderExtensionRequest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  uniqueMessageId String @unique
+  uniqueMessageId String        @unique
   // relationships
   order           Order         @relation(fields: [orderId], references: [id])
   OrderMessage    OrderMessage? @relation(fields: [orderMessageId], references: [id])
@@ -569,6 +566,11 @@ model Payment {
 
   user  User  @relation(fields: [userId], references: [id])
   Order Order @relation(fields: [orderId], references: [id])
+}
+
+enum NotifyRole {
+  USER
+  ADMIN
 }
 
 model Visitors {

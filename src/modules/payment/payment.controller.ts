@@ -45,7 +45,8 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
     })),
     metadata: {
       paymentType: paymentType,
-      updateMessageId: offer?.uniqueId || null
+      updateMessageId: offer?.uniqueId || null,
+      userId: data?.userId,
     },
     mode: 'payment',
     success_url: `http://localhost:5173/project-requirements/${projectNumber}`,

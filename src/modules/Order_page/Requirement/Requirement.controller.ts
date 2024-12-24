@@ -5,6 +5,11 @@ import sendResponse from "../../../libs/sendResponse";
 import { ProjectStatus } from "../Order_page.constant";
 import { OrderStatus } from "../Order_page.constant";
 import catchAsync from "../../../libs/utlitys/catchSynch";
+import PublicMessageHandler from "../../../socket/handlers/PublicMessageHandler";
+import { JwtPayload } from "jsonwebtoken";
+import { userFinder } from "../../../utils/userFinder";
+import { TokenCredential } from "../../../libs/authHelper";
+import { User } from "@prisma/client";
 
 
 const calculateDeliveryDate = (duration: string | null, durationHours: string | null): Date => {
@@ -19,7 +24,7 @@ const calculateDeliveryDate = (duration: string | null, durationHours: string | 
 };
 
 const answerRequirements = catchAsync(async (req: Request, res: Response) => {
-
+    const { user_id } = req.user as TokenCredential;
     const { orderId, requirements, isRequirementsFullFilled } = req.body;
     // Check if order exists
     const order = await prisma.order.findUnique({ where: { id: orderId } });
@@ -52,6 +57,36 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
                 deliveryDate: duration || durationHours ? calculateDeliveryDate(duration, durationHours) : new Date()
             }
         })
+
+
+        if (user_id) {
+            const userData = await userFinder(user_id) as User;
+
+            await prisma.notification.create({
+                data: {
+                    recipient: "ADMIN",
+                    message: `You have a new <b>order</b> and instructions from  <b>${userData.userName} </b> . Get Started.`,
+                    senderId: userData?.id as string,
+                }
+            })
+            PublicMessageHandler({
+                msg: `You have a new <b>order</b> and instructions from  <b>${userData.userName} </b> . Get Started.`,
+                avatar: userData.image,
+            }, userData.role);
+
+
+            await prisma.notification.create({
+                data: {
+                    recipient: "ADMIN",
+                    message: `Your order has started! The designer is now working on your order.`,
+                    senderId: userData?.id as string,
+                }
+            })
+            PublicMessageHandler({
+                msg: `Your order has started! The designer is now working on your order.`,
+                avatar: userData.image,
+            }, userData.role);
+        }
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.CREATED,

@@ -3,7 +3,7 @@ import UserController from '../controller/UserController';
 import SocialMediaLinkController from '../controller/socialMediaLinkController';
 
 import httpStatus from 'http-status';
-import { AWS_SES } from '../helper/smtp/AWS_SES';
+// import { AWS_SES } from '../helper/smtp/AWS_SES';
 import sendResponse from '../libs/sendResponse';
 import catchAsync from '../libs/utlitys/catchSynch';
 import authenticateToken from '../middleware/auth';
@@ -208,8 +208,8 @@ router.post('/payment/extendad-delivery', ExtendDelivery);
 
 router.post('/verify-email', async (req, res) => {
   try {
-    const response = await AWS_SES.verifyEmailIdentity(req.body.email);
-    res.status(200).json({ message: 'Email verification initiated', response });
+    // const response = await AWS_SES.verifyEmailIdentity(req.body.email);
+    res.status(200).json({ message: 'Email verification initiated',   });
   } catch (error) {
     console.error('Error in /verify-email:', error);
     res.status(500).json({
@@ -225,12 +225,12 @@ router.post('/send-email', async (req, res) => {
 
   try {
     // Attempt email verification (it won't throw an error if email is already verified)
-    await AWS_SES.verifyEmailIdentity(email);
+    // await AWS_SES.verifyEmailIdentity(email);
 
     // Send the email
-    const response = await AWS_SES.sendEmail(email, subject, body);
+    // const response = await AWS_SES.sendEmail(email, subject, body);
 
-    res.status(200).json({ message: 'Email sent successfully', response });
+    res.status(200).json({ message: 'Email sent successfully',   });
   } catch (error) {
     console.error('Error in /send-email:', error);
     res.status(500).json({

@@ -26,9 +26,6 @@ export const getNotifications = async (req: Request, res: Response) => {
             orderBy: {
                 createdAt: 'desc', // Sort by most recent notifications first
             },
-            include: {
-                message: true, // Optionally include related message details
-            },
         });
 
         return sendResponse(res, {

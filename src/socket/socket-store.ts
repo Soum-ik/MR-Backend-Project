@@ -94,6 +94,22 @@ const getOnlineUsers = () => {
     return onlineUsers;
 };
 
+// Function to get socket ID by user ID
+const getSocketIdByUserId = (userId: any) => {
+    for (const [socketId, user] of connectedUsers.entries()) {
+        if (user.userId === userId) {
+            return socketId;
+        }
+    }
+    return null;
+};
+
+// Function to get user ID by socket ID
+const getUserIdBySocketId = (socketId: string) => {
+    const user = connectedUsers.get(socketId);
+    return user ? user.userId : null;
+};
+
 // socket store
 const socketStore = {
     addNewConnectedUser,
@@ -101,6 +117,8 @@ const socketStore = {
     setSocketServerInstance,
     getSocketServerInstance,
     getOnlineUsers,
+    getSocketIdByUserId,
+    getUserIdBySocketId,
 };
 
 export default socketStore;

@@ -8,6 +8,7 @@ import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { USER_ROLE } from '../../user/user.constant';
 import catchAsync from '../../../libs/utlitys/catchSynch';
+import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -92,15 +93,17 @@ const sendMessage = async (req: Request, res: Response) => {
           },
         });
 
-        await prisma.notification.create({
-          data: {
-            senderLogo: user?.image,
-            type: 'message',
-            senderUserName: user?.userName ?? 'Unknown',
-            recipientId: admin.id, // Notification goes to each admin
-            messageId: message.id, // Associate the message with the notification
-          },
-        });
+        // await prisma.notification.create({
+        //   data: {
+        //     // senderLogo: user?.image,
+        //     // type: 'message',
+        //     // senderUserName: user?.userName ?? 'Unknown',
+        //     recipientId: admin.id, // Notification goes to each admin
+        //     message: messageText, // Associate the message with the notification
+        //   },
+        // });
+        // const user = req.user as TokenCredential
+        PublicMessageHandler(message, role)
       }
 
       return sendResponse(res, {
@@ -130,15 +133,17 @@ const sendMessage = async (req: Request, res: Response) => {
         },
       });
 
-      await prisma.notification.create({
-        data: {
-          senderLogo: user?.image,
-          type: 'message',
-          senderUserName: user?.userName ?? 'Unknown',
-          recipientId: recipientId as string, // Notification goes to the recipient
-          messageId: message.id, // Associate the message with the notification
-        },
-      });
+      PublicMessageHandler(message, role) 
+
+      // await prisma.notification.create({
+      //   data: {
+      //     senderLogo: user?.image,
+      //     type: 'message',
+      //     senderUserName: user?.userName ?? 'Unknown',
+      //     recipientId: recipientId as string, // Notification goes to the recipient
+      //     messageId: message.id, // Associate the message with the notification
+      //   },
+      // });
 
       // Send message to all admins
       for (const admin of admins) {
@@ -165,15 +170,7 @@ const sendMessage = async (req: Request, res: Response) => {
             },
           });
 
-          await prisma.notification.create({
-            data: {
-              senderLogo: user?.image,
-              type: 'message',
-              senderUserName: user?.userName ?? 'Unknown',
-              recipientId: admin.id, // Notification goes to each admin
-              messageId: messageToAdmin.id, // Associate the message with the notification
-            },
-          });
+           
         }
       }
 
@@ -285,15 +282,15 @@ const replyToMessage = async (req: Request, res: Response) => {
         data: 'user are archive, so there is no notification',
       });
     } else {
-      await prisma.notification.create({
-        data: {
-          senderLogo: user?.image,
-          type: 'message',
-          senderUserName: user?.userName ?? 'Unknown',
-          recipientId: message.recipientId as string, // Notification goes to the recipient
-          messageId: message.id, // Associate the message with the notification
-        },
-      });
+      // await prisma.notification.create({
+      //   data: {
+      //     senderLogo: user?.image,
+      //     type: 'message',
+      //     senderUserName: user?.userName ?? 'Unknown',
+      //     recipientId: message.recipientId as string, // Notification goes to the recipient
+      //     messageId: message.id, // Associate the message with the notification
+      //   },
+      // });
     }
 
     return sendResponse(res, {

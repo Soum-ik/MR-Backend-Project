@@ -1,3 +1,6 @@
+
+import { User, Role } from '@prisma/client';
+
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
@@ -15,6 +18,7 @@ import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
 import { updateDeliveryDate } from '../Order_page/ExtendDelivery/ExtendDelivary.utils';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
+import { userFinder } from '../../utils/userFinder';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -294,6 +298,24 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               piId: session?.payment_intent as string,
             },
           });
+
+
+          if (data?.userId) {
+            const userData = await userFinder(data?.userId) as User;
+
+            await prisma.notification.create({
+              data: {
+                recipient: "ADMIN",
+                message: `You have a new order from ${userData?.userName} and are awaiting buyer requirements.`,
+                senderId: data?.userId as string,
+
+              }
+            })
+            PublicMessageHandler({
+              msg: `You have a new order from ${userData.role} and are awaiting buyer requirements.`,
+              avatar: userData.image,
+            }, userData.role);
+          }
 
           console.log('order', order);
           console.log("Order successfully updated with status 'PLACED'.");
