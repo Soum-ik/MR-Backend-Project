@@ -1,12 +1,16 @@
-
-import { User, Role } from '@prisma/client';
+import { User } from '@prisma/client';
 
 import { Request, Response } from 'express';
+import httpStatus from 'http-status';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
+import AppError from '../../errors/AppError';
 import { prisma } from '../../libs/prismaHelper';
 import catchAsync from '../../libs/utlitys/catchSynch';
+import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
 import { daysToHours } from '../../utils/dayToHours';
+import { userFinder } from '../../utils/userFinder';
+import { updateDeliveryDate } from '../Order_page/ExtendDelivery/ExtendDelivary.utils';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
 import { PaymentStatus, PaymentType } from './payment.constant';
 import {
@@ -14,11 +18,6 @@ import {
   customOfferT,
   extendDeliveryTimeT,
 } from './payment.interface';
-import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
-import { updateDeliveryDate } from '../Order_page/ExtendDelivery/ExtendDelivary.utils';
-import AppError from '../../errors/AppError';
-import httpStatus from 'http-status';
-import { userFinder } from '../../utils/userFinder';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -84,8 +83,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-          console.log(orderData, 'order data checking');
-
           const hours = daysToHours(data?.duration || '0');
 
           const duration =
@@ -93,8 +90,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             parseInt(data?.duration || '0');
           const durationHours =
             parseInt(orderData?.durationHours || '0') + hours;
-
-          console.log(durationHours, 'durationHours checking ');
 
           let UpdatedDeliveryDate;
 
@@ -175,11 +170,13 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-          const existingRequest = await prisma.orderExtensionRequest.findUnique({
-            where: { uniqueMessageId: data?.updateMessageId as string },
-          });
+          const existingRequest = await prisma.orderExtensionRequest.findUnique(
+            {
+              where: { uniqueMessageId: data?.updateMessageId as string },
+            },
+          );
 
-          if (!existingRequest) {
+          if (existingRequest) {
             return console.log('Request are already taken');
           }
 
@@ -189,28 +186,23 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 piId: session?.payment_intent as string,
                 uniqueMessageId: data?.updateMessageId as string,
                 orderId: data?.orderId as string,
-                requestedByClient: data?.requestedByClient === 'false' ? false : true,
+                requestedByClient:
+                  data?.requestedByClient === 'false' ? false : true,
                 requestJSON: data,
                 paymentStatus: paymentStats.status,
               },
             });
           } catch (error) {
-            console.log('Error in extend delivery', error);
+            // console.log('Error in extend delivery', error);
           }
 
-          console.log('Extend delivery payment successfully updated in the database.', data?.requestedByClient);
-
           if (data?.requestedByClient === 'false') {
-            console.log('Extend the database.', data?.requestedByClient);
-
             const findMessage = await prisma.orderMessage.findMany({
               where: {
                 uniqueId: data?.updateMessageId,
               },
               take: 1,
             });
-
-            console.log('extend');
 
             const messageData = findMessage[0];
             const { isAccepted, ...rest } =
@@ -223,7 +215,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             });
 
             if (orderData) {
-              const { duration, durationHours, updatedDeliveryDate } = await updateDeliveryDate(orderData, days);
+              const { duration, durationHours, updatedDeliveryDate } =
+                await updateDeliveryDate(orderData, days);
               const updateMessage = {
                 isAccepted: true,
                 ...rest,
@@ -242,7 +235,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 where: { id: data?.orderId },
                 data: {
                   duration: orderData.duration ? duration.toString() : '',
-                  durationHours: orderData.durationHours ? durationHours.toString() : "",
+                  durationHours: orderData.durationHours
+                    ? durationHours.toString()
+                    : '',
                   deliveryDate: updatedDeliveryDate,
                 },
               });
@@ -250,8 +245,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
             }
           }
-          console.log('Extend delivery payment successfully updated in the database.');
-
         } else if (session?.metadata?.paymentType === PaymentType.TIPS) {
           // paymentType: data.paymentType,
           // ammount: data?.totalAmount,
@@ -274,8 +267,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               piId: session?.payment_intent as string,
             },
           });
-
-          console.log('Tips payment successfully updated in the database.');
         } else {
           // Save payment info in the database
           await prisma.payment.update({
@@ -285,8 +276,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               piId: session?.payment_intent as string,
             },
           });
-
-          console.log('Payment successfully updated in the database.');
 
           // Create an order linked to the payment and user
           const order = await prisma.order.update({
@@ -299,26 +288,24 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-
           if (data?.userId) {
-            const userData = await userFinder(data?.userId) as User;
+            const userData = (await userFinder(data?.userId)) as User;
 
             await prisma.notification.create({
               data: {
-                recipient: "ADMIN",
+                recipient: 'ADMIN',
                 message: `You have a new order from ${userData?.userName} and are awaiting buyer requirements.`,
                 senderId: data?.userId as string,
-
-              }
-            })
-            PublicMessageHandler({
-              msg: `You have a new order from ${userData.role} and are awaiting buyer requirements.`,
-              avatar: userData.image,
-            }, userData.role);
+              },
+            });
+            PublicMessageHandler(
+              {
+                msg: `You have a new order from ${userData.role} and are awaiting buyer requirements.`,
+                avatar: userData.image,
+              },
+              userData.role,
+            );
           }
-
-          console.log('order', order);
-          console.log("Order successfully updated with status 'PLACED'.");
         }
       }
       break;
