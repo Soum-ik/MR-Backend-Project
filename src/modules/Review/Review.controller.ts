@@ -7,6 +7,10 @@ import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 import catchAsync from '../../libs/utlitys/catchSynch';
 import { USER_ROLE } from '../user/user.constant';
+import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
+import { userFinder } from '../../utils/userFinder';
+import { User } from '@prisma/client';
+import { NotificationTypes } from '../../constants/Notification';
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
   const { message, rating, orderId, userName, ...rest } = req.body;
@@ -25,6 +29,48 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
       ...rest,
     },
   });
+
+  const userData = await userFinder(user_id) as User;
+
+
+  const admins = ['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN'].includes(role)
+
+  const payload = {
+    avatar: userData?.image,
+    userId: userData?.id,
+    userName: userData?.userName,
+    type: NotificationTypes.Review,
+  }
+
+  await prisma.notification.create({
+    data: {
+      recipient: admins ? 'ADMIN' : 'USER',
+      message: `<div className="flex-1">
+        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
+          <span className="font-bold">{userName}</span>
+          { left a ${rating} star }
+          <span className="font-bold">${NotificationTypes.Review}</span>
+        </p>
+      </div>`,
+      senderId: user_id as string,
+      payload: payload,
+    }
+  })
+
+  PublicMessageHandler({
+    msg: `<div className="flex-1">
+        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
+          <span className="font-bold">${userName}</span>
+          { left a ${rating} star }
+          <span className="font-bold">${NotificationTypes.Review}</span>
+        </p>
+      </div>`,
+    avatar: userData.image,
+    userId: user_id,
+    userName: userData.userName,
+    type: NotificationTypes.Review,
+    createdAt: new Date(),
+  }, role);
 
   return sendResponse(res, {
     statusCode: 200,

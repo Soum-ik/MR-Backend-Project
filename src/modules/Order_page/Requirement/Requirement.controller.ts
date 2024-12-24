@@ -10,6 +10,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { userFinder } from "../../../utils/userFinder";
 import { TokenCredential } from "../../../libs/authHelper";
 import { User } from "@prisma/client";
+import { NotificationTypes } from "../../../constants/Notification";
 
 
 const calculateDeliveryDate = (duration: string | null, durationHours: string | null): Date => {
@@ -67,6 +68,16 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
                 userId: userData?.id,
                 userName: userData?.userName,
                 thumbnailUrl: order?.projectImage,
+                type: NotificationTypes.Instructions,
+                createdAt: new Date(),
+            }
+            const payload1 = {
+                avatar: userData?.image,
+                userId: userData?.id,
+                userName: userData?.userName,
+                thumbnailUrl: order?.projectImage,
+                type: NotificationTypes.OrderStart,
+                createdAt: new Date(),
             }
 
             await prisma.notification.create({
@@ -99,8 +110,13 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
                 userId: userData.id,
                 userName: userData.userName,
                 thumbnailUrl: order.projectImage,
+                type: NotificationTypes.Instructions,
+                createdAt: new Date(),
             }, 'USER');
 
+
+
+            
 
             await prisma.notification.create({
                 data: {
@@ -112,7 +128,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
       </div>`,
                     senderId: userData?.id as string,
                     recipientId: order.userId,
-
+                    payload: payload1
                 }
             })
             PublicMessageHandler({
@@ -125,6 +141,8 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
                 userId: order.userId,
                 userName: userData.userName,
                 thumbnailUrl: order.projectImage,
+                type: NotificationTypes.OrderStart,
+                createdAt: new Date(),
             }, "ADMIN");
         }
 

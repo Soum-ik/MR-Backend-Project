@@ -18,6 +18,7 @@ import {
   customOfferT,
   extendDeliveryTimeT,
 } from './payment.interface';
+import { NotificationTypes } from '../../constants/Notification';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -296,6 +297,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               userId: userData?.id,
               userName: userData?.userName,
               thumbnailUrl: order?.projectImage,
+              type: NotificationTypes.Order,
+              createdAt: new Date(),
             }
 
             await prisma.notification.create({
@@ -322,6 +325,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               userId: userData.id,
               userName: userData.userName,
               thumbnailUrl: order.projectImage,
+              type: NotificationTypes.Order,
+              createdAt: new Date(),
             }, userData.role);
           }
         }
