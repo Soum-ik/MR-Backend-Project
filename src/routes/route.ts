@@ -54,6 +54,7 @@ import DeliveredRoute from '../modules/Order_page/Delivard/Order-delivar.route';
 import Tips from '../modules/payment/Tips.controller';
 import { ExtendDelivery } from '../modules/payment/ExtendadDelivery.controller'
 import { ExtendDeliveryRouter } from '../modules/Order_page/ExtendDelivery/ExtendDelivary.router';
+import { sendMail } from '../helper/smtp/AWS_SES';
 
 const router = express.Router();
 router.get(
@@ -209,7 +210,7 @@ router.post('/payment/extendad-delivery', ExtendDelivery);
 router.post('/verify-email', async (req, res) => {
   try {
     // const response = await AWS_SES.verifyEmailIdentity(req.body.email);
-    res.status(200).json({ message: 'Email verification initiated',   });
+    res.status(200).json({ message: 'Email verification initiated', });
   } catch (error) {
     console.error('Error in /verify-email:', error);
     res.status(500).json({
@@ -224,13 +225,15 @@ router.post('/send-email', async (req, res) => {
   const { email, subject, body } = req.body;
 
   try {
-    // Attempt email verification (it won't throw an error if email is already verified)
-    // await AWS_SES.verifyEmailIdentity(email);
+    const message = `Your OTP for changing the password is ${74832094}`;
 
-    // Send the email
-    // const response = await AWS_SES.sendEmail(email, subject, body);
+    await sendMail({
+      to: email,
+      subject: 'Change Password OTP',
+      html: `<p>${message}</p>`,
+    });
 
-    res.status(200).json({ message: 'Email sent successfully',   });
+    res.status(200).json({ message: 'Email sent successfully', });
   } catch (error) {
     console.error('Error in /send-email:', error);
     res.status(500).json({

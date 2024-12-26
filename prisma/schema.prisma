@@ -483,6 +483,7 @@ model Order {
   orderFrom                String?
   from                     String?
   projectNumber            String                  @unique
+  isLateDelivery           Boolean?                @default(false)
   duration                 String?
   totalPrice               String
   paymentStatus            PaymentStatus           @default(PENDING)
