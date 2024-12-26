@@ -39,7 +39,7 @@ const IndicatorController = catchAsync(async (req: Request, res: Response) => {
     const averageDeliveryTime = `${onTimePercentage.toFixed(2)}%`;
 
 
-    const [Active_Projects, LastProjectCompleted, Avg_Rating] = await Promise.all([
+    const [Active_Projects, LastProjectCompleted, Avg_Rating, OnTimeDelivery] = await Promise.all([
         await prisma.order.findMany({
             where: {
                 projectStatus: {
@@ -63,10 +63,18 @@ const IndicatorController = catchAsync(async (req: Request, res: Response) => {
             _avg: {
                 rating: true
             }
-        })
+        }),
+
+        await prisma.order.findMany()
     ])
 
-    const Avg_Respons = Avg_Response_Time
+    const regularDelivery = OnTimeDelivery.filter((order) => order.isLateDelivery === false).length;
+    const lateDelivery = OnTimeDelivery.filter((order) => order.isLateDelivery === true).length;
+
+
+    const totalDelivery = Math.round(regularDelivery / lateDelivery);
+
+
 
     return sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -77,6 +85,7 @@ const IndicatorController = catchAsync(async (req: Request, res: Response) => {
             LastProjectCompleted: {
                 date: LastProjectCompleted?.updatedAt ? formatDistanceToNow(new Date(LastProjectCompleted?.updatedAt), { addSuffix: true }) : null
             },
+            OnTimeDelivery: totalDelivery || 0,
             Avg_Rating: Avg_Rating?._avg.rating,
             Avg_Respons: averageDeliveryTime
         }
