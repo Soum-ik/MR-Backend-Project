@@ -1,4 +1,5 @@
-<!doctype html>
+export const emailTemplate = () => {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -244,7 +245,7 @@
       <div class="logo-box">
         <img
           class="logo"
-          src="https://mr-backend.s3.amazonaws.com/MR+Logo+Black.png"
+          src="https://mr-backend.s3.ap-south-1.amazonaws.com/MR+Logo+Icon.png"
           alt="MR Logo"
         />
       </div>
@@ -361,4 +362,5 @@
       </ul>
     </div>
   </body>
-</html>
+</html>`
+}

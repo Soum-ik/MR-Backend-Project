@@ -12,8 +12,8 @@ function isDeliverProjectT(offer: unknown): offer is deliverProjectT {
     const maybeOffer = offer as Partial<deliverProjectT>;
 
     return (
-        typeof maybeOffer.isRevision === 'boolean' &&
-        typeof maybeOffer.isAccepted === 'boolean' &&
+        maybeOffer.isRevision === false &&
+        maybeOffer.isAccepted === false &&
         typeof maybeOffer.thumbnailImage === 'object' &&
         Array.isArray(maybeOffer.attachments) &&
         maybeOffer.attachments.every(item => typeof item === 'object')

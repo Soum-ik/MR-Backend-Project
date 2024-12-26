@@ -55,6 +55,7 @@ import Tips from '../modules/payment/Tips.controller';
 import { ExtendDelivery } from '../modules/payment/ExtendadDelivery.controller'
 import { ExtendDeliveryRouter } from '../modules/Order_page/ExtendDelivery/ExtendDelivary.router';
 import { sendMail } from '../helper/smtp/AWS_SES';
+import { emailTemplate } from '../helper/email/additionalOfferandExtendDate';
 
 const router = express.Router();
 router.get(
@@ -225,12 +226,10 @@ router.post('/send-email', async (req, res) => {
   const { email, subject, body } = req.body;
 
   try {
-    const message = `Your OTP for changing the password is ${74832094}`;
-
     await sendMail({
       to: email,
-      subject: 'Change Password OTP',
-      html: `<p>${message}</p>`,
+      subject: subject,
+      html: emailTemplate(),
     });
 
     res.status(200).json({ message: 'Email sent successfully', });

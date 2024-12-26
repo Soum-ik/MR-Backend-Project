@@ -28,6 +28,8 @@ export const sendMail = async (options: SendMailOptions) => {
 
         // 1. create transporter
         const transporter = nodemailer.createTransport(nodeMailerOptions);
+        console.log(transporter, 'checking transporter');
+        
 
         // 2. define email options
         const mailOptions = {
