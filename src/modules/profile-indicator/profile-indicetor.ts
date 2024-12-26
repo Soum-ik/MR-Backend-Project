@@ -85,7 +85,7 @@ const IndicatorController = catchAsync(async (req: Request, res: Response) => {
             LastProjectCompleted: {
                 date: LastProjectCompleted?.updatedAt ? formatDistanceToNow(new Date(LastProjectCompleted?.updatedAt), { addSuffix: true }) : null
             },
-            OnTimeDelivery: totalDelivery,
+            OnTimeDelivery: totalDelivery || 0,
             Avg_Rating: Avg_Rating?._avg.rating,
             Avg_Respons: averageDeliveryTime
         }
