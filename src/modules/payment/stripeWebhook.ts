@@ -256,7 +256,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               PublicMessageHandler(
                 {
                   thumbnailUrl: orderData?.projectImage,
-                  type: NotificationTypes.OrderExtendAdmin,
+                  type: NotificationTypes.OrderExtendUser,
                   projectNumber: orderData.projectNumber,
                   days: orderData.duration,
                   hours: orderData.durationHours,

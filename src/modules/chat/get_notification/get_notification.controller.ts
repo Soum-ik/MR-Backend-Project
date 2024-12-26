@@ -23,9 +23,6 @@ export const getNotifications = async (req: Request, res: Response) => {
             where: {
                 recipientId: user_id as string,
             },
-            orderBy: {
-                createdAt: 'desc', // Sort by most recent notifications first
-            },
         });
 
         return sendResponse(res, {
