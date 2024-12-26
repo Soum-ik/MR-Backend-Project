@@ -7,6 +7,9 @@ import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
 import { ProjectStatus } from '../Order_page.constant';
 import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import { userFinder } from '../../../utils/userFinder';
+import { User } from '@prisma/client';
+import { NotificationTypes } from '../../../constants/Notification';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 export const CancelProject = catchAsync(async (req: Request, res: Response) => {
@@ -49,7 +52,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-  await prisma.order.update({
+  const orderData = await prisma.order.update({
     where: {
       id: orderId,
     },
@@ -58,6 +61,67 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
       finishedDate: new Date(),
     },
   });
+
+  const userData = (await userFinder(orderData?.userId as string)) as User;
+
+      const payload = {
+        thumbnailUrl: orderData?.projectImage,
+        type: NotificationTypes.CancelAccept,
+        projectNumber: orderData?.projectNumber,
+        senderUserName: userData.userName,
+        createdAt: new Date(),
+      };
+
+      await prisma.notification.create({
+        //
+        data: {
+          recipient: 'ADMIN',
+          message: ``,
+          senderId: orderData?.id as string,
+          isAdminSent: true,
+          payload: payload,
+        },
+      });
+      PublicMessageHandler(
+        {
+          thumbnailUrl: orderData?.projectImage,
+          type: NotificationTypes.CancelAccept,
+          projectNumber: orderData?.projectNumber,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+        },
+        'USER',
+      );
+
+      const payload2 = {
+        thumbnailUrl: orderData?.projectImage,
+        type: NotificationTypes.CancelAcceptUser,
+        projectNumber: orderData?.projectNumber,
+        senderUserName: "mahfujurrahm535",
+        createdAt: new Date(),
+      };
+
+      await prisma.notification.create({
+        //
+        data: {
+          recipient: 'USER',
+          message: ``,
+          senderId: orderData?.id as string,
+          isAdminSent: true,
+          payload: payload2,
+        },
+      });
+      PublicMessageHandler(
+        {
+          thumbnailUrl: orderData?.projectImage,
+          type: NotificationTypes.CancelAcceptUser,
+          projectNumber: orderData?.projectNumber,
+          createdAt: new Date(),
+          senderUserName: "mahfujurrahm535",
+        },
+        'ADMIN',
+      );
+
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
