@@ -66,7 +66,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
             const payload = {
                 avatar: userData?.image,
                 userId: userData?.id,
-                userName: userData?.userName,
+                senderUserName : userData.userName,
                 thumbnailUrl: order?.projectImage,
                 type: NotificationTypes.Instructions,
                 createdAt: new Date(),
@@ -74,41 +74,26 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
             const payload1 = {
                 avatar: userData?.image,
                 userId: userData?.id,
-                userName: userData?.userName,
                 thumbnailUrl: order?.projectImage,
                 type: NotificationTypes.OrderStart,
                 createdAt: new Date(),
+                senderUserName : "mahfujurrahm535",
             }
 
             await prisma.notification.create({
                 data: {
                     recipient: "ADMIN",
-                    message: `<div className = "flex-1" >
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3" >
-            { 'You have a new'}
-            < span className = "font-bold" > order </>
-{ ' and instructions from' }
-<span className="font-bold" > ${userData.userName} </span>
-{ ". Get Started." }
-</p>
-    </div>`,
+                    message: ``,
                     senderId: userData?.id as string,
+                    
                     payload: payload
                 }
             })
             PublicMessageHandler({
-                msg: `<div className = "flex-1" >
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3" >
-            { 'You have a new '}
-            < span className = "font-bold" > order </>
-{ ' and instructions from' }
-<span className="font-bold" > ${userData.userName} </span>
-{ ". Get Started." }
-</p>
-    </div>`,
+                msg: ``,
                 avatar: userData.image,
                 userId: userData.id,
-                userName: userData.userName,
+                senderUserName : userData.userName,
                 thumbnailUrl: order.projectImage,
                 type: NotificationTypes.Instructions,
                 createdAt: new Date(),
@@ -121,25 +106,17 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
             await prisma.notification.create({
                 data: {
                     recipient: "USER",
-                    message: `<div className="flex-1">
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
-          {'Your order has started! The designer is now working on your order.'}
-        </p>
-      </div>`,
+                    message: ``,
                     senderId: userData?.id as string,
                     recipientId: order.userId,
                     payload: payload1
                 }
             })
             PublicMessageHandler({
-                msg: `<div className="flex-1">
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
-          {'Your order has started! The designer is now working on your order.'}
-        </p>
-      </div>`,
+                msg: ``,
                 avatar: userData.image,
                 userId: order.userId,
-                userName: userData.userName,
+                senderUserName : "mahfujurrahm535",
                 thumbnailUrl: order.projectImage,
                 type: NotificationTypes.OrderStart,
                 createdAt: new Date(),

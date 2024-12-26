@@ -1,15 +1,17 @@
+import { User } from '@prisma/client';
 import { type Request, type Response } from 'express';
 import httpStatus from 'http-status';
+import { NotificationTypes } from '../../../constants/Notification';
 import AppError from '../../../errors/AppError';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
+import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
 import { daysToHours } from '../../../utils/dayToHours';
+import { userFinder } from '../../../utils/userFinder';
 import { extendDeliveryTimeT } from '../../payment/payment.interface';
 import { ExtendDeliveryMessage } from './ExtendDelivary.constant';
 import { updateDeliveryDate } from './ExtendDelivary.utils';
-import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
-import { NotificationTypes } from '../../../constants/Notification';
 
 // Controller for handling user/admin approval
 const approveExtensionRequest = catchAsync(
@@ -20,15 +22,9 @@ const approveExtensionRequest = catchAsync(
       where: { uniqueMessageId: orderMessageId },
     });
 
-
-
-
-
     if (!extensionRequest) {
       throw new AppError(httpStatus.NOT_FOUND, 'Extended request not found');
     }
-
-    console.log(extensionRequest, 'Extension request');
     // Update approval status based on who is approving
     const updatedRequest = await prisma.orderExtensionRequest.update({
       where: { uniqueMessageId: orderMessageId },
@@ -37,8 +33,6 @@ const approveExtensionRequest = catchAsync(
         userApproved: !approvedByAdmin ? true : extensionRequest.userApproved,
       },
     });
-
-    console.log(updatedRequest, 'Updated request');
 
     // Check if both approvals are done
     if (
@@ -81,6 +75,7 @@ const approveExtensionRequest = catchAsync(
             extendDeliveryTime: updateMessage,
           },
         });
+
         const payload = {
           thumbnailUrl: orderData?.projectImage,
           type: NotificationTypes.OrderExtendUser,
@@ -88,26 +83,31 @@ const approveExtensionRequest = catchAsync(
           days: orderData.duration,
           hours: orderData.durationHours,
           createdAt: new Date(),
-        }
+          senderUserName: "mahfujurrahm535",
+        };
 
-        await prisma.notification.create({ //
+        await prisma.notification.create({
+          //
           data: {
-            recipient: 'ADMIN',
+            recipient: 'USER',
             message: ``,
             senderId: orderData.userId as string,
             payload: payload,
-
-          }
-        })
-        PublicMessageHandler({
-          thumbnailUrl: orderData?.projectImage,
-          type: NotificationTypes.OrderExtendUser,
-          projectNumber: orderData.projectNumber,
-          days: orderData.duration,
-          hours: orderData.durationHours,
-          userId: orderData.userId,
-          createdAt: new Date(),
-        }, 'ADMIN');
+          },
+        });
+        PublicMessageHandler(
+          {
+            thumbnailUrl: orderData?.projectImage,
+            type: NotificationTypes.OrderExtendUser,
+            projectNumber: orderData.projectNumber,
+            days: orderData.duration,
+            hours: orderData.durationHours,
+            userId: orderData.userId,
+            senderUserName: "mahfujurrahm535",
+            createdAt: new Date(),
+          },
+          'ADMIN',
+        );
         await prisma.order.update({
           where: { id: orderId },
           data: {
@@ -189,32 +189,40 @@ const ExtendDeliveryMessageOption = catchAsync(
         },
       });
 
+       const userData = (await userFinder(orderData?.userId as string)) as User;
+
       const payload = {
         thumbnailUrl: orderData?.projectImage,
-        type: NotificationTypes.OrderExtendUser,
+        type: NotificationTypes.OrderExtendAdmin,
         projectNumber: orderData?.projectNumber,
         days: orderData?.duration,
         hours: orderData?.durationHours,
+        senderUserName: userData.userName,
         createdAt: new Date(),
-      }
+      };
 
-      await prisma.notification.create({ //
+      await prisma.notification.create({
+        //
         data: {
-          recipient: 'USER',
+          recipient: 'ADMIN',
           message: ``,
-          senderId: orderData?.id as string,
+          senderId: orderData?.userId as string,
           isAdminSent: true,
-          payload: payload
-        }
-      })
-      PublicMessageHandler({
-        thumbnailUrl: orderData?.projectImage,
-        type: NotificationTypes.OrderExtendAccept,
-        projectNumber: orderData?.projectNumber,
-        days: orderData?.duration,
-        hours: orderData?.durationHours,
-        createdAt: new Date(),
-      }, 'USER');
+          payload: payload,
+        },
+      });
+      PublicMessageHandler(
+        {
+          thumbnailUrl: orderData?.projectImage,
+          type: NotificationTypes.OrderExtendAdmin ,
+          projectNumber: orderData?.projectNumber,
+          days: orderData?.duration,
+          hours: orderData?.durationHours,
+          createdAt: new Date(),
+          senderUserName: userData?.userName,
+        },
+        'USER',
+      );
 
       await prisma.order.update({
         where: {
@@ -239,4 +247,4 @@ const ExtendDeliveryMessageOption = catchAsync(
   },
 );
 
-export { ExtendDeliveryMessageOption, approveExtensionRequest };
+export { approveExtensionRequest, ExtendDeliveryMessageOption };

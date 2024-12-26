@@ -3,7 +3,7 @@ import { prisma } from "../libs/prismaHelper";
 import schedule from 'node-schedule'
 import { PaymentStatus } from "../modules/payment/payment.constant";
 
-schedule.scheduleJob('*/10 * * * * *', async () => {
+schedule.scheduleJob('*/10 * * * *', async () => {
     print.blue('Scheduler running to delete expired payments...');
     
     try {

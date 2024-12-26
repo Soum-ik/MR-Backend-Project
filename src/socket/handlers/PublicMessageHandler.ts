@@ -17,7 +17,6 @@ const PublicMessageHandler = async (msg: any, userData: string) => {
         adminUserSockets.forEach(adminSocket => {
             socket.to(adminSocket.socketId).emit("get:notification", msg);
         });
-        console.log(adminUserSockets, 'admin socket');
         
     }
 };

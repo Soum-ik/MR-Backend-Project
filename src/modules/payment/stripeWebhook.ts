@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
+import { NotificationTypes } from '../../constants/Notification';
 import AppError from '../../errors/AppError';
 import { prisma } from '../../libs/prismaHelper';
 import catchAsync from '../../libs/utlitys/catchSynch';
@@ -18,7 +19,6 @@ import {
   customOfferT,
   extendDeliveryTimeT,
 } from './payment.interface';
-import { NotificationTypes } from '../../constants/Notification';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -177,8 +177,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           );
 
-
-
           if (existingRequest) {
             return console.log('Request are already taken');
           }
@@ -234,32 +232,38 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 },
               });
 
+              const userData = (await userFinder(orderData.userId)) as User;
+
               const payload = {
                 thumbnailUrl: orderData?.projectImage,
                 type: NotificationTypes.OrderExtendUser,
                 projectNumber: orderData.projectNumber,
                 days: orderData.duration,
                 hours: orderData.durationHours,
+                senderUserName: userData.userName,
                 createdAt: new Date(),
-              }
+              };
 
-              await prisma.notification.create({ //
+              await prisma.notification.create({
                 data: {
                   recipient: 'ADMIN',
                   message: ``,
                   senderId: orderData.userId as string,
-                  payload: payload
-                }
-              })
-              PublicMessageHandler({
-                thumbnailUrl: orderData?.projectImage,
-                type: NotificationTypes.OrderExtendUser,
-                projectNumber: orderData.projectNumber,
-                days: orderData.duration,
-                hours: orderData.durationHours,
-                createdAt: new Date(),
-              }, 'USER');
-
+                  payload: payload,
+                },
+              });
+              PublicMessageHandler(
+                {
+                  thumbnailUrl: orderData?.projectImage,
+                  type: NotificationTypes.OrderExtendAdmin,
+                  projectNumber: orderData.projectNumber,
+                  days: orderData.duration,
+                  hours: orderData.durationHours,
+                  createdAt: new Date(),
+                  senderUserName: userData.userName,
+                },
+                'USER',
+              );
 
               await prisma.order.update({
                 where: { id: data?.orderId },
@@ -324,39 +328,32 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             const payload = {
               avatar: userData?.image,
               userId: userData?.id,
-              userName: userData?.userName,
+              senderUserName: userData?.userName,
               thumbnailUrl: order?.projectImage,
               type: NotificationTypes.Order,
               createdAt: new Date(),
-            }
+            };
 
             await prisma.notification.create({
               data: {
                 recipient: 'ADMIN',
-                message: `You have a new order from ${userData?.userName} and are awaiting buyer requirements.`,
+                message: ``,
                 senderId: data?.userId as string,
-                payload: payload
-              }
-            })
-            PublicMessageHandler({
-              msg: `
-              <div className="flex-1">
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
-          {'You have a new '}
-          <span className="font-bold">order</span>
-          {'from'}
-          <span className="font-bold">${userData.role}</span>
-          {'and are awaiting buyer requirements.'}
-        </p>
-      </div>
-      `,
-              avatar: userData.image,
-              userId: userData.id,
-              userName: userData.userName,
-              thumbnailUrl: order.projectImage,
-              type: NotificationTypes.Order,
-              createdAt: new Date(),
-            }, userData.role);
+                payload: payload,
+              },
+            });
+            PublicMessageHandler(
+              {
+                msg: ``,
+                avatar: userData.image,
+                userId: userData.id,
+                senderUserName: userData.userName,
+                thumbnailUrl: order.projectImage,
+                type: NotificationTypes.Order,
+                createdAt: new Date(),
+              },
+              "USER",
+            );
           }
         }
       }
