@@ -38,36 +38,24 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
   const payload = {
     avatar: userData?.image,
     userId: userData?.id,
-    userName: userData?.userName,
+    senderUserName: userData?.userName,
     type: NotificationTypes.Review,
   }
 
   await prisma.notification.create({
     data: {
       recipient: admins ? 'ADMIN' : 'USER',
-      message: `<div className="flex-1">
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
-          <span className="font-bold">{userName}</span>
-          { left a ${rating} star }
-          <span className="font-bold">${NotificationTypes.Review}</span>
-        </p>
-      </div>`,
+      message: ``,
       senderId: user_id as string,
       payload: payload,
     }
   })
 
   PublicMessageHandler({
-    msg: `<div className="flex-1">
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
-          <span className="font-bold">${userName}</span>
-          { left a ${rating} star }
-          <span className="font-bold">${NotificationTypes.Review}</span>
-        </p>
-      </div>`,
-    avatar: userData.image,
+    msg: ``,
+    avatar: admins ? '' : userData.image,
     userId: user_id,
-    userName: userData.userName,
+    senderUserName: admins ? 'mahfujurrahm535' : userData.userName,
     type: NotificationTypes.Review,
     createdAt: new Date(),
   }, role);

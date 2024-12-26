@@ -131,6 +131,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       type: NotificationTypes.CompleteOrder,
       projectNumber: order.projectNumber,
       senderUserName : userData.userName,
+      avatar : userData.image,
       createdAt: new Date(),
     }
 
@@ -148,6 +149,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       type: NotificationTypes.CompleteOrder,
       createdAt: new Date(),
       senderUserName : userData.userName,
+      avatar : userData.image,
     }, 'USER');
 
     const payload2 = {
@@ -231,6 +233,7 @@ const handleDeliveryResponse = catchAsync(
         projectNumber: order.projectNumber,
         projectName: order.projectName,
         senderUserName : userData.userName,
+        avatar : userData.image,
         createdAt: new Date(),
       }
 
@@ -248,6 +251,7 @@ const handleDeliveryResponse = catchAsync(
         projectName: order.projectName,
         projectNumber: projectNumber,
         senderUserName : userData.userName,
+        avatar : userData.image,
         type: NotificationTypes.Revision,
         thumbnailUrl: order?.projectImage,
         createdAt: new Date(),

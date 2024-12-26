@@ -84,6 +84,7 @@ const approveExtensionRequest = catchAsync(
           hours: orderData.durationHours,
           createdAt: new Date(),
           senderUserName: "mahfujurrahm535",
+          avatar : "",
         };
 
         await prisma.notification.create({
@@ -104,6 +105,7 @@ const approveExtensionRequest = catchAsync(
             hours: orderData.durationHours,
             userId: orderData.userId,
             senderUserName: "mahfujurrahm535",
+            avatar : "",
             createdAt: new Date(),
           },
           'ADMIN',
@@ -198,6 +200,7 @@ const ExtendDeliveryMessageOption = catchAsync(
         days: orderData?.duration,
         hours: orderData?.durationHours,
         senderUserName: userData.userName,
+        avatar : userData.image,
         createdAt: new Date(),
       };
 
@@ -220,6 +223,7 @@ const ExtendDeliveryMessageOption = catchAsync(
           hours: orderData?.durationHours,
           createdAt: new Date(),
           senderUserName: userData?.userName,
+          avatar : userData.image,
         },
         'USER',
       );

@@ -69,6 +69,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
         type: NotificationTypes.CancelAccept,
         projectNumber: orderData?.projectNumber,
         senderUserName: userData.userName,
+        avatar : userData.image,
         createdAt: new Date(),
       };
 
@@ -89,6 +90,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
           projectNumber: orderData?.projectNumber,
           createdAt: new Date(),
           senderUserName: userData.userName,
+          avatar : userData.image,
         },
         'USER',
       );

@@ -241,6 +241,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 days: orderData.duration,
                 hours: orderData.durationHours,
                 senderUserName: userData.userName,
+                avatar : userData.image,
                 createdAt: new Date(),
               };
 
@@ -261,6 +262,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   hours: orderData.durationHours,
                   createdAt: new Date(),
                   senderUserName: userData.userName,
+                  avatar : userData.image,
                 },
                 'USER',
               );
@@ -330,6 +332,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               userId: userData?.id,
               senderUserName: userData?.userName,
               thumbnailUrl: order?.projectImage,
+              projectNumber : order.projectNumber,
               type: NotificationTypes.Order,
               createdAt: new Date(),
             };
@@ -349,6 +352,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 userId: userData.id,
                 senderUserName: userData.userName,
                 thumbnailUrl: order.projectImage,
+                projectNumber : order.projectNumber,
                 type: NotificationTypes.Order,
                 createdAt: new Date(),
               },

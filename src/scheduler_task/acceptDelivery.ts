@@ -94,6 +94,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                 const userData = (await userFinder(order.userId)) as User;
 
                 const payload = {
+                  avatar : userData.image,
                   thumbnailUrl: order?.projectImage,
                   type: NotificationTypes.AutoCompleteOrder,
                   projectNumber: order.projectNumber,
@@ -116,6 +117,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     type: NotificationTypes.CompleteOrder,
                     createdAt: new Date(),
                     senderUserName: userData.userName,
+                    avatar : userData.image,
                   },
                   'USER',
                 );
@@ -126,6 +128,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   projectNumber: order.projectNumber,
                   senderUserName: 'mahfujurrahm535',
                   createdAt: new Date(),
+                  avatar : "",
                 };
 
                 await prisma.notification.create({
@@ -143,6 +146,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     type: NotificationTypes.CompleteOrderUser,
                     createdAt: new Date(),
                     senderUserName: 'mahfujurrahm535',
+                    avatar : "",
                   },
                   'ADMIN',
                 );

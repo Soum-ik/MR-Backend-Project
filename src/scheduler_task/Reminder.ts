@@ -50,29 +50,14 @@ schedule.scheduleJob('*/10 * * * *', async () => {
                         await prisma.notification.create({
                             data: {
                                 recipient: 'ADMIN',
-                                message: ` <div className="flex-1">
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
-          <span className="font-bold">Reminder: </span>
-          the delivery is due in less than 12 hours
-          <span className="font-bold"> Deliver Now</span>
-        </p>
-      </div>
-                   `,
+                                message: ``,
                                 senderId: message.userId,
                                 payload: payload,
 
                             }
                         })
                         PublicMessageHandler({
-                            msg: `
-                            <div className="flex-1">
-        <p className="text-sm font-medium sm:text-base text-gray-900 line-clamp-3">
-          <span className="font-bold">Reminder: </span>
-          the delivery is due in less than 12 hours
-          <span className="font-bold"> Deliver Now</span>
-        </p>
-      </div>
-                    `,
+                            msg: ``,
                             deliveryDate: deliveryDate,
                             projectName: projectName,
                             projectNumber: projectNumber,
