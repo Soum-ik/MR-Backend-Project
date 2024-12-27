@@ -26,6 +26,6 @@ router.get('/get',  authenticateToken(
 // Route to update a project message
 router.put('/update', orderMessageController.updateProjectMessage);
 
-router.delete('/:commonkey/:projectNumber', orderMessageController.deleteMessage)
+router.delete('/:uniqueId/:projectNumber', orderMessageController.deleteMessage)
 
 export const handleOrderMessageRoute = router;
