@@ -1,4 +1,5 @@
-<!doctype html>
+export const revisionTemplate = () => {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -128,15 +129,15 @@
         />
       </div>
       <!-- replace with the username -->
-      <h2 class="title">ClientName123 left you new comments</h2>
+      <h2 class="title">ClientName123 has requested a revision</h2>
       <span class="divider"></span>
-      <!-- replace commented length and client name -->
+      <!-- replace client name project name and project number -->
       <p class="messageText">
-        ClientName123 left you 3 new comments in your project files. View the
-        conversation to reply.
+        ClientName123 requested a modification for their project of Door Hanger
+        #MRA2EPN
       </p>
       <div style="text-align: center">
-        <a href="" class="button">View Conversation</a>
+        <a href="" class="button">See Revision</a>
       </div>
       <ul class="social">
         <li>
@@ -223,3 +224,5 @@
     </div>
   </body>
 </html>
+`;
+};

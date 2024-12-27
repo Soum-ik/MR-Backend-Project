@@ -1,4 +1,5 @@
-<!doctype html>
+export const tipsTemplate = () => {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -127,16 +128,14 @@
           alt="MR Logo"
         />
       </div>
-      <!-- replace with the username -->
-      <h2 class="title">ClientName123 has requested a revision</h2>
+      <h2 class="title">You've just been tipped!</h2>
       <span class="divider"></span>
-      <!-- replace client name project name and project number -->
+      <!-- replace client name and project number -->
       <p class="messageText">
-        ClientName123 requested a modification for their project of Door Hanger
-        #MRA2EPN
+        You recieved a tip from ClientName123 for project #MRA2EPN
       </p>
       <div style="text-align: center">
-        <a href="" class="button">See Revision</a>
+        <a href="" class="button">View Project</a>
       </div>
       <ul class="social">
         <li>
@@ -223,3 +222,5 @@
     </div>
   </body>
 </html>
+`;
+};

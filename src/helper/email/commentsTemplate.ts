@@ -1,4 +1,4 @@
-<!doctype html>
+export const commentsTemplate = () => { return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -128,16 +128,15 @@
         />
       </div>
       <!-- replace with the username -->
-      <h2 class="title">ClientName123 has sent a cancellation request</h2>
+      <h2 class="title">ClientName123 left you new comments</h2>
       <span class="divider"></span>
-      <!-- replace client name project cancel duration and project number -->
+      <!-- replace commented length and client name -->
       <p class="messageText">
-        ClientName123 has requested to cancel project #MRA2EPN. Please review
-        the request and respond within the next 2 days, or the project will be
-        automatically canceled.
+        ClientName123 left you 3 new comments in your project files. View the
+        conversation to reply.
       </p>
       <div style="text-align: center">
-        <a href="" class="button">View and Respond</a>
+        <a href="" class="button">View Conversation</a>
       </div>
       <ul class="social">
         <li>
@@ -224,3 +223,4 @@
     </div>
   </body>
 </html>
+` }

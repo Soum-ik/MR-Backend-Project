@@ -1,4 +1,5 @@
-<!doctype html>
+export const messagesTemplate = () => {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -127,14 +128,18 @@
           alt="MR Logo"
         />
       </div>
-      <h2 class="title">You've just been tipped!</h2>
+      <!-- replace with the username -->
+      <h2 class="title">You've recieved messages from ClientName123</h2>
       <span class="divider"></span>
-      <!-- replace client name and project number -->
       <p class="messageText">
-        You recieved a tip from ClientName123 for project #MRA2EPN
+        <!-- Replace this text with the actual message text -->
+        Hello, I need another flyer with the same info only a different layout.
+        Just want a new look. Can you do something different?
       </p>
+      <!-- here use this if your message has attachments -->
+      <p class="messageText" style="margin-bottom: 40px">[1 file attached]</p>
       <div style="text-align: center">
-        <a href="" class="button">View Project</a>
+        <a href="" class="button">View and Reply</a>
       </div>
       <ul class="social">
         <li>
@@ -221,3 +226,5 @@
     </div>
   </body>
 </html>
+`;
+};

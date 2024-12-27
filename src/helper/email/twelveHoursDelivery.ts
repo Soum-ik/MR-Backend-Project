@@ -1,4 +1,5 @@
-<!doctype html>
+export const twelveHoursDelivery = () => {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -47,7 +48,7 @@
         color: #333;
         text-align: center;
         margin-bottom: 15px;
-        margin-top: 20px;
+        margin-top: 25px;
         font-size: 22px;
         font-weight: 500;
       }
@@ -127,18 +128,20 @@
           alt="MR Logo"
         />
       </div>
-      <!-- replace with the username -->
-      <h2 class="title">You've recieved messages from ClientName123</h2>
+      <h2 class="title">Your delivery deadline is coming up</h2>
       <span class="divider"></span>
+      <!-- replace the project number and client name -->
       <p class="messageText">
-        <!-- Replace this text with the actual message text -->
-        Hello, I need another flyer with the same info only a different layout.
-        Just want a new look. Can you do something different?
+        We wanted to remind you that your delivery deadline for project #MRA2EPN
+        with ClientName123 is in less than 12 hours.
       </p>
-      <!-- here use this if your message has attachments -->
-      <p class="messageText" style="margin-bottom: 40px">[1 file attached]</p>
+      <!-- replace client name -->
+      <p class="messageText" style="margin-bottom: 40px">
+        If you still need more time to work on this project, you can ask
+        ClientName123 to extend the delivery time.
+      </p>
       <div style="text-align: center">
-        <a href="" class="button">View and Reply</a>
+        <a href="" class="button">Deliver Now</a>
       </div>
       <ul class="social">
         <li>
@@ -225,3 +228,5 @@
     </div>
   </body>
 </html>
+`;
+};

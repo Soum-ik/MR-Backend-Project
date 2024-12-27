@@ -1,4 +1,5 @@
-<!doctype html>
+export const directProjectTemplate = () => {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -110,127 +111,6 @@
         fill: #1b8cdc;
       }
 
-      .items-block {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid rgba(128, 128, 128, 0.3);
-      }
-
-      .items-heading-block {
-        display: flex;
-        align-items: center;
-        font-weight: 600;
-        flex-wrap: nowrap;
-        width: 100%;
-      }
-
-      .items-content-block {
-        display: flex;
-        align-items: stretch;
-        flex-wrap: nowrap;
-        width: 100%;
-      }
-
-      .heading-1 {
-        flex-grow: 1;
-        flex-shrink: 0;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-        padding: 12px;
-      }
-
-      .items-content-block > .heading-1 {
-        flex-shrink: 1;
-      }
-
-      .heading-1 > h1 {
-        font-size: 16px;
-        font-weight: 600;
-        width: 100%;
-        text-wrap: wrap;
-      }
-
-      .heading-1 > p {
-        color: rgba(0, 0, 0, 0.8);
-      }
-
-      .heading-2,
-      .heading-3,
-      .heading-4 {
-        width: 17%;
-        flex-shrink: 0;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-        border-left: 1px solid rgba(128, 128, 128, 0.3);
-        padding: 12px;
-        text-align: center;
-      }
-
-      .items-content-block > .heading-2,
-      .items-content-block > .heading-3,
-      .items-content-block > .heading-4 {
-        font-weight: 500;
-      }
-
-      .bullet-dots-block {
-        list-style: none;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-        padding: 16px 12px;
-      }
-
-      .dots-item {
-        /* my-1 flex items-center gap-2 */
-        margin-block: 4px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .dots-item > span {
-        display: flex;
-        font-size: 10px;
-        color: white;
-        align-items: center;
-        justify-content: center;
-        height: 16px;
-        width: 16px;
-        background-color: #1b8cdc;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-
-      .extra-delivery,
-      .total-price-block {
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-      }
-
-      .extra-delivery-text,
-      .total-price-text {
-        flex-grow: 1;
-        flex-shrink: 0;
-        padding: 12px;
-      }
-
-      .total-price-block {
-        border: none;
-      }
-
-      .total-price-text {
-        font-weight: 600;
-      }
-
-      .extra-delivery-price,
-      .total-price {
-        width: 17%;
-        flex-shrink: 0;
-        padding: 12px;
-        text-align: center;
-      }
-
-      .total-price {
-        font-weight: 600;
-      }
-
       /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
@@ -248,46 +128,17 @@
           alt="MR Logo"
         />
       </div>
-      <!-- replace the client name -->
-      <h2 class="title">You've received a project from ClientName123</h2>
+      <!-- replace with the username -->
+      <h2 class="title">ClientName123 has sent a cancellation request</h2>
       <span class="divider"></span>
-      <!-- replace the project number -->
-      <p class="messageText">Project #MRA2EPN</p>
-      <!-- replace with items data -->
-      <div class="items-block">
-        <div class="items-heading-block">
-          <div class="heading-1">Item</div>
-          <div class="heading-2">Qty</div>
-          <div class="heading-3">Dur</div>
-          <div class="heading-4">Price</div>
-        </div>
-        <div class="items-content-block">
-          <div class="heading-1">
-            <h1>Door Hanger Design</h1>
-            <p>Double sided design</p>
-          </div>
-          <div class="heading-2">1</div>
-          <div class="heading-3">2 days</div>
-          <div class="heading-4">$40</div>
-        </div>
-        <ul class="bullet-dots-block">
-          <li class="dots-item"><span>&#x2714;</span> Unlimited Revisions</li>
-          <li class="dots-item"><span>&#x2714;</span> PSD Source File</li>
-          <li class="dots-item">
-            <span>&#x2714;</span> Print Ready PDF or JPEG File
-          </li>
-        </ul>
-        <div class="extra-delivery">
-          <div class="extra-delivery-text">Extra-fast 1-day delivery</div>
-          <div class="extra-delivery-price">$10</div>
-        </div>
-        <div class="total-price-block">
-          <div class="total-price-text">Total</div>
-          <div class="total-price">$50</div>
-        </div>
-      </div>
-      <div style="text-align: center; margin-top: 20px">
-        <a href="" class="button">Take a look</a>
+      <!-- replace client name project cancel duration and project number -->
+      <p class="messageText">
+        ClientName123 has requested to cancel project #MRA2EPN. Please review
+        the request and respond within the next 2 days, or the project will be
+        automatically canceled.
+      </p>
+      <div style="text-align: center">
+        <a href="" class="button">View and Respond</a>
       </div>
       <ul class="social">
         <li>
@@ -374,3 +225,5 @@
     </div>
   </body>
 </html>
+`;
+};

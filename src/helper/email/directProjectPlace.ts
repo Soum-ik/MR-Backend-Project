@@ -1,4 +1,5 @@
-<!doctype html>
+export const directProjectPlace = () => {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -204,15 +205,15 @@
         border-bottom: 1px solid rgba(128, 128, 128, 0.3);
       }
 
-      .total-price-block {
-        border: none;
-      }
-
       .extra-delivery-text,
       .total-price-text {
         flex-grow: 1;
         flex-shrink: 0;
         padding: 12px;
+      }
+
+      .total-price-block {
+        border: none;
       }
 
       .total-price-text {
@@ -229,22 +230,6 @@
 
       .total-price {
         font-weight: 600;
-      }
-
-      .requirements-block {
-        list-style: none;
-        padding-left: 0;
-      }
-      .requirement {
-        margin-top: 20px;
-        display: flex;
-        gap: 16px;
-      }
-      .requirement > span {
-        display: block;
-        color: #1b8cdc;
-        font-weight: 600;
-        flex-shrink: 0;
       }
 
       /* Responsive Styles */
@@ -268,10 +253,7 @@
       <h2 class="title">You've received a project from ClientName123</h2>
       <span class="divider"></span>
       <!-- replace the project number -->
-      <p class="messageText">
-        <span style="font-weight: 500">Project #MRA2EPN</span> is due Oct 25,
-        2023, 08:45.
-      </p>
+      <p class="messageText">Project #MRA2EPN</p>
       <!-- replace with items data -->
       <div class="items-block">
         <div class="items-heading-block">
@@ -305,88 +287,8 @@
           <div class="total-price">$50</div>
         </div>
       </div>
-
-      <div style="margin-top: 20px">
-        The buyer has provided the following project requirements:
-      </div>
-
-      <ul class="requirements-block">
-        <li class="requirement">
-          <span>1.</span>
-          <div>
-            <p style="margin-bottom: 5px">Which industry do you work in?</p>
-            <p>Pest control and bed maintenance</p>
-          </div>
-        </li>
-        <li class="requirement">
-          <span>2.</span>
-          <div>
-            <p style="margin-bottom: 5px">Do you have your own/company logo?</p>
-            <p>use one of these or a combination for the aeration image.</p>
-            <span style="display: block; margin-top: 5px"
-              >[2 files attached]</span
-            >
-          </div>
-        </li>
-        <li class="requirement">
-          <span>3.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              Do you have your own/company website?
-            </p>
-            <p>www.website.com</p>
-          </div>
-        </li>
-        <li class="requirement">
-          <span>4.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              Do you have any imaginary or specific design ideas?
-            </p>
-            <p>please use this image for fertilizing add</p>
-            <span style="display: block; margin-top: 5px"
-              >[1 files attached]</span
-            >
-          </div>
-        </li>
-        <li class="requirement">
-          <span>5.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              Do you have your specific design size?
-            </p>
-            <p>4.5x11 inch</p>
-          </div>
-        </li>
-        <li class="requirement">
-          <span>6.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              You have to give clear information that you need in the design.
-              (For example, all texts, all photos, logo, contact info, etc.)
-            </p>
-            <p>
-              please use a combination of these for pest control and bed
-              maintenance ads
-            </p>
-            <span style="display: block; margin-top: 5px"
-              >[5 files attached]</span
-            >
-          </div>
-        </li>
-      </ul>
-
-      <div style="text-align: center; margin-top: 30px">
-        <span
-          style="
-            display: block;
-            width: 100%;
-            background-color: rgba(128, 128, 128, 0.3);
-            height: 2px;
-          "
-        ></span>
-        <p style="margin-block: 15px">Got everything you need?</p>
-        <a href="" class="button">Review Requirements</a>
+      <div style="text-align: center; margin-top: 20px">
+        <a href="" class="button">Take a look</a>
       </div>
       <ul class="social">
         <li>
@@ -473,3 +375,5 @@
     </div>
   </body>
 </html>
+`;
+};
