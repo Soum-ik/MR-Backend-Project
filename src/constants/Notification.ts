@@ -12,7 +12,7 @@ export const NotificationTypes = {
     OrderExtendAccept: 'OrderExtendAccept',
     AdditionalOffer: 'AdditionalOffer',
     AdditionalOfferAccept: 'AdditionalOfferAccept',
-    // CancelRequest: 'CancelRequest',
+    //  : 'CancelRequest',
     CancelAccept: 'CancelAccept',
     CancelAcceptUser: 'CancelAcceptUser',
     DirectCancel: 'DirectCancel',
@@ -26,4 +26,7 @@ export const NotificationTypes = {
     AutoCompleteOrderUser: 'AutoCompleteOrder',
     OrderExtendUser: 'OrderExtendUser',
     OrderExtendAdmin: 'OrderExtendAdmin',  
+    Tips : "Tips",
+    AffiliateWidthrawRequsted: "AffiliateWidthrawRequsted",
+    CustomOfferByClient: "CustomOfferByClient", //
 };

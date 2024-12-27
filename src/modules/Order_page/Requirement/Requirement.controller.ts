@@ -72,6 +72,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         thumbnailUrl: order?.projectImage,
         type: NotificationTypes.Instructions,
         createdAt: new Date(),
+        projectNumber: updateRequirements.projectNumber
       };
       const payload1 = {
         avatar: userData?.image,
@@ -80,6 +81,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         type: NotificationTypes.OrderStart,
         createdAt: new Date(),
         senderUserName: 'mahfujurrahm535',
+        projectNumber: updateRequirements.projectNumber
       };
 
       await prisma.notification.create({
@@ -99,6 +101,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
           senderUserName: userData.userName,
           thumbnailUrl: order.projectImage,
           type: NotificationTypes.Instructions,
+          projectNumber: updateRequirements.projectNumber,
           createdAt: new Date(),
         },
         'USER',
@@ -121,6 +124,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
           senderUserName: 'mahfujurrahm535',
           thumbnailUrl: order.projectImage,
           type: NotificationTypes.OrderStart,
+          projectNumber: updateRequirements.projectNumber,
           createdAt: new Date(),
         },
         'ADMIN',

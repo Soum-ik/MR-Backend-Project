@@ -379,8 +379,8 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
 
 export const updateProjectMessage = catchAsync(
   async (req: Request, res: Response) => {
-    const { projectNumber,  uniqueId } = req.body;
-    const { id, ...updateBody } = req.body
+    const { projectNumber, uniqueId } = req.body;
+    const { timeAndDate, id, ...updateBody } = req.body;
     if (!uniqueId) {
       return sendResponse(res, {
         statusCode: httpStatus.BAD_REQUEST,

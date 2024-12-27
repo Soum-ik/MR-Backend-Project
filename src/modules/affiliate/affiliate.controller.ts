@@ -1,4 +1,4 @@
-import { affiliateWithdrawType } from '@prisma/client';
+import { affiliateWithdrawType, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
@@ -8,6 +8,9 @@ import sendResponse from '../../libs/sendResponse';
 import catchAsync from '../../libs/utlitys/catchSynch';
 import affiliateNumberCreator from '../Order_page/projectNumberGenarator.ts/affiliateNumberCreator';
 import { AFFILIATE_SUCCESS } from './affiliate.constant';
+import { userFinder } from '../../utils/userFinder';
+import { NotificationTypes } from '../../constants/Notification';
+import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
 
 const autoGenerate = catchAsync(async (req: Request, res: Response) => {
   const { user_id } = req.user as TokenCredential;
@@ -457,6 +460,33 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
       ammount: ammount,
     },
   });
+
+  const userData = (await userFinder(user_id)) as User;
+
+  const payload = {
+    type: NotificationTypes.AffiliateWidthrawRequsted,
+    senderUserName: userData.userName,
+    avatar: userData.image,
+    createdAt: new Date(),
+  };
+
+  await prisma.notification.create({
+    data: {
+      recipient: 'ADMIN',
+      message: ``,
+      senderId: user_id as string,
+      payload: payload,
+    },
+  });
+  PublicMessageHandler(
+    {
+      type: NotificationTypes.AffiliateWidthrawRequsted,
+      createdAt: new Date(),
+      senderUserName: userData.userName,
+      avatar: userData.image,
+    },
+    'USER',
+  );
 
   return sendResponse(res, {
     statusCode: 200,

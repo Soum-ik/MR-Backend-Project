@@ -40,6 +40,7 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
     userId: userData?.id,
     senderUserName: userData?.userName,
     type: NotificationTypes.Review,
+    rating: rating,
   }
 
   await prisma.notification.create({
@@ -47,7 +48,7 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
       recipient: admins ? 'ADMIN' : 'USER',
       message: ``,
       senderId: user_id as string,
-      payload: payload,
+      payload: payload
     }
   })
 

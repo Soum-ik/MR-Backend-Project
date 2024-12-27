@@ -6,7 +6,7 @@ import { NotificationTypes } from '../constants/Notification';
 
 
 
-schedule.scheduleJob('*/10 * * * *', async () => {
+schedule.scheduleJob('*/10 * * * * *', async () => {
     print.blue('Scheduler running to send order delivery reminder...');
 
     try {

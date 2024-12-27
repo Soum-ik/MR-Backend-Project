@@ -105,8 +105,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               UpdatedDeliveryDate.getDate() + duration,
             ); //+
           }
-
-          await prisma.order.update({
+          const updatedOrder = await prisma.order.update({
             where: {
               id: data?.orderId,
             },
@@ -119,6 +118,41 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               deliveryDate: UpdatedDeliveryDate,
             },
           });
+
+          const userData = (await userFinder(updatedOrder?.userId)) as User;
+
+          const payload = {
+            thumbnailUrl: orderData?.projectImage,
+            type: NotificationTypes.CustomOfferByClient,
+            projectNumber: orderData?.projectNumber,
+            days: orderData?.duration,
+            hours: orderData?.durationHours,
+            senderUserName: userData?.userName,
+            avatar: userData.image,
+            createdAt: new Date(),
+          };
+
+          await prisma.notification.create({
+            data: {
+              recipient: 'ADMIN',
+              message: ``,
+              senderId: userData.id as string,
+              payload: payload,
+            },
+          });
+          PublicMessageHandler(
+            {
+              thumbnailUrl: orderData?.projectImage,
+              type: NotificationTypes.AdditionalOfferAccept,
+              projectNumber: orderData?.projectNumber,
+              days: orderData?.duration,
+              hours: orderData?.durationHours,
+              createdAt: new Date(),
+              senderUserName: userData.userName,
+              avatar: userData.image,
+            },
+            'USER',
+          );
         } else if (
           session?.metadata?.paymentType === PaymentType.CUSTOM_OFFER
         ) {
@@ -165,7 +199,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
           const payload = {
             thumbnailUrl: orderData?.projectImage,
-            type: NotificationTypes.OrderExtendUser,
+            type: NotificationTypes.CustomOfferByClient,
             projectNumber: orderData.projectNumber,
             days: orderData.duration,
             hours: orderData.durationHours,
@@ -185,7 +219,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           PublicMessageHandler(
             {
               thumbnailUrl: orderData?.projectImage,
-              type: NotificationTypes.OrderExtendUser,
+              type: NotificationTypes.CustomOfferByClient,
               projectNumber: orderData.projectNumber,
               days: orderData.duration,
               hours: orderData.durationHours,
@@ -322,7 +356,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           // projectNumber: data?.projectNumber,
 
           const updateTips = { amount: data?.ammount || 0 };
-          await prisma.order.update({
+          const orderData = await prisma.order.update({
             where: {
               projectNumber: data?.projectNumber,
             },
@@ -330,6 +364,42 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               projectTips: updateTips,
             },
           });
+
+          const userData = (await userFinder(orderData.userId)) as User;
+
+          const payload = {
+            thumbnailUrl: orderData?.projectImage,
+            type: NotificationTypes.Tips,
+            projectNumber: orderData.projectNumber,
+            days: orderData.duration,
+            hours: orderData.durationHours,
+            senderUserName: userData.userName,
+            avatar: userData.image,
+            createdAt: new Date(),
+
+          };
+
+          await prisma.notification.create({
+            data: {
+              recipient: 'ADMIN',
+              message: ``,
+              senderId: orderData.userId as string,
+              payload: payload,
+            },
+          });
+          PublicMessageHandler(
+            {
+              thumbnailUrl: orderData?.projectImage,
+              type: NotificationTypes.Tips,
+              projectNumber: orderData.projectNumber,
+              days: orderData.duration,
+              hours: orderData.durationHours,
+              createdAt: new Date(),
+              senderUserName: userData.userName,
+              avatar: userData.image,
+            },
+            'USER',
+          );
 
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
