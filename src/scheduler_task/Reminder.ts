@@ -37,16 +37,17 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
             await Promise.all(
                 orderList.map(async (message) => {
                     const { deliveryDate, projectNumber, projectName } = message;
-                    const payload = {
-                        thumbnailUrl: message?.projectImage,
-                        type: NotificationTypes.Order,
-                        projectNumber: message.projectNumber,
-                        projectName: message.projectName,
-                        createdAt: new Date(),
-                    }
+
                     print.yellow(`Sending delivery reminder for project: ${projectNumber}.`);
 
                     try {
+                        const payload = {
+                            thumbnailUrl: message?.projectImage,
+                            type: NotificationTypes.Order,
+                            projectNumber: message.projectNumber,
+                            projectName: message.projectName,
+                            createdAt: new Date(),
+                        }
                         await prisma.notification.create({
                             data: {
                                 recipient: 'ADMIN',

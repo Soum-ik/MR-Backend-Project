@@ -149,6 +149,7 @@ model OrderMessage {
   commonKey             String
   isCancelled           Boolean                 @default(false)
   unseend               Boolean                 @default(false)
+  sendNotification Boolean  @default(false)
   // Relationships
   uniqueId              String
   sender                User                    @relation("OrderMessageSent", fields: [senderId], references: [id])
@@ -190,28 +191,29 @@ model Notification {
 }
 
 model Message {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  userImage       String?
-  senderName      String?
-  senderUserName  String?
-  senderId        String   @db.ObjectId
-  recipientId     String   @db.ObjectId
-  messageText     String?
-  attachment      Json[]   @default([])
-  createdAt       DateTime @default(now())
-  isFromAdmin     Role?
-  customOffer     Json?
-  timeAndDate     String
-  contactForm     Json?
-  commonkey       String
-  uniqueId        String
-  seen            Boolean  @default(false)
-  replyTo         Json?
-  read            Boolean  @default(false)
-  seenBy          String[] @default([])
-  hiddenFromAdmin Boolean  @default(false)
-  sender          User     @relation("SentMessages", fields: [senderId], references: [id])
-  recipient       User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  userImage        String?
+  senderName       String?
+  senderUserName   String?
+  senderId         String   @db.ObjectId
+  recipientId      String   @db.ObjectId
+  messageText      String?
+  attachment       Json[]   @default([])
+  createdAt        DateTime @default(now())
+  isFromAdmin      Role?
+  customOffer      Json?
+  timeAndDate      String
+  contactForm      Json?
+  commonkey        String
+  uniqueId         String
+  seen             Boolean  @default(false)
+  replyTo          Json?
+  read             Boolean  @default(false)
+  seenBy           String[] @default([])
+  hiddenFromAdmin  Boolean  @default(false)
+  sender           User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipient        User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  sendNotification Boolean  @default(false)
 
   isClientSeen   Boolean @default(false)
   isAdminSeen    Boolean @default(false)
