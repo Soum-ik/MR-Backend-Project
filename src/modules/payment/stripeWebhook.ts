@@ -144,6 +144,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
+
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
             data: {
@@ -151,7 +152,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               piId: session?.payment_intent as string,
             },
           });
-          await prisma.order.update({
+          const orderData = await prisma.order.update({
             where: { stripeId: session.id.split('_').join('') },
             data: {
               trackProjectStatus: OrderStatus.PROJECT_PLACED,
@@ -160,6 +161,40 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               piId: session?.payment_intent as string,
             },
           });
+          const userData = (await userFinder(orderData.userId)) as User;
+
+          const payload = {
+            thumbnailUrl: orderData?.projectImage,
+            type: NotificationTypes.OrderExtendUser,
+            projectNumber: orderData.projectNumber,
+            days: orderData.duration,
+            hours: orderData.durationHours,
+            senderUserName: userData.userName,
+            avatar: userData.image,
+            createdAt: new Date(),
+          };
+
+          await prisma.notification.create({
+            data: {
+              recipient: 'ADMIN',
+              message: ``,
+              senderId: orderData.userId as string,
+              payload: payload,
+            },
+          });
+          PublicMessageHandler(
+            {
+              thumbnailUrl: orderData?.projectImage,
+              type: NotificationTypes.OrderExtendUser,
+              projectNumber: orderData.projectNumber,
+              days: orderData.duration,
+              hours: orderData.durationHours,
+              createdAt: new Date(),
+              senderUserName: userData.userName,
+              avatar: userData.image,
+            },
+            'USER',
+          );
         } else if (
           session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY
         ) {
@@ -241,7 +276,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 days: orderData.duration,
                 hours: orderData.durationHours,
                 senderUserName: userData.userName,
-                avatar : userData.image,
+                avatar: userData.image,
                 createdAt: new Date(),
               };
 
@@ -262,7 +297,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   hours: orderData.durationHours,
                   createdAt: new Date(),
                   senderUserName: userData.userName,
-                  avatar : userData.image,
+                  avatar: userData.image,
                 },
                 'USER',
               );
@@ -332,7 +367,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               userId: userData?.id,
               senderUserName: userData?.userName,
               thumbnailUrl: order?.projectImage,
-              projectNumber : order.projectNumber,
+              projectNumber: order.projectNumber,
               type: NotificationTypes.Order,
               createdAt: new Date(),
             };
@@ -352,7 +387,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 userId: userData.id,
                 senderUserName: userData.userName,
                 thumbnailUrl: order.projectImage,
-                projectNumber : order.projectNumber,
+                projectNumber: order.projectNumber,
                 type: NotificationTypes.Order,
                 createdAt: new Date(),
               },

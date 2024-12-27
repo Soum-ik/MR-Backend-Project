@@ -340,11 +340,11 @@ export const getMessages = async (req: Request, res: Response) => {
 
 // Controller: Delete a message
 const deleteMessage = catchAsync(async (req: Request, res: Response) => {
-  const { commonkey, projectNumber } = req.params;
+  const { uniqueId, projectNumber } = req.params;
 
   const message = await prisma.orderMessage.findMany({
     where: {
-      commonKey: commonkey as string,
+      uniqueId: uniqueId as string,
       projectNumber: projectNumber
     }
   });
@@ -360,7 +360,7 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
 
   const deleteMessage = await prisma.orderMessage.deleteMany({
     where: {
-      commonKey: commonkey as string,
+      uniqueId: uniqueId as string,
       projectNumber: projectNumber
     },
   });
@@ -379,9 +379,9 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
 
 export const updateProjectMessage = catchAsync(
   async (req: Request, res: Response) => {
-    const { projectNumber, commonKey } = req.body;
+    const { projectNumber,  uniqueId } = req.body;
     const { id, ...updateBody } = req.body
-    if (!commonKey) {
+    if (!uniqueId) {
       return sendResponse(res, {
         statusCode: httpStatus.BAD_REQUEST,
         success: false,
@@ -390,7 +390,7 @@ export const updateProjectMessage = catchAsync(
     }
 
     const updateMessage = await prisma.orderMessage.updateMany({
-      where: { projectNumber: projectNumber, commonKey: commonKey },
+      where: { projectNumber: projectNumber, uniqueId: uniqueId },
       data: {
         ...updateBody
       },
