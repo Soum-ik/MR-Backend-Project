@@ -19,8 +19,8 @@ schedule.scheduleJob('*/10 * * * *', async () => {
                 projectStatus: 'Ongoing',
                 deliveryDate:
                 {
-                    lte: new Date(now.getTime() + 12 * 60 * 60 * 1000)
-                }
+                    equals: new Date(now.getTime() + 12 * 60 * 60 * 1000)
+                },
             },
             select: {
                 deliveryDate: true,
