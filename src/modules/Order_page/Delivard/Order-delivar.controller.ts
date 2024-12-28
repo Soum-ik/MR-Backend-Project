@@ -44,7 +44,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
         submittedData: updatedMessage,
         deliveryAttempt: 2,
-        projectThumbnail: updatedMessage?.deliverProject?.thumbnailImage?.url,
+        projectThumbnail: updatedMessage?.deliverProject?.thumbnailImage?.watermarkUrl,
         completedDate: new Date(),
       },
     });
@@ -130,8 +130,8 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       thumbnailUrl: order?.projectImage,
       type: NotificationTypes.CompleteOrder,
       projectNumber: order.projectNumber,
-      senderUserName : userData.userName,
-      avatar : userData.image,
+      senderUserName: userData.userName,
+      avatar: userData.image,
       createdAt: new Date(),
     }
 
@@ -148,15 +148,15 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       projectNumber: projectNumber,
       type: NotificationTypes.CompleteOrder,
       createdAt: new Date(),
-      senderUserName : userData.userName,
-      avatar : userData.image,
+      senderUserName: userData.userName,
+      avatar: userData.image,
     }, 'USER');
 
     const payload2 = {
       thumbnailUrl: order?.projectImage,
       type: NotificationTypes.CompleteOrderUser,
       projectNumber: order.projectNumber,
-      senderUserName : "mahfujurrahm535",
+      senderUserName: "mahfujurrahm535",
       createdAt: new Date(),
     }
 
@@ -173,7 +173,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       projectNumber: projectNumber,
       type: NotificationTypes.CompleteOrderUser,
       createdAt: new Date(),
-      senderUserName : "mahfujurrahm535",
+      senderUserName: "mahfujurrahm535",
     }, 'ADMIN');
 
     return updateOrder;
@@ -232,8 +232,8 @@ const handleDeliveryResponse = catchAsync(
         type: NotificationTypes.Revision,
         projectNumber: order.projectNumber,
         projectName: order.projectName,
-        senderUserName : userData.userName,
-        avatar : userData.image,
+        senderUserName: userData.userName,
+        avatar: userData.image,
         createdAt: new Date(),
       }
 
@@ -250,8 +250,8 @@ const handleDeliveryResponse = catchAsync(
         deliveryDate: order.deliveryDate,
         projectName: order.projectName,
         projectNumber: projectNumber,
-        senderUserName : userData.userName,
-        avatar : userData.image,
+        senderUserName: userData.userName,
+        avatar: userData.image,
         type: NotificationTypes.Revision,
         thumbnailUrl: order?.projectImage,
         createdAt: new Date(),
@@ -295,33 +295,33 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
 
   // const userData = (await userFinder(order.userId)) as User;
 
-      const payload = {
-        thumbnailUrl: order?.projectImage,
-        type: NotificationTypes.FileDelivered,
-        projectNumber: order.projectNumber,
-        projectName: order.projectName,
-        senderUserName : "mahfujurrahm535",
-        createdAt: new Date(),
-      }
+  const payload = {
+    thumbnailUrl: order?.projectImage,
+    type: NotificationTypes.FileDelivered,
+    projectNumber: order.projectNumber,
+    projectName: order.projectName,
+    senderUserName: "mahfujurrahm535",
+    createdAt: new Date(),
+  }
 
-      await prisma.notification.create({
-        data: {
-          recipient: 'USER',
-          message: ``,
-          senderId: order.userId as string,
-          payload: payload
-        }
-      })
-      PublicMessageHandler({
-        msg: ``,
-        deliveryDate: order.deliveryDate,
-        projectName: order.projectName,
-        projectNumber: projectNumber,
-        senderUserName : "mahfujurrahm535",
-        type: NotificationTypes.FileDelivered,
-        thumbnailUrl: order?.projectImage,
-        createdAt: new Date(),
-      }, 'ADMIN');
+  await prisma.notification.create({
+    data: {
+      recipient: 'USER',
+      message: ``,
+      senderId: order.userId as string,
+      payload: payload
+    }
+  })
+  PublicMessageHandler({
+    msg: ``,
+    deliveryDate: order.deliveryDate,
+    projectName: order.projectName,
+    projectNumber: projectNumber,
+    senderUserName: "mahfujurrahm535",
+    type: NotificationTypes.FileDelivered,
+    thumbnailUrl: order?.projectImage,
+    createdAt: new Date(),
+  }, 'ADMIN');
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
