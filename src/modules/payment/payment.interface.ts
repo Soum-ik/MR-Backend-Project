@@ -1,41 +1,43 @@
 interface customOfferT {
-    thumbnail: string;
-    title: string;
-    deliveryCount: string;
-    price: string;
-    desc: string;
-    isAccepted: boolean;
-    isRejected: boolean;
-    isWithdrawn: boolean;
-    requirements: string[];
+  thumbnail: string;
+  title: string;
+  deliveryCount: string;
+  price: string;
+  desc: string;
+  isAccepted: boolean;
+  isRejected: boolean;
+  isWithdrawn: boolean;
+  requirements: string[];
 }
 
 interface additionalOfferT {
-    text: string
-    price: string;
-    duration: string;
-    isWithdrawn: boolean;
-    isAccepted: boolean;
-    isRejected: boolean;
+  text: string;
+  price: string;
+  duration: string;
+  isWithdrawn: boolean;
+  isAccepted: boolean;
+  isRejected: boolean;
 }
 
 interface extendDeliveryTimeT {
-    days: number;
-    explainWhyExtend: string;
-    extendType: string;
-    isAccepted: boolean;
-    isRejected: boolean;
-    amount?: number;
+  days: number;
+  explainWhyExtend: string;
+  extendType: string;
+  isAccepted: boolean;
+  isRejected: boolean;
+  amount?: number;
 }
-
-
 
 interface deliverProjectT {
-    isRevision: boolean;
-    isAccepted: boolean;
-    thumbnailImage: { watermarkUrl?: string };
-    attachments: Array<object>;
+  isRevision: boolean;
+  isAccepted: boolean;
+  thumbnailImage: { watermark?: string };
+  attachments: Array<object>;
 }
 
-
-export type { extendDeliveryTimeT, additionalOfferT, customOfferT, deliverProjectT };
+export type {
+  additionalOfferT,
+  customOfferT,
+  deliverProjectT,
+  extendDeliveryTimeT,
+};

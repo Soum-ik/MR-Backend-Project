@@ -1,15 +1,14 @@
-import { print } from './../../../helper/colorConsolePrint.ts/colorizedConsole';
+import { User } from '@prisma/client';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import { NotificationTypes } from '../../../constants/Notification';
+import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import { OrderStatus, ProjectStatus } from '../Order_page.constant';
 import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
-import { NotificationTypes } from '../../../constants/Notification';
 import { userFinder } from '../../../utils/userFinder';
-import { TokenCredential } from '../../../libs/authHelper';
-import { User } from '@prisma/client';
+import { OrderStatus, ProjectStatus } from '../Order_page.constant';
 
 interface deliverProjectT {
   isRevision: boolean;
@@ -44,7 +43,8 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
         submittedData: updatedMessage,
         deliveryAttempt: 2,
-        projectThumbnail: updatedMessage?.deliverProject?.thumbnailImage?.watermarkUrl,
+        projectThumbnail:
+          updatedMessage?.deliverProject?.thumbnailImage?.watermark,
         completedDate: new Date(),
       },
     });
@@ -133,48 +133,56 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       senderUserName: userData.userName,
       avatar: userData.image,
       createdAt: new Date(),
-    }
+    };
 
-    await prisma.notification.create({ //
+    await prisma.notification.create({
+      //
       data: {
         recipient: 'ADMIN',
         message: ``,
         senderId: userData?.id as string,
-        payload: payload
-      }
-    })
-    PublicMessageHandler({
-      thumbnailUrl: order?.projectImage,
-      projectNumber: projectNumber,
-      type: NotificationTypes.CompleteOrder,
-      createdAt: new Date(),
-      senderUserName: userData.userName,
-      avatar: userData.image,
-    }, 'USER');
+        payload: payload,
+      },
+    });
+    PublicMessageHandler(
+      {
+        thumbnailUrl: order?.projectImage,
+        projectNumber: projectNumber,
+        type: NotificationTypes.CompleteOrder,
+        createdAt: new Date(),
+        senderUserName: userData.userName,
+        avatar: userData.image,
+      },
+      'USER',
+    );
 
     const payload2 = {
       thumbnailUrl: order?.projectImage,
       type: NotificationTypes.CompleteOrderUser,
       projectNumber: order.projectNumber,
-      senderUserName: "mahfujurrahm535",
+      senderUserName: 'mahfujurrahm535',
       createdAt: new Date(),
-    }
+    };
 
-    await prisma.notification.create({ //
+    await prisma.notification.create({
+      //
       data: {
         recipient: 'USER',
         message: ``,
         senderId: userData?.id as string,
-        payload: payload2
-      }
-    })
-    PublicMessageHandler({
-      thumbnailUrl: order?.projectImage,
-      projectNumber: projectNumber,
-      type: NotificationTypes.CompleteOrderUser,
-      createdAt: new Date(),
-      senderUserName: "mahfujurrahm535",
-    }, 'ADMIN');
+        payload: payload2,
+      },
+    });
+    PublicMessageHandler(
+      {
+        thumbnailUrl: order?.projectImage,
+        projectNumber: projectNumber,
+        type: NotificationTypes.CompleteOrderUser,
+        createdAt: new Date(),
+        senderUserName: 'mahfujurrahm535',
+      },
+      'ADMIN',
+    );
 
     return updateOrder;
   });
@@ -190,7 +198,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
 const handleDeliveryResponse = catchAsync(
   async (req: Request, res: Response) => {
     const { projectNumber, uniqueId, updatedMessage } = req.body;
-    const { user_id } = req.user as TokenCredential
+    const { user_id } = req.user as TokenCredential;
     const result = await prisma.$transaction(async (prisma) => {
       const order = await prisma.order.findUnique({
         where: {
@@ -235,27 +243,30 @@ const handleDeliveryResponse = catchAsync(
         senderUserName: userData.userName,
         avatar: userData.image,
         createdAt: new Date(),
-      }
+      };
 
       await prisma.notification.create({
         data: {
           recipient: 'ADMIN',
           message: ``,
           senderId: userData?.id as string,
-          payload: payload
-        }
-      })
-      PublicMessageHandler({
-        msg: ``,
-        deliveryDate: order.deliveryDate,
-        projectName: order.projectName,
-        projectNumber: projectNumber,
-        senderUserName: userData.userName,
-        avatar: userData.image,
-        type: NotificationTypes.Revision,
-        thumbnailUrl: order?.projectImage,
-        createdAt: new Date(),
-      }, 'USER');
+          payload: payload,
+        },
+      });
+      PublicMessageHandler(
+        {
+          msg: ``,
+          deliveryDate: order.deliveryDate,
+          projectName: order.projectName,
+          projectNumber: projectNumber,
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          type: NotificationTypes.Revision,
+          thumbnailUrl: order?.projectImage,
+          createdAt: new Date(),
+        },
+        'USER',
+      );
 
       // Update all messages with the same uniqueId
       await prisma.orderMessage.updateMany({
@@ -282,8 +293,6 @@ const handleDeliveryResponse = catchAsync(
 const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
   const { projectNumber } = req.body;
 
-
-
   const order = await prisma.order.update({
     where: {
       projectNumber,
@@ -300,28 +309,31 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
     type: NotificationTypes.FileDelivered,
     projectNumber: order.projectNumber,
     projectName: order.projectName,
-    senderUserName: "mahfujurrahm535",
+    senderUserName: 'mahfujurrahm535',
     createdAt: new Date(),
-  }
+  };
 
   await prisma.notification.create({
     data: {
       recipient: 'USER',
       message: ``,
       senderId: order.userId as string,
-      payload: payload
-    }
-  })
-  PublicMessageHandler({
-    msg: ``,
-    deliveryDate: order.deliveryDate,
-    projectName: order.projectName,
-    projectNumber: projectNumber,
-    senderUserName: "mahfujurrahm535",
-    type: NotificationTypes.FileDelivered,
-    thumbnailUrl: order?.projectImage,
-    createdAt: new Date(),
-  }, 'ADMIN');
+      payload: payload,
+    },
+  });
+  PublicMessageHandler(
+    {
+      msg: ``,
+      deliveryDate: order.deliveryDate,
+      projectName: order.projectName,
+      projectNumber: projectNumber,
+      senderUserName: 'mahfujurrahm535',
+      type: NotificationTypes.FileDelivered,
+      thumbnailUrl: order?.projectImage,
+      createdAt: new Date(),
+    },
+    'ADMIN',
+  );
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,

@@ -44,7 +44,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
         uniqueId: true,
         deliverProject: true,
       },
-    });    
+    });
 
     if (messageList.length > 0) {
       await Promise.all(
@@ -85,7 +85,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   submittedData: updateOffer,
                   deliveryAttempt: 2,
                   projectThumbnail: updateOffer?.thumbnailImage
-                    ?.watermarkUrl as unknown as string,
+                    ?.watermark as unknown as string,
                   completedDate: new Date(),
                 },
               });
@@ -94,7 +94,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                 const userData = (await userFinder(order.userId)) as User;
 
                 const payload = {
-                  avatar : userData.image,
+                  avatar: userData.image,
                   thumbnailUrl: order?.projectImage,
                   type: NotificationTypes.AutoCompleteOrder,
                   projectNumber: order.projectNumber,
@@ -117,7 +117,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     type: NotificationTypes.CompleteOrder,
                     createdAt: new Date(),
                     senderUserName: userData.userName,
-                    avatar : userData.image,
+                    avatar: userData.image,
                   },
                   'USER',
                 );
@@ -128,7 +128,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   projectNumber: order.projectNumber,
                   senderUserName: 'mahfujurrahm535',
                   createdAt: new Date(),
-                  avatar : "",
+                  avatar: '',
                 };
 
                 await prisma.notification.create({
@@ -146,7 +146,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     type: NotificationTypes.CompleteOrderUser,
                     createdAt: new Date(),
                     senderUserName: 'mahfujurrahm535',
-                    avatar : "",
+                    avatar: '',
                   },
                   'ADMIN',
                 );
