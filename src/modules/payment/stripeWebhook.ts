@@ -116,6 +116,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 ? durationHours.toString()
                 : '',
               deliveryDate: UpdatedDeliveryDate,
+              totalPrice: ((parseFloat(orderData?.totalPrice as string) || 0) + parseInt(updateMessage.price || '0')).toString(),
             },
           });
 
@@ -344,6 +345,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                     ? durationHours.toString()
                     : '',
                   deliveryDate: updatedDeliveryDate,
+                  totalPrice: (parseFloat(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
                 },
               });
             } else {
@@ -351,9 +353,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             }
           }
         } else if (session?.metadata?.paymentType === PaymentType.TIPS) {
-          // paymentType: data.paymentType,
-          // ammount: data?.totalAmount,
-          // projectNumber: data?.projectNumber,
 
           const updateTips = { amount: data?.ammount || 0 };
           const orderData = await prisma.order.update({

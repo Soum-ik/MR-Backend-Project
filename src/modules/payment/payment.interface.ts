@@ -33,7 +33,7 @@ interface extendDeliveryTimeT {
 interface deliverProjectT {
     isRevision: boolean;
     isAccepted: boolean;
-    thumbnailImage: { url?: string };
+    thumbnailImage: { watermarkUrl?: string };
     attachments: Array<object>;
 }
 

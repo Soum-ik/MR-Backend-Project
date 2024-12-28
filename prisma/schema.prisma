@@ -55,6 +55,7 @@ model User {
   Order                 Order[]
   Note                  Note[]
   Payment               Payment[]
+  isClock               Boolean           @default(false)
 
   OrderMessageSent     OrderMessage[]      @relation("OrderMessageSent")
   OrderMessageReceived OrderMessage[]      @relation("OrderMessageReceived")
@@ -149,7 +150,7 @@ model OrderMessage {
   commonKey             String
   isCancelled           Boolean                 @default(false)
   unseend               Boolean                 @default(false)
-  sendNotification Boolean  @default(false)
+  sendNotification      Boolean                 @default(false)
   // Relationships
   uniqueId              String
   sender                User                    @relation("OrderMessageSent", fields: [senderId], references: [id])

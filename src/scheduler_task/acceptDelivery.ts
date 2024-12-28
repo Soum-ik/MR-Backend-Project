@@ -85,7 +85,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   submittedData: updateOffer,
                   deliveryAttempt: 2,
                   projectThumbnail: updateOffer?.thumbnailImage
-                    ?.url as unknown as string,
+                    ?.watermarkUrl as unknown as string,
                   completedDate: new Date(),
                 },
               });
