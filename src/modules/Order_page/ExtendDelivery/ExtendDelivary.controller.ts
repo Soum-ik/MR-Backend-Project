@@ -83,8 +83,8 @@ const approveExtensionRequest = catchAsync(
           days: orderData.duration,
           hours: orderData.durationHours,
           createdAt: new Date(),
-          senderUserName: "mahfujurrahm535",
-          avatar: "",
+          senderUserName: 'mahfujurrahm535',
+          avatar: '',
         };
 
         await prisma.notification.create({
@@ -104,8 +104,8 @@ const approveExtensionRequest = catchAsync(
             days: orderData.duration,
             hours: orderData.durationHours,
             userId: orderData.userId,
-            senderUserName: "mahfujurrahm535",
-            avatar: "",
+            senderUserName: 'mahfujurrahm535',
+            avatar: '',
             createdAt: new Date(),
           },
           'ADMIN',
@@ -118,7 +118,10 @@ const approveExtensionRequest = catchAsync(
               ? durationHours.toString()
               : '',
             deliveryDate: updatedDeliveryDate,
-            totalPrice: (parseInt(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
+            totalPrice: (
+              (parseInt(orderData?.totalPrice as string) || 0) +
+              (updateMessage.amount || 0)
+            ).toString(),
           },
         });
       } else {
@@ -239,7 +242,10 @@ const ExtendDeliveryMessageOption = catchAsync(
             ? durationHours.toString()
             : '',
           deliveryDate: UpdatedDeliveryDate,
-          totalPrice: (parseInt(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
+          totalPrice: (
+            (parseInt(orderData?.totalPrice as string) || 0) +
+            (updateMessage.amount || 0)
+          ).toString(),
         },
       });
     });
@@ -253,4 +259,4 @@ const ExtendDeliveryMessageOption = catchAsync(
   },
 );
 
-export { approveExtensionRequest, ExtendDeliveryMessageOption };
+export { ExtendDeliveryMessageOption, approveExtensionRequest };
