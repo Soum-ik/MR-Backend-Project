@@ -239,6 +239,7 @@ const ExtendDeliveryMessageOption = catchAsync(
             ? durationHours.toString()
             : '',
           deliveryDate: UpdatedDeliveryDate,
+          totalPrice: (parseInt(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
         },
       });
     });
