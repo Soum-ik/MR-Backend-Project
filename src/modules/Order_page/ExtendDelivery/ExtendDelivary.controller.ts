@@ -118,7 +118,7 @@ const approveExtensionRequest = catchAsync(
               ? durationHours.toString()
               : '',
             deliveryDate: updatedDeliveryDate,
-            totalPrice: (parseFloat(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
+            totalPrice: (parseInt(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
           },
         });
       } else {
