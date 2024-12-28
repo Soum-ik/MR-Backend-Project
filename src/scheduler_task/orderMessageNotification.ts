@@ -69,24 +69,24 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                     }
                 })
 
-                await prisma.notification.create({
-                    data: {
-                        recipient: admins ? 'USER' : 'ADMIN',
-                        message: ``,
-                        senderId: SenderId,
-                        payload: payload,
-                    },
-                });
-                PublicMessageHandler(
-                    {
-                        type: NotificationTypes.OrderMessage,
-                        createdAt: new Date(),
-                        senderUserName: userData.userName,
-                        avatar: userData.image,
-                        senderId: SenderId,
-                    },
-                    role,
-                );
+                // await prisma.notification.create({
+                //     data: {
+                //         recipient: admins ? 'USER' : 'ADMIN',
+                //         message: ``,
+                //         senderId: SenderId,
+                //         payload: payload,
+                //     },
+                // });
+                // PublicMessageHandler(
+                //     {
+                //         type: NotificationTypes.OrderMessage,
+                //         createdAt: new Date(),
+                //         senderUserName: userData.userName,
+                //         avatar: userData.image,
+                //         senderId: SenderId,
+                //     },
+                //     role,
+                // );
 
 
             })

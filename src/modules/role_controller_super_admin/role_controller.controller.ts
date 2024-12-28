@@ -7,12 +7,31 @@ import { createToken } from "../../libs/authHelper";
 const manage_role = async (req: Request, res: Response) => {
   try {
     const { user_id, role, users } = req.body;
+    console.log(req.body, 'role chageing');
 
     // If users array is provided, handle multiple role updates
     if (users && Array.isArray(users) && users.length > 0) {
       const results = [];
 
       for (const { user_id, role } of users) {
+
+        if (role === "USER") {
+          const deleteMessages = await prisma.message.deleteMany({
+            where: {
+              OR: [
+                {
+                  recipientId: user_id
+                },
+                {
+                  senderId: user_id
+                }
+              ]
+            }
+          })
+          console.log('delet message ', deleteMessages);
+        }
+
+
         const findUser = await prisma.user.findUnique({
           where: { id: user_id },
         });
@@ -72,6 +91,22 @@ const manage_role = async (req: Request, res: Response) => {
         where: { id: user_id },
         data: { role },
       });
+
+      if (role === "USER") {
+        const deleteMessages = await prisma.message.deleteMany({
+          where: {
+            OR: [
+              {
+                recipientId: user_id
+              },
+              {
+                senderId: user_id
+              }
+            ]
+          }
+        })
+        console.log('delet message ', deleteMessages);
+      }
 
       return sendResponse(res, {
         statusCode: httpStatus.OK,

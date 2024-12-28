@@ -59,6 +59,7 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
     senderUserName: admins ? 'mahfujurrahm535' : userData.userName,
     type: NotificationTypes.Review,
     createdAt: new Date(),
+    rating: rating,
   }, role);
 
   return sendResponse(res, {
