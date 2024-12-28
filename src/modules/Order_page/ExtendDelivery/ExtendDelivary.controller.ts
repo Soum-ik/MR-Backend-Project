@@ -84,7 +84,7 @@ const approveExtensionRequest = catchAsync(
           hours: orderData.durationHours,
           createdAt: new Date(),
           senderUserName: "mahfujurrahm535",
-          avatar : "",
+          avatar: "",
         };
 
         await prisma.notification.create({
@@ -105,7 +105,7 @@ const approveExtensionRequest = catchAsync(
             hours: orderData.durationHours,
             userId: orderData.userId,
             senderUserName: "mahfujurrahm535",
-            avatar : "",
+            avatar: "",
             createdAt: new Date(),
           },
           'ADMIN',
@@ -118,6 +118,7 @@ const approveExtensionRequest = catchAsync(
               ? durationHours.toString()
               : '',
             deliveryDate: updatedDeliveryDate,
+            totalPrice: (parseFloat(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
           },
         });
       } else {
@@ -191,7 +192,7 @@ const ExtendDeliveryMessageOption = catchAsync(
         },
       });
 
-       const userData = (await userFinder(orderData?.userId as string)) as User;
+      const userData = (await userFinder(orderData?.userId as string)) as User;
 
       const payload = {
         thumbnailUrl: orderData?.projectImage,
@@ -200,7 +201,7 @@ const ExtendDeliveryMessageOption = catchAsync(
         days: orderData?.duration,
         hours: orderData?.durationHours,
         senderUserName: userData.userName,
-        avatar : userData.image,
+        avatar: userData.image,
         createdAt: new Date(),
       };
 
@@ -217,13 +218,13 @@ const ExtendDeliveryMessageOption = catchAsync(
       PublicMessageHandler(
         {
           thumbnailUrl: orderData?.projectImage,
-          type: NotificationTypes.OrderExtendAdmin ,
+          type: NotificationTypes.OrderExtendAdmin,
           projectNumber: orderData?.projectNumber,
           days: orderData?.duration,
           hours: orderData?.durationHours,
           createdAt: new Date(),
           senderUserName: userData?.userName,
-          avatar : userData.image,
+          avatar: userData.image,
         },
         'USER',
       );

@@ -133,7 +133,7 @@ const sendMessage = async (req: Request, res: Response) => {
         },
       });
 
-      PublicMessageHandler(message, role) 
+      PublicMessageHandler(message, role)
 
       // await prisma.notification.create({
       //   data: {
@@ -170,7 +170,7 @@ const sendMessage = async (req: Request, res: Response) => {
             },
           });
 
-           
+
         }
       }
 
