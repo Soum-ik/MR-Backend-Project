@@ -139,9 +139,42 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const getUnseenMessageController = catchAsync(async (req: Request, res: Response) => {
+  const { user_id, role } = req.user as TokenCredential;
+
+  if (role === 'USER') {
+    await prisma.notification.updateMany({
+      where: {
+        recipientId: user_id
+      },
+      data: {
+        isClientSeen: true
+      }
+    })
+  } else {
+    const admin = await prisma.notification.findMany({
+      where: { recipient: 'ADMIN' },
+      select: { isAdminSeen: true },
+    });
+ 
+    await prisma.notification.updateMany({
+      where: { recipient: 'ADMIN' },
+      data: {
+        isAdminSeen: { push: user_id }, // `push` appends to the array
+      },
+    });
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      data: { admin },
+      message: 'update seen message ',
+    });
+  }
+})
 
 
 export const InboxNotification = {
   getMessages,
-  getNotifications
+  getNotifications,
+  getUnseenMessageController
 };
