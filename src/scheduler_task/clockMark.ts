@@ -30,8 +30,6 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
             }
         });
 
-        console.log(useList, 'checking user list ');
-
 
         for (const user of useList) {
             if (user.receivedMessages.length > 0) {
