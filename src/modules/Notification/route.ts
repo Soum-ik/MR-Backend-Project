@@ -1,19 +1,53 @@
-import { InboxNotification } from './InboxNotification'
-import express from "express";
+import express from 'express';
+import { InboxNotification } from './InboxNotification';
 
-import authenticateToken from "../../middleware/auth";
-import { USER_ROLE } from "../user/user.constant";
+import authenticateToken from '../../middleware/auth';
+import { USER_ROLE } from '../user/user.constant';
 
 const router = express.Router();
 
-router.get('/inbox', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.USER),
-    InboxNotification.getMessages
-)
+router.get(
+  '/inbox',
+  authenticateToken(
+    USER_ROLE.ADMIN,
+    USER_ROLE.SUB_ADMIN,
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.USER,
+  ),
+  InboxNotification.getMessages,
+);
 
-router.get('/get', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.USER),
-    InboxNotification.getNotifications
-)
+router.get(
+  '/get',
+  authenticateToken(
+    USER_ROLE.ADMIN,
+    USER_ROLE.SUB_ADMIN,
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.USER,
+  ),
+  InboxNotification.getNotifications,
+);
 
-router.put('/update', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.USER), InboxNotification.getUnseenMessageController)
+router.get(
+  '/count',
+  authenticateToken(
+    USER_ROLE.ADMIN,
+    USER_ROLE.SUB_ADMIN,
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.USER,
+  ),
+  InboxNotification.notficationCount,
+);
 
-export const NotificationInbox = router 
+router.put(
+  '/update',
+  authenticateToken(
+    USER_ROLE.ADMIN,
+    USER_ROLE.SUB_ADMIN,
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.USER,
+  ),
+  InboxNotification.getUnseenMessageController,
+);
+
+export const NotificationInbox = router;

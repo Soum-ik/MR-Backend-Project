@@ -1,4 +1,3 @@
-
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { TokenCredential } from '../../libs/authHelper';
@@ -91,21 +90,25 @@ const getMessages = catchAsync(async (req: Request, res: Response) => {
 const getNotifications = catchAsync(async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
 
-  const admins = ["ADMIN", "SUPER_ADMIN", "SUB_ADMIN"].includes(role);
+  const admins = ['ADMIN', 'SUPER_ADMIN', 'SUB_ADMIN'].includes(role);
   if (admins) {
     const allNotifications = await prisma.notification.findMany({
       where: {
         recipient: 'ADMIN',
       },
-    })
+    });
 
-    const filteredNotifications = allNotifications.filter(notification => {
+    const filteredNotifications = allNotifications.filter((notification) => {
       const payload = notification.payload;
-      return payload && typeof payload === 'object' && 'type' in payload && payload.type !== 'Message';
+      return (
+        payload &&
+        typeof payload === 'object' &&
+        'type' in payload &&
+        payload.type !== 'Message'
+      );
     });
 
     console.log(filteredNotifications, 'filtered notifications');
-
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -113,19 +116,22 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
       data: { filteredNotifications },
       message: 'allNotifications',
     });
-  }
-  else if (role === USER_ROLE.USER) {
-
+  } else if (role === USER_ROLE.USER) {
     const allNotifications = await prisma.notification.findMany({
       where: {
         recipient: 'USER',
         recipientId: user_id,
       },
-    })
+    });
 
-    const filteredNotifications = allNotifications.filter(notification => {
+    const filteredNotifications = allNotifications.filter((notification) => {
       const payload = notification.payload;
-      return payload && typeof payload === 'object' && 'type' in payload && payload.type !== 'Message';
+      return (
+        payload &&
+        typeof payload === 'object' &&
+        'type' in payload &&
+        payload.type !== 'Message'
+      );
     });
 
     return sendResponse(res, {
@@ -135,46 +141,78 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
       message: 'allNotifications',
     });
   }
-
 });
 
+const getUnseenMessageController = catchAsync(
+  async (req: Request, res: Response) => {
+    const { user_id, role } = req.user as TokenCredential;
 
-const getUnseenMessageController = catchAsync(async (req: Request, res: Response) => {
+    if (role === 'USER') {
+      await prisma.notification.updateMany({
+        where: {
+          recipientId: user_id,
+        },
+        data: {
+          isClientSeen: true,
+        },
+      });
+    } else {
+      const admin = await prisma.notification.findMany({
+        where: { recipient: 'ADMIN' },
+        select: { isAdminSeen: true },
+      });
+
+      await prisma.notification.updateMany({
+        where: { recipient: 'ADMIN' },
+        data: {
+          isAdminSeen: { push: user_id }, // `push` appends to the array
+        },
+      });
+      return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: { admin },
+        message: 'update seen message ',
+      });
+    }
+  },
+);
+
+const notficationCount = catchAsync(async (req, res) => {
   const { user_id, role } = req.user as TokenCredential;
-
+  let data;
   if (role === 'USER') {
-    await prisma.notification.updateMany({
+    data = await prisma.notification.findMany({
       where: {
-        recipientId: user_id
+        recipientId: user_id,
+        isClientSeen: false,
       },
-      data: {
-        isClientSeen: true
-      }
-    })
+    });
   } else {
-    const admin = await prisma.notification.findMany({
-      where: { recipient: 'ADMIN' },
-      select: { isAdminSeen: true },
-    });
- 
-    await prisma.notification.updateMany({
-      where: { recipient: 'ADMIN' },
-      data: {
-        isAdminSeen: { push: user_id }, // `push` appends to the array
+    data = await prisma.notification.findMany({
+      where: {
+        NOT: {
+          isAdminSeen: {
+            has: user_id,
+          },
+        },
       },
-    });
-    return sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      data: { admin },
-      message: 'update seen message ',
     });
   }
-})
 
+  console.log('data', data);
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    data: data.length,
+    message: 'notfication count retrived successfully!',
+  });
+});
 
 export const InboxNotification = {
   getMessages,
   getNotifications,
-  getUnseenMessageController
+  getUnseenMessageController,
+  notficationCount,
 };
