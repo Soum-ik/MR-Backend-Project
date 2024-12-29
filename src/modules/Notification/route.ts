@@ -14,4 +14,6 @@ router.get('/get', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_
     InboxNotification.getNotifications
 )
 
+router.put('/update', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.USER), InboxNotification.getUnseenMessageController)
+
 export const NotificationInbox = router 
