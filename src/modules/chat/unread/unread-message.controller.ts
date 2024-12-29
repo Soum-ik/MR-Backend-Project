@@ -154,7 +154,7 @@ const getUnseenMessageControllerList = catchAsync(
           isFromAdmin: Role.USER,
         },
       });
-      
+
     } else if (role === Role.USER) {
       unseenMessages = await prisma.message.findMany({
         where: {
@@ -174,8 +174,41 @@ const getUnseenMessageControllerList = catchAsync(
   },
 );
 
+const unreadMessageHandler = catchAsync(
+  async (req: Request, res: Response) => { 
+    
+    const { userId } = req.body;
+    
+    const updateMessage = await prisma.message.updateMany({
+      where: {
+        OR: [
+          {
+            senderId: userId,
+          },
+          {
+            recipientId: userId,
+          },
+        ],
+      },
+      data: {
+        isAdminSeen: false,
+      },
+    });
+
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: false,
+      message: 'admin seen successfully',
+      data: updateMessage,
+    });
+
+  },
+);
+
+
 export const unreadMessageController = {
   getUnseenMessageController,
   getUnseenMessageControllerList,
   updateUnseenMessageController,
+  unreadMessageHandler
 };

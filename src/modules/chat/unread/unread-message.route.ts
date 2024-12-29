@@ -8,4 +8,6 @@ const router = Router();
 router.get("/total/:commonkey", authenticateToken(USER_ROLE.USER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN), unreadMessageController.getUnseenMessageController);
 router.patch("/update/:userId", authenticateToken(USER_ROLE.USER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN), unreadMessageController.updateUnseenMessageController);
 
+router.put('/update', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.SUPER_ADMIN), unreadMessageController.unreadMessageHandler)
+
 export const unseenMessageRoutes = router;

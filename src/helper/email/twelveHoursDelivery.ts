@@ -1,4 +1,12 @@
-export const twelveHoursDelivery = () => {
+interface data {
+  projectNumber: string;
+  clientName: string
+}
+
+export const twelveHoursDelivery = (data: data) => {
+
+  const { projectNumber, clientName } = data;
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -130,15 +138,15 @@ export const twelveHoursDelivery = () => {
       </div>
       <h2 class="title">Your delivery deadline is coming up</h2>
       <span class="divider"></span>
-      <!-- replace the project number and client name -->
+   
       <p class="messageText">
-        We wanted to remind you that your delivery deadline for project #MRA2EPN
-        with ClientName123 is in less than 12 hours.
+        We wanted to remind you that your delivery deadline for project ${projectNumber}
+        with ${clientName} is in less than 12 hours.
       </p>
-      <!-- replace client name -->
+      
       <p class="messageText" style="margin-bottom: 40px">
         If you still need more time to work on this project, you can ask
-        ClientName123 to extend the delivery time.
+        ${clientName} to extend the delivery time.
       </p>
       <div style="text-align: center">
         <a href="" class="button">Deliver Now</a>
