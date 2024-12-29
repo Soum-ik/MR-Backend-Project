@@ -103,7 +103,7 @@ const sendMessage = async (req: Request, res: Response) => {
         //   },
         // });
         // const user = req.user as TokenCredential
-        PublicMessageHandler(message, role)
+        // PublicMessageHandler(message, role)
       }
 
       return sendResponse(res, {
@@ -133,7 +133,7 @@ const sendMessage = async (req: Request, res: Response) => {
         },
       });
 
-      PublicMessageHandler(message, role)
+      // PublicMessageHandler(message, role)
 
       // await prisma.notification.create({
       //   data: {
