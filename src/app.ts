@@ -24,6 +24,7 @@ import './scheduler_task/onTimeDelivery'
 import './scheduler_task/Reminder'
 import './scheduler_task/messageNotification'
 import './scheduler_task/orderMessageNotification'
+import './scheduler_task/clockMark'
 // const limiter = rateLimit({
 //   windowMs: 1 * 60 * 1000, // 1 minute
 //   max: 100, // Limit each IP to 100 requests per windowMs
@@ -53,7 +54,7 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 // Apply morganLogger before other middlewares
-app.use(morganLogger);
+// app.use(morganLogger);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());

@@ -7,7 +7,7 @@ export const updateLastSeen = async (userId: any) => {
         try {
             await prisma.user.update({
                 where: { id: userId },
-                data: { lastSeen: null },
+                data: { lastSeen: 'Online' },
             });
             print.green(`Updated last seen for user ${userId} to "Online"`);
             break; // Exit the loop if the update succeeds
