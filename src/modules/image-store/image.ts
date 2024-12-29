@@ -2,13 +2,15 @@ import { Request, Response } from "express";
 import catchAsync from "../../libs/utlitys/catchSynch";
 import sendResponse from "../../libs/sendResponse";
 import httpStatus from "http-status";
-import { prisma } from "../../libs/prismaHelper"; 
+import { prisma } from "../../libs/prismaHelper";
 
 
 
 const imageController = catchAsync(async (req: Request, res: Response) => {
     // Find existing image store or create new one
     const existingImage = await prisma.imageStore.findFirst();
+
+    const { image, requirements } = req.body;
 
     let image_store;
     if (existingImage) {
@@ -18,14 +20,16 @@ const imageController = catchAsync(async (req: Request, res: Response) => {
                 id: existingImage.id
             },
             data: {
-                image: req.body
+                image: image,
+                requirments: requirements
             }
         });
     } else {
         // Create new record
         image_store = await prisma.imageStore.create({
             data: {
-                image: req.body
+                image: image,
+                requirments: requirements
             }
         });
     }
@@ -51,9 +55,9 @@ const getImage = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
- export const ImageStoreController = {
+export const ImageStoreController = {
     imageController,
     getImage
 }
 
- 
+
