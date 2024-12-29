@@ -99,10 +99,18 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
       },
     })
 
+    const filteredNotifications = allNotifications.filter(notification => {
+      const payload = notification.payload;
+      return payload && typeof payload === 'object' && 'type' in payload && payload.type !== 'Message';
+    });
+
+    console.log(filteredNotifications, 'filtered notifications');
+
+
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      data: { allNotifications },
+      data: { filteredNotifications },
       message: 'allNotifications',
     });
   }
@@ -115,15 +123,22 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
       },
     })
 
+    const filteredNotifications = allNotifications.filter(notification => {
+      const payload = notification.payload;
+      return payload && typeof payload === 'object' && 'type' in payload && payload.type !== 'Message';
+    });
+
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      data: { allNotifications },
+      data: { filteredNotifications },
       message: 'allNotifications',
     });
   }
 
 });
+
+
 
 
 export const InboxNotification = {

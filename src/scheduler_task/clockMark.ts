@@ -14,7 +14,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
             where: {
                 isClock: false,
                 role: {
-                    notIn: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN]
+                    equals: USER_ROLE.USER
                 }
             },
             include: {

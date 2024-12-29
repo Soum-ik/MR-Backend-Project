@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { print } from "../helper/colorConsolePrint.ts/colorizedConsole";
 import { prisma } from "../libs/prismaHelper";
-import { updateLastSeen } from "./handlers/updateLastSeen";
+import { updateLastSeen, updateLastSeenDisconnect } from "./handlers/updateLastSeen";
 
 // map instance to store connected users
 const connectedUsers = new Map();
@@ -52,10 +52,7 @@ const removeConnectedUser = async (socketId: string) => {
         if (user) {
             try {
                 // Update lastSeen in the Prisma database
-                await prisma.user.update({
-                    where: { id: user.userId },
-                    data: { lastSeen: new Date().toISOString().toString() },
-                });
+                await updateLastSeenDisconnect(user.userId)
 
             } catch (error) {
                 print.red(

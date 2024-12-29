@@ -14,8 +14,9 @@ datasource db {
 }
 
 model ImageStore {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  image Json?
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  image       Json?
+  requirments Json?
 }
 
 model User {
@@ -177,8 +178,8 @@ model Notification {
 
   recipientId String?
 
-  isAdminSeen Boolean @default(false)
-  isClietSeen Boolean @default(false)
+  isAdminSeen  String[] @default([])
+  isClientSeen Boolean  @default(false)
 
   recipient   NotifyRole
   isAdminSent Boolean?
