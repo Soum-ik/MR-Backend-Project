@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +10,7 @@ import { USER_ROLE } from '../../user/user.constant';
 import catchAsync from '../../../libs/utlitys/catchSynch';
 import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
 import { NotificationTypes } from '../../../constants/Notification';
+import { userFinder } from '../../../utils/userFinder';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -101,6 +102,7 @@ const sendMessage = async (req: Request, res: Response) => {
           message: messageText,
           createdAt: new Date(),
         }
+        const userData = (await userFinder(user_id)) as User;
 
         await prisma.notification.create({
           data: {
@@ -112,7 +114,14 @@ const sendMessage = async (req: Request, res: Response) => {
           },
         });
 
-        PublicMessageHandler(message, role)
+        PublicMessageHandler({
+          type: NotificationTypes.Message,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          senderId: user_id,
+          message: messageText
+        }, 'USER')
       }
 
       return sendResponse(res, {

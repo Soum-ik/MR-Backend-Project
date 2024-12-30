@@ -163,6 +163,9 @@ model OrderMessage {
   extendDeliveryTime    Json?
   cancelProject         Json?
   OrderExtensionRequest OrderExtensionRequest[]
+  isClientSeen          Boolean                 @default(false)
+  isAdminSeen           Boolean                 @default(false)
+  isFromClient Boolean @default(false)
 
   @@map("OrderMessages")
 }

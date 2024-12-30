@@ -7,7 +7,7 @@ import { User, Role } from '@prisma/client';
 import { NotificationTypes } from '../constants/Notification';
 
 
-schedule.scheduleJob('*/1 * * * * *', async () => {
+schedule.scheduleJob('*/10 * * * * *', async () => {
     print.blue('Scheduler running to sending notification...');
 
     try {

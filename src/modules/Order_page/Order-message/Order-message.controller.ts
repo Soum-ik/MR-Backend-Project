@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,6 +8,9 @@ import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
 import { USER_ROLE } from '../../user/user.constant';
 import AppError from '../../../errors/AppError';
+import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import { NotificationTypes } from '../../../constants/Notification';
+import { userFinder } from '../../../utils/userFinder';
 
 // Controller: Send a message
 const sendMessage = catchAsync(async (req: Request, res: Response) => {
@@ -95,18 +98,35 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           cancelProject,
           uniqueId
         },
-
       });
+      const userData = (await userFinder(user_id)) as User;
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.OrderMessage,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          senderId: user_id,
+          message: messageText
+        },
+        "USER"
+      );
 
-      // await prisma.notification.create({
-      //   data: {
-      //     senderLogo: user?.image,
-      //     type: 'message',
-      //     senderUserName: user?.userName ?? 'Unknown',
-      //     recipientId: admin.id, // Notification goes to each admin
-      //     messageId: message.id, // Associate the message with the notification
-      //   },
-      // });
+      const payload = {
+        type: NotificationTypes.Message,
+        avatar: user?.image,
+        message: messageText,
+        createdAt: new Date(),
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'ADMIN',
+          payload: payload,
+          recipientId: admin.id, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+        },
+      });
     }
 
     return sendResponse(res, {
@@ -138,16 +158,34 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         uniqueId
       },
     });
-
-    // await prisma.notification.create({
-    //   data: {
-    //     senderLogo: user?.image,
-    //     type: 'message',
-    //     senderUserName: user?.userName ?? 'Unknown',
-    //     recipientId: recipientId as string, // Notification goes to the recipient
-    //     messageId: message.id, // Associate the message with the notification
-    //   },
-    // });
+    const userData = (await userFinder(user_id)) as User;
+    PublicMessageHandler(
+      {
+        type: NotificationTypes.OrderMessage,
+        createdAt: new Date(),
+        senderUserName: userData.userName,
+        avatar: userData.image,
+        senderId: user_id,
+        message: messageText,
+        userId: recipientId
+      },
+      "ADMIN"
+    );
+    const payload = {
+      type: NotificationTypes.Message,
+      avatar: user?.image,
+      message: messageText,
+      createdAt: new Date(),
+    }
+    await prisma.notification.create({
+      data: {
+        senderId: user_id as string,
+        recipient: 'USER',
+        payload: payload,
+        recipientId: recipientId, // Notification goes to each admin
+        message: messageText, // Associate the message with the notification
+      },
+    });
 
     // Send message to all admins
     for (const admin of admins) {
@@ -177,15 +215,33 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           },
         });
 
-        // await prisma.notification.create({
-        //   data: {
-        //     senderLogo: user?.image,
-        //     type: 'message',
-        //     senderUserName: user?.userName ?? 'Unknown',
-        //     recipientId: admin.id, // Notification goes to each admin
-        //     messageId: messageToAdmin.id, // Associate the message with the notification
-        //   },
-        // });
+        const userData = (await userFinder(user_id)) as User;
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.OrderMessage,
+            createdAt: new Date(),
+            senderUserName: userData.userName,
+            avatar: userData.image,
+            senderId: user_id,
+            message: messageText,
+            userId: recipientId
+          },
+          "USER"
+        );
+        const payload = {
+          type: NotificationTypes.OrderMessage,
+          avatar: user?.image,
+          message: messageText,
+          createdAt: new Date(),
+        }
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: messageText, // Associate the message with the notification
+          },
+        });
       }
     }
 
