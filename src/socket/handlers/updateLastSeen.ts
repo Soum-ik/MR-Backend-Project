@@ -3,14 +3,25 @@ import { prisma } from "../../libs/prismaHelper";
 
 export const updateLastSeen = async (userId: any) => {
     const MAX_RETRIES = 3;
+
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
+            const userExists = await prisma.user.findUnique({
+                where: { id: userId },
+            });
+
+            if (!userExists) {
+                print.red(`User with id ${userId} does not exist.`, userExists);
+                return; // Exit if the user doesn't exist
+            }
+
             await prisma.user.update({
                 where: { id: userId },
                 data: { lastSeen: 'Online' },
             });
+
             print.green(`Updated last seen for user ${userId} to "Online"`);
-            break; // Exit the loop if the update succeeds
+            return; // Exit the loop if the update succeeds
         } catch (error) {
             if ((error as any).code === 'P2034' && attempt < MAX_RETRIES) {
                 print.yellow(`Retrying update for user ${userId}... Attempt ${attempt}`);
@@ -22,6 +33,7 @@ export const updateLastSeen = async (userId: any) => {
         }
     }
 };
+
 export const updateLastSeenDisconnect = async (userId: any) => {
     const MAX_RETRIES = 3;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {

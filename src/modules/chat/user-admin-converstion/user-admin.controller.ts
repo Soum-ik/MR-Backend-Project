@@ -9,6 +9,7 @@ import sendResponse from '../../../libs/sendResponse';
 import { USER_ROLE } from '../../user/user.constant';
 import catchAsync from '../../../libs/utlitys/catchSynch';
 import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import { NotificationTypes } from '../../../constants/Notification';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -89,21 +90,29 @@ const sendMessage = async (req: Request, res: Response) => {
             uniqueId,
             seenBy,
             isClientSeen,
-            isAdminSeen
+            isAdminSeen,
+            isFromClient: true
           },
         });
 
-        // await prisma.notification.create({
-        //   data: {
-        //     // senderLogo: user?.image,
-        //     // type: 'message',
-        //     // senderUserName: user?.userName ?? 'Unknown',
-        //     recipientId: admin.id, // Notification goes to each admin
-        //     message: messageText, // Associate the message with the notification
-        //   },
-        // });
-        // const user = req.user as TokenCredential
-        // PublicMessageHandler(message, role)
+        const payload = {
+          type: NotificationTypes.Message,
+          avatar: user?.image,
+          message: messageText,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            recipientId: admin.id, // Notification goes to each admin
+            message: messageText, // Associate the message with the notification
+          },
+        });
+
+        PublicMessageHandler(message, role)
       }
 
       return sendResponse(res, {

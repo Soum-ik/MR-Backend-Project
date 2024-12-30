@@ -178,7 +178,7 @@ const getUnseenMessageController = catchAsync(
   },
 );
 
-const notficationCount = catchAsync(async (req, res) => {
+const notficationCount = catchAsync(async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
   let data;
   if (role === 'USER') {

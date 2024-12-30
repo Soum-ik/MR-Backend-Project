@@ -217,6 +217,8 @@ model Message {
   recipient        User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
   sendNotification Boolean  @default(false)
 
+  isFromClient Boolean @default(false)
+
   isClientSeen   Boolean @default(false)
   isAdminSeen    Boolean @default(false)
   notificationId String? @db.ObjectId

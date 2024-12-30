@@ -78,7 +78,7 @@ const registerSocketServer = (server: Server) => {
 
   const onlineUsersInterval = setInterval(() => {
     const onlineUsers = socketStore.getOnlineUsers();
-    // print.blue("online users: " + onlineUsers.length);
+    print.blue("online users: " + onlineUsers.length);
     for (let i = 0; i < onlineUsers.length; i++) {
       const user = onlineUsers[i];
     }
