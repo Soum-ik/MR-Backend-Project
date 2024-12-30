@@ -52,39 +52,6 @@ const getMessages = catchAsync(async (req: Request, res: Response) => {
       message: 'Total inbox message',
     });
   }
-
-  const allMessages = await prisma.message.findMany({
-    where: {
-      seen: false,
-      recipient: {
-        role: {
-          in: ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN', 'USER'],
-        },
-      },
-    },
-  });
-  const uniqueTotalInboxMessages = allMessages.filter(
-    (msg, i, arr) => i === arr.findIndex((t) => t.commonkey === msg.commonkey),
-  ).length;
-
-  if (uniqueTotalInboxMessages === 0) {
-    return sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      data: {
-        total: uniqueTotalInboxMessages,
-      },
-      message: 'Total inbox message',
-    });
-  }
-  return sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    data: {
-      total: uniqueTotalInboxMessages,
-    },
-    message: 'Total inbox message',
-  });
 });
 
 const getNotifications = catchAsync(async (req: Request, res: Response) => {

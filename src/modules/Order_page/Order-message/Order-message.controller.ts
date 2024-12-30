@@ -96,7 +96,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           extendDeliveryTime,
           additionalOffer,
           cancelProject,
-          uniqueId
+          uniqueId,
+          isClientSeen: true
         },
       });
       const userData = (await userFinder(user_id)) as User;
@@ -113,7 +114,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       );
 
       const payload = {
-        type: NotificationTypes.Message,
+        type: NotificationTypes.OrderMessage,
         avatar: user?.image,
         message: messageText,
         createdAt: new Date(),
@@ -155,7 +156,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         extendDeliveryTime,
         additionalOffer,
         cancelProject,
-        uniqueId
+        uniqueId,
+        isAdminSeen: true
       },
     });
     const userData = (await userFinder(user_id)) as User;
@@ -211,7 +213,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             extendDeliveryTime,
             additionalOffer,
             cancelProject,
-            uniqueId
+            uniqueId,
+            isAdminSeen: true
           },
         });
 
@@ -252,9 +255,6 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       message: `Message sent to recipient ID: ${recipientId}`,
     });
   }
-
-  // Create a notification for the recipient
-
 })
 
 // Controller: Reply to a message
@@ -471,10 +471,37 @@ export const updateProjectMessage = catchAsync(
   },
 );
 
+const updateUnseenMessage = catchAsync(async (req: Request, res: Response) => {
+  const { user_id, role } = req.user as TokenCredential;
+  const { projectNumber } = req.params;
+
+  const updateData = {
+    isClientSeen: role === 'USER' ? true : undefined,
+    isAdminSeen: ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(role as string) ? true : undefined,
+  };
+
+  const updateUnseenMessage = await prisma.orderMessage.updateMany({
+    where: {
+      projectNumber: projectNumber,
+      senderId: user_id,
+      recipientId: user_id,
+    },
+    data: updateData,
+  });
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    data: updateUnseenMessage,
+    message: 'Unseen messages updated successfully',
+  });
+});
+
 export const orderMessageController = {
   sendMessage,
   replyToMessage,
   getMessages,
   deleteMessage,
   updateProjectMessage,
+  updateUnseenMessage
 };

@@ -85,7 +85,7 @@ const SignUp = async (
 
         // Create the token
         const token = createToken({ role, user_id: id, email: Useremail });
- 
+
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.CREATED,
@@ -184,7 +184,7 @@ const forgotPass = async (req: Request, res: Response) => {
         });
     } else {
         const verfiyCode = Math.floor(1000000 + Math.random() * 9000000);
-        const { fullName } = findByEmail; 
+        const { fullName } = findByEmail;
         if (!fullName) {
             return console.log("full name need");
         }
@@ -285,7 +285,7 @@ const setNewPass = async (req: Request, res: Response) => {
                 message: "Your new password set successfully",
             });
         }
-    } catch (error) { 
+    } catch (error) {
         return sendResponse<any>(res, {
             data: error,
             statusCode: httpStatus.OK,
@@ -378,7 +378,7 @@ const updateUser = async (req: Request, res: Response) => {
             },
         });
 
-        
+
 
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
@@ -422,7 +422,22 @@ const getSingelUser = async (
     try {
         const findByEmail = await prisma.user.findUnique({
             where: { email },
-            include: { SocialMediaLinks: true },
+            select: {
+                SocialMediaLinks: true,
+                address: true,
+                city: true,
+                country: true,
+                description: true,
+                email: true,
+                fullName: true,
+                id: true,
+                image: true,
+                industryName: true,
+                userName: true,
+                number: true,
+                role: true,
+                
+            },
         });
         if (findByEmail) {
             return sendResponse<any>(res, {

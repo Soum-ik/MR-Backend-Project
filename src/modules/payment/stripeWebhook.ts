@@ -124,7 +124,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
           const payload = {
             thumbnailUrl: orderData?.projectImage,
-            type: NotificationTypes.CustomOfferByClient,
+            type: NotificationTypes.AdditionalOfferAccept,
             projectNumber: orderData?.projectNumber,
             days: orderData?.duration,
             hours: orderData?.durationHours,

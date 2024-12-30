@@ -6,26 +6,33 @@ const router = Router();
 
 // Route to send a message
 router.post('/send', authenticateToken(
-    USER_ROLE.ADMIN,
-    USER_ROLE.SUPER_ADMIN,
-    USER_ROLE.SUB_ADMIN,
-    USER_ROLE.USER,
+  USER_ROLE.ADMIN,
+  USER_ROLE.SUPER_ADMIN,
+  USER_ROLE.SUB_ADMIN,
+  USER_ROLE.USER,
 ), orderMessageController.sendMessage);
 
 // Route to reply to a message
 router.post('/reply', orderMessageController.replyToMessage);
 
 // Route to get messages between user and admin
-router.get('/get',  authenticateToken(
-    USER_ROLE.ADMIN,
-    USER_ROLE.SUPER_ADMIN,
-    USER_ROLE.SUB_ADMIN,
-    USER_ROLE.USER,
-  ), orderMessageController.getMessages);
+router.get('/get', authenticateToken(
+  USER_ROLE.ADMIN,
+  USER_ROLE.SUPER_ADMIN,
+  USER_ROLE.SUB_ADMIN,
+  USER_ROLE.USER,
+), orderMessageController.getMessages);
 
 // Route to update a project message
 router.put('/update', orderMessageController.updateProjectMessage);
 
 router.delete('/:uniqueId/:projectNumber', orderMessageController.deleteMessage)
+
+router.put('/:projectNumber', authenticateToken(
+  USER_ROLE.ADMIN,
+  USER_ROLE.SUPER_ADMIN,
+  USER_ROLE.SUB_ADMIN,
+  USER_ROLE.USER,
+), orderMessageController.updateUnseenMessage)
 
 export const handleOrderMessageRoute = router;
