@@ -75,26 +75,26 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                     createdAt: new Date(),
                 };
 
-                await prisma.notification.create({
-                    data: {
-                        recipient: isFromClient ? "ADMIN" : "USER",
-                        message: messageText,
-                        senderId: SenderId,
-                        payload: payload,
-                    },
-                });
+                // await prisma.notification.create({
+                //     data: {
+                //         recipient: isFromClient ? "ADMIN" : "USER",
+                //         message: messageText,
+                //         senderId: SenderId,
+                //         payload: payload,
+                //     },
+                // });
 
-                PublicMessageHandler(
-                    {
-                        type: NotificationTypes.Message,
-                        createdAt: new Date(),
-                        senderUserName: userData.userName,
-                        avatar: userData.image,
-                        senderId: SenderId,
-                        message: messageText
-                    },
-                    isFromClient ? "USER" : "ADMIN"
-                );
+                // PublicMessageHandler(
+                //     {
+                //         type: NotificationTypes.Message,
+                //         createdAt: new Date(),
+                //         senderUserName: userData.userName,
+                //         avatar: userData.image,
+                //         senderId: SenderId,
+                //         message: messageText
+                //     },
+                //     isFromClient ? "USER" : "ADMIN"
+                // );
 
                 await prisma.message.updateMany({
                     where: {
