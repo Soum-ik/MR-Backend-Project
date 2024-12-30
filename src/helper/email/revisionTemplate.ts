@@ -1,4 +1,11 @@
-export const revisionTemplate = () => {
+interface data {
+  projectName: string;
+  projectNumber: string;
+  clientName: string;
+}
+
+export const revisionTemplate = (data: data) => {
+  const { projectNumber, clientName, projectName } = data;
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -111,7 +118,6 @@ export const revisionTemplate = () => {
         fill: #1b8cdc;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -128,16 +134,15 @@ export const revisionTemplate = () => {
           alt="MR Logo"
         />
       </div>
-      <!-- replace with the username -->
-      <h2 class="title">ClientName123 has requested a revision</h2>
+      <h2 class="title">${clientName} has requested a revision</h2>
       <span class="divider"></span>
       <!-- replace client name project name and project number -->
       <p class="messageText">
-        ClientName123 requested a modification for their project of Door Hanger
-        #MRA2EPN
+        ${clientName} requested a modification for their project of ${projectName}
+        #${projectNumber}
       </p>
       <div style="text-align: center">
-        <a href="" class="button">See Revision</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">See Revision</a>
       </div>
       <ul class="social">
         <li>

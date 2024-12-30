@@ -1,4 +1,29 @@
-export const directProjectRequirements = () => {
+interface data {
+  projectNumber: string;
+  clientName: string;
+  items: [];
+  requirements: [];
+  orderCreateDate: Date;
+}
+
+export const directProjectRequirements = (data: data) => {
+  const { projectNumber, clientName, items, requirements, orderCreateDate } =
+    data;
+
+  function dateTimeFormatter(timestamp: Date): string {
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true, // 12-hour format
+    };
+
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    return formatter.format(timestamp);
+  }
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -178,7 +203,6 @@ export const directProjectRequirements = () => {
       }
 
       .dots-item {
-        /* my-1 flex items-center gap-2 */
         margin-block: 4px;
         display: flex;
         align-items: center;
@@ -248,7 +272,6 @@ export const directProjectRequirements = () => {
         flex-shrink: 0;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -265,13 +288,10 @@ export const directProjectRequirements = () => {
           alt="MR Logo"
         />
       </div>
-      <!-- replace the client name -->
-      <h2 class="title">You've received a project from ClientName123</h2>
+      <h2 class="title">You've received a project from ${clientName}</h2>
       <span class="divider"></span>
-      <!-- replace the project number -->
       <p class="messageText">
-        <span style="font-weight: 500">Project #MRA2EPN</span> is due Oct 25,
-        2023, 08:45.
+        <span style="font-weight: 500">Project #${projectNumber}</span> is ${dateTimeFormatter(orderCreateDate)}.
       </p>
       <!-- replace with items data -->
       <div class="items-block">
@@ -387,7 +407,7 @@ export const directProjectRequirements = () => {
           "
         ></span>
         <p style="margin-block: 15px">Got everything you need?</p>
-        <a href="" class="button">Review Requirements</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">Review Requirements</a>
       </div>
       <ul class="social">
         <li>

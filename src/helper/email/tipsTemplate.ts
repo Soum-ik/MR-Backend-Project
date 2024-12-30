@@ -1,4 +1,10 @@
-export const tipsTemplate = () => {
+interface data {
+  projectNumber: string;
+  clientName: string;
+}
+
+export const tipsTemplate = (data: data) => {
+  const { projectNumber, clientName } = data;
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -111,7 +117,6 @@ export const tipsTemplate = () => {
         fill: #1b8cdc;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -130,12 +135,11 @@ export const tipsTemplate = () => {
       </div>
       <h2 class="title">You've just been tipped!</h2>
       <span class="divider"></span>
-      <!-- replace client name and project number -->
       <p class="messageText">
-        You recieved a tip from ClientName123 for project #MRA2EPN
+        You recieved a tip from ${clientName} for project #${projectNumber}
       </p>
       <div style="text-align: center">
-        <a href="" class="button">View Project</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">View Project</a>
       </div>
       <ul class="social">
         <li>

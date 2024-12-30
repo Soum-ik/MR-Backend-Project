@@ -1,4 +1,12 @@
-export const messagesTemplate = () => {
+interface data {
+  messageText: string;
+  clientName: string;
+  attachments: [];
+}
+
+export const messagesTemplate = (data: data) => {
+  const { messageText, clientName, attachments } = data;
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -111,7 +119,6 @@ export const messagesTemplate = () => {
         fill: #1b8cdc;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -128,18 +135,15 @@ export const messagesTemplate = () => {
           alt="MR Logo"
         />
       </div>
-      <!-- replace with the username -->
-      <h2 class="title">You've recieved messages from ClientName123</h2>
+      <h2 class="title">You've recieved messages from ${clientName}</h2>
       <span class="divider"></span>
       <p class="messageText">
-        <!-- Replace this text with the actual message text -->
-        Hello, I need another flyer with the same info only a different layout.
-        Just want a new look. Can you do something different?
+        ${messageText}
       </p>
       <!-- here use this if your message has attachments -->
-      <p class="messageText" style="margin-bottom: 40px">[1 file attached]</p>
+      ${attachments && `<p class="messageText" style="margin-bottom: 40px">[${attachments?.length} file attached]</p>`}
       <div style="text-align: center">
-        <a href="" class="button">View and Reply</a>
+        <a href="https://mahfujurrahm535.com/inbox" class="button">View and Reply</a>
       </div>
       <ul class="social">
         <li>
