@@ -1,10 +1,9 @@
 interface data {
   projectNumber: string;
-  clientName: string
+  clientName: string;
 }
 
 export const twelveHoursDelivery = (data: data) => {
-
   const { projectNumber, clientName } = data;
 
   return `<!doctype html>
@@ -119,7 +118,6 @@ export const twelveHoursDelivery = (data: data) => {
         fill: #1b8cdc;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -149,7 +147,7 @@ export const twelveHoursDelivery = (data: data) => {
         ${clientName} to extend the delivery time.
       </p>
       <div style="text-align: center">
-        <a href="" class="button">Deliver Now</a>
+        <a href="https://https://mahfujurrahm535.com/order/${projectNumber}" class="button">Deliver Now</a>
       </div>
       <ul class="social">
         <li>

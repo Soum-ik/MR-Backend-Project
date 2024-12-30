@@ -1,4 +1,12 @@
-export const emailTemplate = () => {
+interface data {
+  projectNumber: string;
+  clientName: string;
+  items: [];
+}
+
+export const emailTemplate = (data: data) => {
+  const { projectNumber, clientName, items } = data;
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -178,7 +186,6 @@ export const emailTemplate = () => {
       }
 
       .dots-item {
-        /* my-1 flex items-center gap-2 */
         margin-block: 4px;
         display: flex;
         align-items: center;
@@ -232,7 +239,6 @@ export const emailTemplate = () => {
         font-weight: 600;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -251,9 +257,8 @@ export const emailTemplate = () => {
       </div>
       <h2 class="title">Your offer has been accepted</h2>
       <span class="divider"></span>
-      <!-- replace the project number and client name -->
       <p class="messageText">
-        ClientName123 has accepted your offer on project #MRA2EPN
+        ${clientName} has accepted your offer on project #${projectNumber}
       </p>
       <!-- replace with items data -->
       <div class="items-block">
@@ -276,7 +281,7 @@ export const emailTemplate = () => {
         </div>
       </div>
       <div style="text-align: center; margin-top: 20px">
-        <a href="" class="button">View project</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">View project</a>
       </div>
       <ul class="social">
         <li>
@@ -362,5 +367,5 @@ export const emailTemplate = () => {
       </ul>
     </div>
   </body>
-</html>`
-}
+</html>`;
+};

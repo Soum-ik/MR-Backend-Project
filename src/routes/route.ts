@@ -4,6 +4,7 @@ import SocialMediaLinkController from '../controller/socialMediaLinkController';
 
 import httpStatus from 'http-status';
 // import { AWS_SES } from '../helper/smtp/AWS_SES';
+import { sendMail } from '../helper/smtp/AWS_SES';
 import sendResponse from '../libs/sendResponse';
 import catchAsync from '../libs/utlitys/catchSynch';
 import authenticateToken from '../middleware/auth';
@@ -15,6 +16,8 @@ import analyticsRouter from '../modules/Analytics/analytics.route';
 import { DDroute } from '../modules/Drag&Drop/DD.route';
 import { NotificationInbox } from '../modules/Notification/route';
 import { CancelProject } from '../modules/Order_page/Cancel-project/cancel-project.controller';
+import DeliveredRoute from '../modules/Order_page/Delivard/Order-delivar.route';
+import { ExtendDeliveryRouter } from '../modules/Order_page/ExtendDelivery/ExtendDelivary.router';
 import OrderNoteRouter from '../modules/Order_page/Note/OrderNote.rotue';
 import { handleOrderMessageRoute } from '../modules/Order_page/Order-message/Order-message.route';
 import getOrderStatusRoute from '../modules/Order_page/Order-status/order-status.route';
@@ -42,6 +45,8 @@ import { createProjectRoute } from '../modules/create-project-admin/createProjec
 import ImageStoreRouter from '../modules/image-store/image.router';
 import { multiProjectRoute } from '../modules/multi-project/multiProject.route';
 import { stripePayment } from '../modules/payment/AdditionalPaymentController';
+import { ExtendDelivery } from '../modules/payment/ExtendadDelivery.controller';
+import Tips from '../modules/payment/Tips.controller';
 import { payment } from '../modules/payment/payment.controller';
 import { Indicator } from '../modules/profile-indicator/profile-indicetor';
 import { handleRoleRoute } from '../modules/role_controller_super_admin/role_controller.router';
@@ -50,12 +55,6 @@ import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessa
 import uploadImage from '../modules/uploadImage/uploadController';
 import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
-import DeliveredRoute from '../modules/Order_page/Delivard/Order-delivar.route';
-import Tips from '../modules/payment/Tips.controller';
-import { ExtendDelivery } from '../modules/payment/ExtendadDelivery.controller'
-import { ExtendDeliveryRouter } from '../modules/Order_page/ExtendDelivery/ExtendDelivary.router';
-import { sendMail } from '../helper/smtp/AWS_SES';
-import { emailTemplate } from '../helper/email/additionalOfferandExtendDate';
 
 const router = express.Router();
 router.get(
@@ -84,7 +83,6 @@ router.post(
   '/upload-attachment',
   uploadFile.array('files'),
   (req, res, next) => {
-
     next();
   },
   uploadAttachmentToS3AndFormatBody(),
@@ -123,13 +121,12 @@ router.get(
   UserController.getSingelUser,
 );
 
-
 router.get('/profile-indicator', Indicator.IndicatorController);
 router.use('/extend', ExtendDeliveryRouter);
 router.use('/dd', DDroute);
 router.use('/delivery', DeliveredRoute);
 router.use('/review', reviewRouter);
-router.use('/image', ImageStoreRouter)
+router.use('/image', ImageStoreRouter);
 router.use('/search', searchProjectsRouter);
 router.use('/', UserRoute);
 router.use('/category', CategoryRoute);
@@ -161,7 +158,7 @@ router.use(
   handleMessageRoute,
 );
 
-router.use('/notification', NotificationInbox)
+router.use('/notification', NotificationInbox);
 router.use('/seen', unseenMessageRoutes);
 router.use('/bookMark', bookMarkRoute);
 router.use('/archive', archiveRoute);
@@ -192,7 +189,7 @@ router.use('/inbox', Start_Project_Controller);
 router.get('/avaiableforchat/:id', chating.AvaiableForChat);
 
 router.use('/block-chat', blockChatRouter);
-router.post('/cancel-order', CancelProject)
+router.post('/cancel-order', CancelProject);
 //Multi-Project Route
 router.use('/multi-project', multiProjectRoute);
 
@@ -211,7 +208,7 @@ router.post('/payment/extendad-delivery', ExtendDelivery);
 router.post('/verify-email', async (req, res) => {
   try {
     // const response = await AWS_SES.verifyEmailIdentity(req.body.email);
-    res.status(200).json({ message: 'Email verification initiated', });
+    res.status(200).json({ message: 'Email verification initiated' });
   } catch (error) {
     console.error('Error in /verify-email:', error);
     res.status(500).json({
@@ -229,10 +226,10 @@ router.post('/send-email', async (req, res) => {
     await sendMail({
       to: email,
       subject: subject,
-      html: emailTemplate(),
+      // html: emailTemplate(data),
     });
 
-    res.status(200).json({ message: 'Email sent successfully', });
+    res.status(200).json({ message: 'Email sent successfully' });
   } catch (error) {
     console.error('Error in /send-email:', error);
     res.status(500).json({

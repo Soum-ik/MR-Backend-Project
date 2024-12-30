@@ -1,4 +1,12 @@
-export const directProjectPlace = () => {
+interface data {
+  projectNumber: string;
+  clientName: string;
+  items: [];
+}
+
+export const directProjectPlace = (data: data) => {
+  const { projectNumber, clientName, items } = data;
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -178,7 +186,6 @@ export const directProjectPlace = () => {
       }
 
       .dots-item {
-        /* my-1 flex items-center gap-2 */
         margin-block: 4px;
         display: flex;
         align-items: center;
@@ -232,7 +239,6 @@ export const directProjectPlace = () => {
         font-weight: 600;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -249,11 +255,9 @@ export const directProjectPlace = () => {
           alt="MR Logo"
         />
       </div>
-      <!-- replace the client name -->
-      <h2 class="title">You've received a project from ClientName123</h2>
+      <h2 class="title">You've received a project from ${clientName}</h2>
       <span class="divider"></span>
-      <!-- replace the project number -->
-      <p class="messageText">Project #MRA2EPN</p>
+      <p class="messageText">Project #${projectNumber}</p>
       <!-- replace with items data -->
       <div class="items-block">
         <div class="items-heading-block">
@@ -288,7 +292,7 @@ export const directProjectPlace = () => {
         </div>
       </div>
       <div style="text-align: center; margin-top: 20px">
-        <a href="" class="button">Take a look</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">Take a look</a>
       </div>
       <ul class="social">
         <li>

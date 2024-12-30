@@ -1,4 +1,13 @@
-export const commentsTemplate = () => { return `<!doctype html>
+interface data {
+  projectNumber: string;
+  clientName: string;
+  commentLength: number;
+}
+
+export const commentsTemplate = (data: data) => {
+  const { projectNumber, clientName, commentLength } = data;
+
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -110,7 +119,6 @@ export const commentsTemplate = () => { return `<!doctype html>
         fill: #1b8cdc;
       }
 
-      /* Responsive Styles */
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
@@ -127,16 +135,15 @@ export const commentsTemplate = () => { return `<!doctype html>
           alt="MR Logo"
         />
       </div>
-      <!-- replace with the username -->
-      <h2 class="title">ClientName123 left you new comments</h2>
+      <h2 class="title">${clientName} left you new comments</h2>
       <span class="divider"></span>
       <!-- replace commented length and client name -->
       <p class="messageText">
-        ClientName123 left you 3 new comments in your project files. View the
+        ${clientName} left you ${commentLength} new comments in your project files. View the
         conversation to reply.
       </p>
       <div style="text-align: center">
-        <a href="" class="button">View Conversation</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">View Conversation</a>
       </div>
       <ul class="social">
         <li>
@@ -223,4 +230,5 @@ export const commentsTemplate = () => { return `<!doctype html>
     </div>
   </body>
 </html>
-` }
+`;
+};
