@@ -18,6 +18,23 @@ interface ExtendDelivery {
   isWithdrawn: boolean,
 }
 
+interface Reply {
+  newReply?: boolean;
+}
+
+interface Comment {
+  newComment?: boolean;
+  replies?: Reply[];
+}
+
+interface Image {
+  comments?: Comment[];
+}
+
+interface Message {
+  imageComments?: Image[];
+}
+
 
 // Controller: Send a message
 const sendMessage = catchAsync(async (req: Request, res: Response) => {
@@ -110,38 +127,108 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       });
     }
     const userData = (await userFinder(user_id)) as User;
-    PublicMessageHandler(
-      {
+
+    const calculateNewCommentsAndReplies = (message: Message) => {
+      const filteredImages = message.imageComments?.filter((image) => {
+        // Check if any comment in this image has newComment: true
+        const hasNewComment = image.comments?.some(
+          (comment) => comment.newComment === true
+        );
+    
+        // Check if any comment has replies with newReply: true
+        const hasNewReply = image.comments?.some((comment) =>
+          comment.replies?.some((reply) => reply.newReply === true)
+        );
+    
+        // Return true if either hasNewComment or hasNewReply is true
+        return hasNewComment || hasNewReply;
+      }) || [];
+    
+      // Calculate total new comments
+      const totalNewComments = filteredImages.reduce((total, img) => {
+        const newCommentsCount = img.comments?.filter((c) => c.newComment).length || 0;
+    
+        const newRepliesCount = img.comments
+          ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
+          .reduce((sum, count) => sum + count, 0) || 0;
+    
+        return total + newCommentsCount + newRepliesCount;
+      }, 0);
+    
+      return totalNewComments;
+    };
+    const total = calculateNewCommentsAndReplies(message as unknown as Message);
+
+
+    if (message?.imageComments  && total > 0) {
+
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.Comment,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          message: messageText,
+          userId: user_id,
+          projectNumber: projectNumber,
+          commentQuantity: total
+        },
+        'USER'
+      );
+
+      const payload = {
+        type: NotificationTypes.Comment,
+        createdAt: new Date(),
+        senderUserName: userData.userName,
+        avatar: userData.image,
+        message: 'Image Comments',
+        userId: user_id,
+        projectNumber: projectNumber,
+        commentQuantity:total
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'ADMIN',
+          payload: payload,
+          message: messageText, // Associate the message with the notification
+          isClientSeen: true
+        },
+      });
+    } else {
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.OrderMessage,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          senderId: user_id,
+          message: messageText,
+          projectNumber: projectNumber,
+          projectImage: "testing images"
+        },
+        "USER"
+      );
+
+      const payload = {
         type: NotificationTypes.OrderMessage,
         createdAt: new Date(),
         senderUserName: userData.userName,
         avatar: userData.image,
-        senderId: user_id,
         message: messageText,
+        senderId: user_id,
         projectNumber: projectNumber,
-        projectImage: "testing images"
-      },
-      "USER"
-    );
-
-    const payload = {
-      type: NotificationTypes.OrderMessage,
-      createdAt: new Date(),
-      senderUserName: userData.userName,
-      avatar: userData.image,
-      message: messageText,
-      senderId: user_id,
-      projectNumber: projectNumber,
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'ADMIN',
+          payload: payload,
+          message: messageText, // Associate the message with the notification
+          isClientSeen: true
+        },
+      });
     }
-    await prisma.notification.create({
-      data: {
-        senderId: user_id as string,
-        recipient: 'ADMIN',
-        payload: payload,
-        message: messageText, // Associate the message with the notification
-        isClientSeen: true
-      },
-    });
 
     return sendResponse(res, {
       statusCode: httpStatus.CREATED,
@@ -175,6 +262,37 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     });
     const userData = (await userFinder(user_id)) as User;
     const offer = message?.extendDeliveryTime as unknown as ExtendDelivery
+
+    const calculateNewCommentsAndReplies = (message: Message) => {
+      const filteredImages = message.imageComments?.filter((image) => {
+        // Check if any comment in this image has newComment: true
+        const hasNewComment = image.comments?.some(
+          (comment) => comment.newComment === true
+        );
+    
+        // Check if any comment has replies with newReply: true
+        const hasNewReply = image.comments?.some((comment) =>
+          comment.replies?.some((reply) => reply.newReply === true)
+        );
+    
+        // Return true if either hasNewComment or hasNewReply is true
+        return hasNewComment || hasNewReply;
+      }) || [];
+    
+      // Calculate total new comments
+      const totalNewComments = filteredImages.reduce((total, img) => {
+        const newCommentsCount = img.comments?.filter((c) => c.newComment).length || 0;
+    
+        const newRepliesCount = img.comments
+          ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
+          .reduce((sum, count) => sum + count, 0) || 0;
+    
+        return total + newCommentsCount + newRepliesCount;
+      }, 0);
+    
+      return totalNewComments;
+    };
+    const total = calculateNewCommentsAndReplies(message as unknown as Message);
 
     if (message.additionalOffer) {
       PublicMessageHandler({
@@ -250,6 +368,35 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 
       const payload = {
         type: NotificationTypes.OrderExtend,
+        avatar: ADMINLOGO,
+        senderUserName: "mahfujurrahm535",
+        message: messageText,
+        recipientId: recipientId,
+        projectNumber: projectNumber,
+        createdAt: new Date(),
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        },
+      });
+    } else if (message.imageComments && total)   {
+      PublicMessageHandler({
+        type: NotificationTypes.Comment,
+        createdAt: new Date(),
+        senderUserName: "mahfujurrahm535",
+        avatar: ADMINLOGO,
+        message: messageText,
+        userId: recipientId
+      }, 'ADMIN')
+
+      const payload = {
+        type: NotificationTypes.Comment,
         avatar: ADMINLOGO,
         senderUserName: "mahfujurrahm535",
         message: messageText,
@@ -776,7 +923,7 @@ export const updateProjectMessage = catchAsync(
             message: `mahfujurrahm535 withdrawn the extension request`, // Associate the message with the notification
           },
         });
-      }  else {
+      } else {
         const findOrder = await prisma.order.findUnique({
           where: {
             projectNumber: projectNumber
