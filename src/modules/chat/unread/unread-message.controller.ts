@@ -175,11 +175,11 @@ const getUnseenMessageControllerList = catchAsync(
 );
 
 const unreadMessageHandler = catchAsync(
-  async (req: Request, res: Response) => { 
-    
+  async (req: Request, res: Response) => {
+
     const { userId } = req.body;
-    
-    const updateMessage = await prisma.message.updateMany({
+
+    const updateMessage = await prisma.message.findMany({
       where: {
         OR: [
           {
@@ -190,16 +190,28 @@ const unreadMessageHandler = catchAsync(
           },
         ],
       },
-      data: {
-        isAdminSeen: false,
-      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
+
+    const lastMessage = updateMessage[0];
+
+    const updateLastSeenmessage = await prisma.message.update({
+      where: {
+        id: lastMessage.id
+      },
+      data: {
+        isAdminSeen: false
+      }
+    })
+
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: false,
       message: 'admin seen successfully',
-      data: updateMessage,
+      data: updateLastSeenmessage,
     });
 
   },
