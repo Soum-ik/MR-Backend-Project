@@ -167,35 +167,70 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     });
     const userData = (await userFinder(user_id)) as User;
 
-    PublicMessageHandler({
-      type: NotificationTypes.OrderMessage,
-      createdAt: new Date(),
-      senderUserName: "mahfujurrahm535",
-      avatar: ADMINLOGO,
-      message: messageText,
-      userId: recipientId
-    }, 'ADMIN')
+    if (message.additionalOffer) {
+      PublicMessageHandler({
+        type: NotificationTypes.AdditionalOffer,
+        createdAt: new Date(),
+        senderUserName: "mahfujurrahm535",
+        avatar: ADMINLOGO,
+        message: messageText,
+        userId: recipientId
+      }, 'ADMIN')
+
+      const payload = {
+        type: NotificationTypes.AdditionalOffer,
+        avatar: ADMINLOGO,
+        senderUserName: "mahfujurrahm535",
+        message: messageText,
+        recipientId: recipientId,
+        projectNumber: projectNumber,
+        createdAt: new Date(),
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        },
+      });
+
+      return
+    } else {
+      PublicMessageHandler({
+        type: NotificationTypes.OrderMessage,
+        createdAt: new Date(),
+        senderUserName: "mahfujurrahm535",
+        avatar: ADMINLOGO,
+        message: messageText,
+        userId: recipientId
+      }, 'ADMIN')
 
 
-    const payload = {
-      type: NotificationTypes.OrderMessage,
-      avatar: ADMINLOGO,
-      senderUserName: "mahfujurrahm535",
-      message: messageText,
-      recipientId: recipientId,
-      projectNumber: projectNumber,
-      createdAt: new Date(),
+      const payload = {
+        type: NotificationTypes.OrderMessage,
+        avatar: ADMINLOGO,
+        senderUserName: "mahfujurrahm535",
+        message: messageText,
+        recipientId: recipientId,
+        projectNumber: projectNumber,
+        createdAt: new Date(),
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        },
+      });
     }
-    await prisma.notification.create({
-      data: {
-        senderId: user_id as string,
-        recipient: 'USER',
-        payload: payload,
-        recipientId: recipientId, // Notification goes to each admin
-        message: messageText, // Associate the message with the notification
-        isAdminSeen: [user_id],
-      },
-    });
+
+
 
     // Send message to all admins
     for (const admin of admins) {
@@ -228,33 +263,46 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 
         const userData = (await userFinder(recipientId)) as User;
 
-        PublicMessageHandler({
-          type: NotificationTypes.Message,
-          createdAt: new Date(),
-          senderUserName: "mahfujurrahm535",
-          avatar: ADMINLOGO,
-          message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
-          admindId: user_id
-        }, 'ADMINS')
+        if (messageToAdmin.additionalOffer) {
+          PublicMessageHandler({
+            type: NotificationTypes.AdditionalOffer,
+            createdAt: new Date(),
+            senderUserName: "mahfujurrahm535",
+            avatar: ADMINLOGO,
+            message: messageText,
+            userId: recipientId,
 
-        const payload = {
-          type: NotificationTypes.OrderMessage,
-          avatar: ADMINLOGO,
-          senderUserName: "mahfujurrahm535",
-          message: messageText,
-          recipientId: recipientId,
-          projectNumber: projectNumber,
-          createdAt: new Date(),
+          }, 'ADMINS')
+        } else {
+          PublicMessageHandler({
+            type: NotificationTypes.Message,
+            createdAt: new Date(),
+            senderUserName: "mahfujurrahm535",
+            avatar: ADMINLOGO,
+            message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
+            admindId: user_id
+          }, 'ADMINS')
+
+          const payload = {
+            type: NotificationTypes.OrderMessage,
+            avatar: ADMINLOGO,
+            senderUserName: "mahfujurrahm535",
+            message: messageText,
+            recipientId: recipientId,
+            projectNumber: projectNumber,
+            createdAt: new Date(),
+          }
+
+          await prisma.notification.create({
+            data: {
+              senderId: user_id as string,
+              recipient: 'ADMIN',
+              payload: payload,
+              message: messageText, // Associate the message with the notification
+            },
+          });
         }
 
-        await prisma.notification.create({
-          data: {
-            senderId: user_id as string,
-            recipient: 'ADMIN',
-            payload: payload,
-            message: messageText, // Associate the message with the notification
-          },
-        });
       }
     }
 
@@ -464,6 +512,7 @@ export const updateProjectMessage = catchAsync(
 
 
 
+
     if (!updateMessage) {
       return sendResponse(res, {
         statusCode: httpStatus.NOT_FOUND,
@@ -471,6 +520,37 @@ export const updateProjectMessage = catchAsync(
         message: 'Message not found',
       });
     }
+
+    // need to added middleware to send better response
+    PublicMessageHandler({
+      type: NotificationTypes.OfferReject,
+      createdAt: new Date(),
+      senderUserName: "mahfujurrahm535",
+      avatar: ADMINLOGO,
+      projectNumber: projectNumber,
+
+      // message: messageText,
+      // userId: recipientId
+    }, 'USER')
+    const payload = {
+      type: NotificationTypes.OfferReject,
+      avatar: ADMINLOGO,
+      senderUserName: "User",
+      message: "User reject the addition offer request",
+      projectNumber: projectNumber,
+      createdAt: new Date(),
+    }
+
+    await prisma.notification.create({
+      data: {
+        senderId: projectNumber as string,
+        recipient: 'ADMIN',
+        payload: payload,
+        message: "User reject the addition offer request", // Associate the message with the notification
+      },
+    });
+
+
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,

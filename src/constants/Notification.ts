@@ -19,14 +19,15 @@ export const NotificationTypes = {
     AttchFile: 'AttchFile',
     FileDelivered: 'FileDelivered',
     RevisionDateUpdated: 'RevisionDateUpdated',
-    Feedback : 'Feedback',
+    Feedback: 'Feedback',
     CompleteOrder: 'CompleteOrder',
     CompleteOrderUser: 'CompleteOrder',
     AutoCompleteOrder: 'AutoCompleteOrder',
     AutoCompleteOrderUser: 'AutoCompleteOrder',
     OrderExtendUser: 'OrderExtendUser',
-    OrderExtendAdmin: 'OrderExtendAdmin',  
-    Tips : "Tips",
+    OrderExtendAdmin: 'OrderExtendAdmin',
+    Tips: "Tips",
     AffiliateWidthrawRequsted: "AffiliateWidthrawRequsted",
-    CustomOfferByClient: "CustomOfferByClient", //
+    CustomOfferByClient: "CustomOfferByClient",
+    OfferReject: "OfferReject" //
 };
