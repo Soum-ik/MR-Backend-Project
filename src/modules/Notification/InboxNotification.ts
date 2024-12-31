@@ -158,6 +158,7 @@ const notficationCount = catchAsync(async (req: Request, res: Response) => {
   } else {
     data = await prisma.notification.findMany({
       where: {
+        recipient : 'ADMIN',
         NOT: {
           isAdminSeen: {
             has: user_id,

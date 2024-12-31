@@ -197,8 +197,42 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
 
-      return
-    } else {
+      
+    } else if (message.cancelProject && !message.isCancelled) {
+      PublicMessageHandler({
+        type: NotificationTypes.CancelOffer,
+        createdAt: new Date(),
+        senderUserName: "mahfujurrahm535",
+        avatar: ADMINLOGO,
+        message: messageText,
+        userId: recipientId
+      }, 'ADMIN')
+
+      const payload = {
+        type: NotificationTypes.CancelOffer,
+        avatar: ADMINLOGO,
+        senderUserName: "mahfujurrahm535",
+        message: messageText,
+        recipientId: recipientId,
+        projectNumber: projectNumber,
+        createdAt: new Date(),
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        },
+      });
+
+       
+    } else if (message.cancelProject && message.isCancelled) {
+       
+    }
+    else {
       PublicMessageHandler({
         type: NotificationTypes.OrderMessage,
         createdAt: new Date(),
@@ -493,13 +527,15 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
 
 export const updateProjectMessage = catchAsync(
   async (req: Request, res: Response) => {
+    const { user_id, role } = req.user as TokenCredential;
+
     const { projectNumber, uniqueId } = req.body;
     const { timeAndDate, id, ...updateBody } = req.body;
     if (!uniqueId) {
       return sendResponse(res, {
         statusCode: httpStatus.BAD_REQUEST,
         success: false,
-        message: 'Order message common key is required',
+        message: 'Order message uniqueId is required',
       });
     }
 
@@ -511,6 +547,149 @@ export const updateProjectMessage = catchAsync(
     });
 
 
+    const userData = (await userFinder(user_id)) as User;
+    const findOrder = await prisma.orderMessage.findMany({
+      where: {
+        uniqueId: uniqueId
+      },
+      take: 1
+    })
+
+    if (role === 'USER') {
+      if (findOrder[0].cancelProject) {
+        PublicMessageHandler({
+          type: NotificationTypes.CancelOfferReject,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          projectNumber: projectNumber,
+          userId: user_id
+        }, 'USER')
+
+        const payload = {
+          type: NotificationTypes.CancelOfferReject,
+          avatar: userData.image,
+          senderUserName: userData.userName,
+          message: `${userData.userName} Cancel Offer Reject`,
+          projectNumber: projectNumber,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+          },
+        });
+        return
+      } else {
+        PublicMessageHandler({
+          type: NotificationTypes.OfferReject,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          projectNumber: projectNumber,
+          // message: messageText,
+          userId: user_id
+        }, 'USER')
+
+        const payload = {
+          type: NotificationTypes.OfferReject,
+          avatar: userData.image,
+          senderUserName: userData.userName,
+          message: `${userData.userName} reject the addition offer request`,
+          projectNumber: projectNumber,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: `${userData.userName} reject the addition offer request`, // Associate the message with the notification
+          },
+        });
+      }
+
+    } else {
+      const findOrderMessage = await prisma.orderMessage.findMany({
+        where: {
+          uniqueId: uniqueId
+        },
+        take: 1
+      })
+      const findOrder = await prisma.order.findUnique({
+        where: {
+          projectNumber: projectNumber
+        }
+      })
+      if (findOrderMessage[0].cancelProject) {
+        PublicMessageHandler({
+          type: NotificationTypes.CancelOfferWithdraw,
+          createdAt: new Date(),
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          projectNumber: projectNumber,
+          userId: findOrder?.userId
+        }, 'ADMIN')
+
+        const payload = {
+          type: NotificationTypes.CancelOfferWithdraw,
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          message: `mahfujurrahm535 withdrawn the offer`,
+          projectNumber: projectNumber,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'USER',
+            recipientId: findOrder?.userId,
+            payload: payload,
+            message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+          },
+        });
+      } else {
+        const findOrder = await prisma.order.findUnique({
+          where: {
+            projectNumber: projectNumber
+          }
+        })
+
+        PublicMessageHandler({
+          type: NotificationTypes.AdditionalOfferWithdraw,
+          createdAt: new Date(),
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          projectNumber: projectNumber,
+          userId: findOrder?.userId
+        }, 'ADMIN')
+
+        const payload = {
+          type: NotificationTypes.AdditionalOfferWithdraw,
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          message: `mahfujurrahm535 withdrawn the offer`,
+          projectNumber: projectNumber,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipientId: findOrder?.userId,
+            recipient: 'USER',
+            payload: payload,
+            message: `mahfujurrahm535 withdrawn the offer`, // Associate the message with the notification
+          },
+        });
+      }
+    }
 
 
     if (!updateMessage) {
@@ -520,38 +699,6 @@ export const updateProjectMessage = catchAsync(
         message: 'Message not found',
       });
     }
-
-    // need to added middleware to send better response
-    PublicMessageHandler({
-      type: NotificationTypes.OfferReject,
-      createdAt: new Date(),
-      senderUserName: "mahfujurrahm535",
-      avatar: ADMINLOGO,
-      projectNumber: projectNumber,
-
-      // message: messageText,
-      // userId: recipientId
-    }, 'USER')
-    const payload = {
-      type: NotificationTypes.OfferReject,
-      avatar: ADMINLOGO,
-      senderUserName: "User",
-      message: "User reject the addition offer request",
-      projectNumber: projectNumber,
-      createdAt: new Date(),
-    }
-
-    await prisma.notification.create({
-      data: {
-        senderId: projectNumber as string,
-        recipient: 'ADMIN',
-        payload: payload,
-        message: "User reject the addition offer request", // Associate the message with the notification
-      },
-    });
-
-
-
     return sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,

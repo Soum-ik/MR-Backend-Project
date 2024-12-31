@@ -331,6 +331,7 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
       type: NotificationTypes.FileDelivered,
       thumbnailUrl: order?.projectImage,
       createdAt: new Date(),
+      userId: order.userId,
     },
     'ADMIN',
   );

@@ -24,7 +24,12 @@ router.get('/get', authenticateToken(
 ), orderMessageController.getMessages);
 
 // Route to update a project message
-router.put('/update', orderMessageController.updateProjectMessage);
+router.put('/update', authenticateToken(
+  USER_ROLE.ADMIN,
+  USER_ROLE.SUPER_ADMIN,
+  USER_ROLE.SUB_ADMIN,
+  USER_ROLE.USER,
+), orderMessageController.updateProjectMessage);
 
 router.delete('/:uniqueId/:projectNumber', orderMessageController.deleteMessage)
 
