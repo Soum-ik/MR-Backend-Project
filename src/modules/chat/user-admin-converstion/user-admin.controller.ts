@@ -8,7 +8,7 @@ import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import { USER_ROLE } from '../../user/user.constant';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, { ADMINLOGO } from '../../../socket/handlers/PublicMessageHandler';
 import { NotificationTypes } from '../../../constants/Notification';
 import { userFinder } from '../../../utils/userFinder';
 
@@ -151,17 +151,14 @@ const sendMessage = async (req: Request, res: Response) => {
         },
       });
 
-      // PublicMessageHandler(message, role)
-
-      // await prisma.notification.create({
-      //   data: {
-      //     senderLogo: user?.image,
-      //     type: 'message',
-      //     senderUserName: user?.userName ?? 'Unknown',
-      //     recipientId: recipientId as string, // Notification goes to the recipient
-      //     messageId: message.id, // Associate the message with the notification
-      //   },
-      // });
+      PublicMessageHandler({
+        type: NotificationTypes.Message,
+        createdAt: new Date(),
+        senderUserName: "mahfujurrahm535",
+        avatar: ADMINLOGO,
+        message: messageText,
+        userId: recipientId
+      }, 'ADMIN')
 
       // Send message to all admins
       for (const admin of admins) {
@@ -188,7 +185,16 @@ const sendMessage = async (req: Request, res: Response) => {
             },
           });
 
+          const userData = (await userFinder(recipientId)) as User;
 
+          PublicMessageHandler({
+            type: NotificationTypes.Message,
+            createdAt: new Date(),
+            senderUserName: "mahfujurrahm535",
+            avatar: ADMINLOGO,
+            message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
+            admindId: user_id
+          }, 'ADMINS')
         }
       }
 
