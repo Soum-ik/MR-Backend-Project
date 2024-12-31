@@ -104,15 +104,15 @@ const sendMessage = async (req: Request, res: Response) => {
         }
         const userData = (await userFinder(user_id)) as User;
 
-        await prisma.notification.create({
-          data: {
-            senderId: user_id as string,
-            recipient: 'ADMIN',
-            payload: payload,
-            recipientId: admin.id, // Notification goes to each admin
-            message: messageText, // Associate the message with the notification
-          },
-        });
+        // await prisma.notification.create({
+        //   data: {
+        //     senderId: user_id as string,
+        //     recipient: 'ADMIN',
+        //     payload: payload,
+        //     recipientId: admin.id, // Notification goes to each admin
+        //     message: messageText, // Associate the message with the notification
+        //   },
+        // });
 
         PublicMessageHandler({
           type: NotificationTypes.Message,

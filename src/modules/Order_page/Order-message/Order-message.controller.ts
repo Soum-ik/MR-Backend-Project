@@ -8,7 +8,7 @@ import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
 import { USER_ROLE } from '../../user/user.constant';
 import AppError from '../../../errors/AppError';
-import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, { ADMINLOGO } from '../../../socket/handlers/PublicMessageHandler';
 import { NotificationTypes } from '../../../constants/Notification';
 import { userFinder } from '../../../utils/userFinder';
 
@@ -100,35 +100,40 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isClientSeen: true
         },
       });
-      const userData = (await userFinder(user_id)) as User;
-      PublicMessageHandler(
-        {
-          type: NotificationTypes.OrderMessage,
-          createdAt: new Date(),
-          senderUserName: userData.userName,
-          avatar: userData.image,
-          senderId: user_id,
-          message: messageText
-        },
-        "USER"
-      );
-
-      const payload = {
-        type: NotificationTypes.OrderMessage,
-        avatar: user?.image,
-        message: messageText,
-        createdAt: new Date(),
-      }
-      await prisma.notification.create({
-        data: {
-          senderId: user_id as string,
-          recipient: 'ADMIN',
-          payload: payload,
-          recipientId: admin.id, // Notification goes to each admin
-          message: messageText, // Associate the message with the notification
-        },
-      });
     }
+    const userData = (await userFinder(user_id)) as User;
+    PublicMessageHandler(
+      {
+        type: NotificationTypes.OrderMessage,
+        createdAt: new Date(),
+        senderUserName: userData.userName,
+        avatar: userData.image,
+        senderId: user_id,
+        message: messageText,
+        projectNumber: projectNumber,
+        projectImage: "testing images"
+      },
+      "USER"
+    );
+
+    const payload = {
+      type: NotificationTypes.OrderMessage,
+      createdAt: new Date(),
+      senderUserName: userData.userName,
+      avatar: userData.image,
+      message: messageText,
+      senderId: user_id,
+      projectNumber: projectNumber,
+    }
+    await prisma.notification.create({
+      data: {
+        senderId: user_id as string,
+        recipient: 'ADMIN',
+        payload: payload,
+        message: messageText, // Associate the message with the notification
+        isClientSeen: true
+      },
+    });
 
     return sendResponse(res, {
       statusCode: httpStatus.CREATED,
@@ -161,22 +166,24 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       },
     });
     const userData = (await userFinder(user_id)) as User;
-    PublicMessageHandler(
-      {
-        type: NotificationTypes.OrderMessage,
-        createdAt: new Date(),
-        senderUserName: userData.userName,
-        avatar: userData.image,
-        senderId: user_id,
-        message: messageText,
-        userId: recipientId
-      },
-      "ADMIN"
-    );
-    const payload = {
-      type: NotificationTypes.Message,
-      avatar: user?.image,
+
+    PublicMessageHandler({
+      type: NotificationTypes.OrderMessage,
+      createdAt: new Date(),
+      senderUserName: "mahfujurrahm535",
+      avatar: ADMINLOGO,
       message: messageText,
+      userId: recipientId
+    }, 'ADMIN')
+
+
+    const payload = {
+      type: NotificationTypes.OrderMessage,
+      avatar: ADMINLOGO,
+      senderUserName: "mahfujurrahm535",
+      message: messageText,
+      recipientId: recipientId,
+      projectNumber: projectNumber,
       createdAt: new Date(),
     }
     await prisma.notification.create({
@@ -186,6 +193,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         payload: payload,
         recipientId: recipientId, // Notification goes to each admin
         message: messageText, // Associate the message with the notification
+        isAdminSeen: [user_id],
       },
     });
 
@@ -218,25 +226,27 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           },
         });
 
-        const userData = (await userFinder(user_id)) as User;
-        PublicMessageHandler(
-          {
-            type: NotificationTypes.OrderMessage,
-            createdAt: new Date(),
-            senderUserName: userData.userName,
-            avatar: userData.image,
-            senderId: user_id,
-            message: messageText,
-            userId: recipientId
-          },
-          "USER"
-        );
+        const userData = (await userFinder(recipientId)) as User;
+
+        PublicMessageHandler({
+          type: NotificationTypes.Message,
+          createdAt: new Date(),
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
+          admindId: user_id
+        }, 'ADMINS')
+
         const payload = {
           type: NotificationTypes.OrderMessage,
-          avatar: user?.image,
+          avatar: ADMINLOGO,
+          senderUserName: "mahfujurrahm535",
           message: messageText,
+          recipientId: recipientId,
+          projectNumber: projectNumber,
           createdAt: new Date(),
         }
+
         await prisma.notification.create({
           data: {
             senderId: user_id as string,
