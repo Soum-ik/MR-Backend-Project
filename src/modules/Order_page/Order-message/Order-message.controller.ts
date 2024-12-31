@@ -12,6 +12,13 @@ import PublicMessageHandler, { ADMINLOGO } from '../../../socket/handlers/Public
 import { NotificationTypes } from '../../../constants/Notification';
 import { userFinder } from '../../../utils/userFinder';
 
+interface ExtendDelivery {
+  isAccepted: boolean,
+  isRejected: boolean,
+  isWithdrawn: boolean,
+}
+
+
 // Controller: Send a message
 const sendMessage = catchAsync(async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
@@ -75,8 +82,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 
   if (role === 'USER') {
     // Send message to all admins if the role is USER
+    let message;
     for (const admin of admins) {
-      const message = await prisma.orderMessage.create({
+      message = await prisma.orderMessage.create({
         data: {
           senderId: user_id as string,
           userImage: user?.image,
@@ -166,6 +174,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       },
     });
     const userData = (await userFinder(user_id)) as User;
+    const offer = message?.extendDeliveryTime as unknown as ExtendDelivery
 
     if (message.additionalOffer) {
       PublicMessageHandler({
@@ -197,7 +206,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
 
-      
+
     } else if (message.cancelProject && !message.isCancelled) {
       PublicMessageHandler({
         type: NotificationTypes.CancelOffer,
@@ -228,9 +237,36 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
 
-       
-    } else if (message.cancelProject && message.isCancelled) {
-       
+
+    } else if (message.extendDeliveryTime && !offer.isAccepted && !offer.isRejected && !offer.isWithdrawn) {
+      PublicMessageHandler({
+        type: NotificationTypes.OrderExtend,
+        createdAt: new Date(),
+        senderUserName: "mahfujurrahm535",
+        avatar: ADMINLOGO,
+        message: messageText,
+        userId: recipientId
+      }, 'ADMIN')
+
+      const payload = {
+        type: NotificationTypes.OrderExtend,
+        avatar: ADMINLOGO,
+        senderUserName: "mahfujurrahm535",
+        message: messageText,
+        recipientId: recipientId,
+        projectNumber: projectNumber,
+        createdAt: new Date(),
+      }
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        },
+      });
     }
     else {
       PublicMessageHandler({
@@ -554,6 +590,7 @@ export const updateProjectMessage = catchAsync(
       },
       take: 1
     })
+    const offer = findOrder[0].extendDeliveryTime as unknown as ExtendDelivery
 
     if (role === 'USER') {
       if (findOrder[0].cancelProject) {
@@ -583,7 +620,34 @@ export const updateProjectMessage = catchAsync(
             message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
           },
         });
-        return
+
+      } else if (findOrder[0].extendDeliveryTime && !offer.isAccepted && !offer.isRejected && offer.isWithdrawn) {
+        PublicMessageHandler({
+          type: NotificationTypes.OrderExtendWithdraw,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          projectNumber: projectNumber,
+          userId: user_id
+        }, 'USER')
+
+        const payload = {
+          type: NotificationTypes.OrderExtendWithdraw,
+          avatar: userData.image,
+          senderUserName: userData.userName,
+          message: `${userData.userName} withdraw the extension request`,
+          projectNumber: projectNumber,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+          },
+        });
       } else {
         PublicMessageHandler({
           type: NotificationTypes.OfferReject,
@@ -654,7 +718,65 @@ export const updateProjectMessage = catchAsync(
             message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
           },
         });
-      } else {
+      } else if (findOrderMessage[0].extendDeliveryTime && !offer.isAccepted && offer.isRejected && !offer.isWithdrawn) {
+        PublicMessageHandler({
+          type: NotificationTypes.OrderExtendReject,
+          createdAt: new Date(),
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          projectNumber: projectNumber,
+          userId: findOrder?.userId
+        }, 'ADMIN')
+
+        const payload = {
+          type: NotificationTypes.OrderExtendReject,
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          message: `mahfujurrahm535 rejected the extension request`,
+          projectNumber: projectNumber,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'USER',
+            recipientId: findOrder?.userId,
+
+            payload: payload,
+            message: `mahfujurrahm535 rejected the extension request`, // Associate the message with the notification
+          },
+        });
+      } else if (findOrderMessage[0].extendDeliveryTime && !offer.isAccepted && !offer.isRejected && offer.isWithdrawn) {
+        PublicMessageHandler({
+          type: NotificationTypes.OrderExtendWithdraw,
+          createdAt: new Date(),
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          projectNumber: projectNumber,
+          userId: findOrder?.userId
+        }, 'ADMIN')
+
+        const payload = {
+          type: NotificationTypes.OrderExtendWithdraw,
+          senderUserName: "mahfujurrahm535",
+          avatar: ADMINLOGO,
+          message: `mahfujurrahm535 withdrawn the extension request`,
+          projectNumber: projectNumber,
+          createdAt: new Date(),
+        }
+
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'USER',
+            recipientId: findOrder?.userId,
+
+            payload: payload,
+            message: `mahfujurrahm535 withdrawn the extension request`, // Associate the message with the notification
+          },
+        });
+      }  else {
         const findOrder = await prisma.order.findUnique({
           where: {
             projectNumber: projectNumber

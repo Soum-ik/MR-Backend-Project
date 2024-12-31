@@ -248,6 +248,42 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           );
 
           if (existingRequest) {
+            const orderData = await prisma.order.findUnique({
+              where: { id: data?.orderId },
+            });
+
+            console.log(orderData, 'order data checking ');
+
+
+            if (orderData) {
+              const userData = (await userFinder(orderData?.userId)) as User;
+
+              PublicMessageHandler({
+                type: NotificationTypes.OrderExtend,
+                createdAt: new Date(),
+                senderUserName: userData.userName,
+                avatar: userData.image,
+                message: '',
+              }, 'USER')
+
+              const payload = {
+                type: NotificationTypes.OrderExtend,
+                avatar: userData.image,
+                senderUserName: userData.userName,
+                message: '',
+                projectNumber: orderData.projectNumber,
+                createdAt: new Date(),
+              }
+              await prisma.notification.create({
+                data: {
+                  senderId: userData.id as string,
+                  recipient: 'ADMIN',
+                  payload: payload,
+                  message: '',
+                  isClientSeen: true
+                },
+              });
+            }
             return console.log('Request are already taken');
           }
 

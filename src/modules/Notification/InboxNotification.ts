@@ -147,18 +147,18 @@ const getUnseenMessageController = catchAsync(
 
 const notficationCount = catchAsync(async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
-  let data;
+  let datas;
   if (role === 'USER') {
-    data = await prisma.notification.findMany({
+    datas = await prisma.notification.findMany({
       where: {
         recipientId: user_id,
         isClientSeen: false,
       },
     });
   } else {
-    data = await prisma.notification.findMany({
+    datas = await prisma.notification.findMany({
       where: {
-        recipient : 'ADMIN',
+        recipient: 'ADMIN',
         NOT: {
           isAdminSeen: {
             has: user_id,
@@ -168,12 +168,16 @@ const notficationCount = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-  console.log('data', data);
+  const filterdData = datas.filter((data) => {
+    const payload = data.payload as { type?: string };
+    return payload && payload.type !== 'Message';
+  }).length;
+
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    data: data.length,
+    data: filterdData,
     message: 'notfication count retrived successfully!',
   });
 });
