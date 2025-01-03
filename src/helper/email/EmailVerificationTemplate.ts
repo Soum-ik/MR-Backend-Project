@@ -1,10 +1,10 @@
 interface TemplateCredentials {
-    name: String;
-    code: Number;
+  name: string;
+  code: number;
 }
 
 export const emailVerficationTemplate = (data: TemplateCredentials) => {
-    return `
+  return `
     <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -64,7 +64,6 @@ export const emailVerficationTemplate = (data: TemplateCredentials) => {
                 font-weight: 600;
             }
 
-            /* Responsive Styles */
             @media only screen and (max-width: 600px) {
                 .container {
                     padding: 10px;

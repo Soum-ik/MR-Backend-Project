@@ -1,10 +1,10 @@
 interface TemplateCredentials {
-    name: String;
-    code: Number;
+  name: string;
+  code: number;
 }
 
 export const emailTemplate = (data: TemplateCredentials) => {
-    return `
+  return `
     <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,7 +62,6 @@ export const emailTemplate = (data: TemplateCredentials) => {
             background-color: #0056b3;
         }
 
-        /* Responsive Styles */
         @media only screen and (max-width: 600px) {
             .container {
                 padding: 10px;
