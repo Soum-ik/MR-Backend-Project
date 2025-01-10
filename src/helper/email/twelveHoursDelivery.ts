@@ -99,19 +99,20 @@ export const twelveHoursDelivery = (data: data) => {
         list-style: none;
         margin: 40px 0 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
+        text-align: center;
+      }
+      .social li {
+        display: inline-block;
+        margin-left: 3px;
+        margin-right: 3px;
       }
       .social a {
         width: 30px;
         height: 30px;
         border-radius: 50%;
         border: 1px solid #ccc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        line-height: 28px;
+        display: inline-block;
       }
 
       @media only screen and (max-width: 600px) {

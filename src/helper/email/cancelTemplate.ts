@@ -6,7 +6,7 @@ interface CancelTemplateData {
 const cancelTemplate = (data: CancelTemplateData): string => {
   const { clientName, projectNumber } = data;
 
-  return `<!doctype html>
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -18,17 +18,8 @@ const cancelTemplate = (data: CancelTemplateData): string => {
         box-sizing: border-box;
       }
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          Roboto,
-          Oxygen,
-          Ubuntu,
-          Cantarell,
-          'Open Sans',
-          'Helvetica Neue',
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
           sans-serif;
         background-color: #f4f4f4;
         margin: 0;
@@ -99,19 +90,20 @@ const cancelTemplate = (data: CancelTemplateData): string => {
         list-style: none;
         margin: 40px 0 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
+        text-align: center;
+      }
+      .social li {
+        display: inline-block;
+        margin-left: 3px;
+        margin-right: 3px;
       }
       .social a {
         width: 30px;
         height: 30px;
         border-radius: 50%;
         border: 1px solid #ccc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        line-height: 28px;
+        display: inline-block;
       }
 
       @media only screen and (max-width: 600px) {

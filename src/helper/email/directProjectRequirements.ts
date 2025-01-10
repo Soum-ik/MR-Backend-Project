@@ -24,7 +24,7 @@ export const directProjectRequirements = (data: data) => {
     return formatter.format(timestamp);
   }
 
-  return `<!doctype html>
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -36,17 +36,8 @@ export const directProjectRequirements = (data: data) => {
         box-sizing: border-box;
       }
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          Roboto,
-          Oxygen,
-          Ubuntu,
-          Cantarell,
-          'Open Sans',
-          'Helvetica Neue',
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
           sans-serif;
         background-color: #f4f4f4;
         margin: 0;
@@ -117,139 +108,20 @@ export const directProjectRequirements = (data: data) => {
         list-style: none;
         margin: 40px 0 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
+        text-align: center;
+      }
+      .social li {
+        display: inline-block;
+        margin-left: 3px;
+        margin-right: 3px;
       }
       .social a {
         width: 30px;
         height: 30px;
         border-radius: 50%;
         border: 1px solid #ccc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .items-block {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid rgba(128, 128, 128, 0.3);
-      }
-
-      .items-heading-block {
-        display: flex;
-        align-items: center;
-        font-weight: 600;
-        flex-wrap: nowrap;
-        width: 100%;
-      }
-
-      .items-content-block {
-        display: flex;
-        align-items: stretch;
-        flex-wrap: nowrap;
-        width: 100%;
-      }
-
-      .heading-1 {
-        flex-grow: 1;
-        flex-shrink: 0;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-        padding: 12px;
-      }
-
-      .items-content-block > .heading-1 {
-        flex-shrink: 1;
-      }
-
-      .heading-1 > h1 {
-        font-size: 16px;
-        font-weight: 600;
-        width: 100%;
-        text-wrap: wrap;
-      }
-
-      .heading-1 > p {
-        color: rgba(0, 0, 0, 0.8);
-      }
-
-      .heading-2,
-      .heading-3,
-      .heading-4 {
-        width: 17%;
-        flex-shrink: 0;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-        border-left: 1px solid rgba(128, 128, 128, 0.3);
-        padding: 12px;
-        text-align: center;
-      }
-
-      .items-content-block > .heading-2,
-      .items-content-block > .heading-3,
-      .items-content-block > .heading-4 {
-        font-weight: 500;
-      }
-
-      .bullet-dots-block {
-        list-style: none;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-        padding: 16px 12px;
-      }
-
-      .dots-item {
-        margin-block: 4px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .dots-item > span {
-        display: flex;
-        font-size: 10px;
-        color: white;
-        align-items: center;
-        justify-content: center;
-        height: 16px;
-        width: 16px;
-        background-color: #1b8cdc;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-
-      .extra-delivery,
-      .total-price-block {
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
-      }
-
-      .total-price-block {
-        border: none;
-      }
-
-      .extra-delivery-text,
-      .total-price-text {
-        flex-grow: 1;
-        flex-shrink: 0;
-        padding: 12px;
-      }
-
-      .total-price-text {
-        font-weight: 600;
-      }
-
-      .extra-delivery-price,
-      .total-price {
-        width: 17%;
-        flex-shrink: 0;
-        padding: 12px;
-        text-align: center;
-      }
-
-      .total-price {
-        font-weight: 600;
+        line-height: 28px;
+        display: inline-block;
       }
 
       .requirements-block {
@@ -258,14 +130,17 @@ export const directProjectRequirements = (data: data) => {
       }
       .requirement {
         margin-top: 20px;
-        display: flex;
-        gap: 16px;
       }
       .requirement > span {
-        display: block;
+        display: inline-block;
+        width: 3%;
         color: #1b8cdc;
         font-weight: 600;
-        flex-shrink: 0;
+        vertical-align: top;
+      }
+      .requirement > div {
+        display: inline-block;
+        width: 95%;
       }
 
       @media only screen and (max-width: 600px) {
@@ -287,41 +162,197 @@ export const directProjectRequirements = (data: data) => {
       <h2 class="title">You've received a project from ${clientName}</h2>
       <span class="divider"></span>
       <p class="messageText">
-        <span style="font-weight: 500">Project #${projectNumber}</span> is ${dateTimeFormatter(orderCreateDate)}.
+        <span style="font-weight: 500">Project #${projectNumber}</span> is due ${dateTimeFormatter(orderCreateDate)}.
       </p>
-      <!-- replace with items data -->
-      <div class="items-block">
-        <div class="items-heading-block">
-          <div class="heading-1">Item</div>
-          <div class="heading-2">Qty</div>
-          <div class="heading-3">Dur</div>
-          <div class="heading-4">Price</div>
-        </div>
-        <div class="items-content-block">
-          <div class="heading-1">
-            <h1>Door Hanger Design</h1>
-            <p>Double sided design</p>
-          </div>
-          <div class="heading-2">1</div>
-          <div class="heading-3">2 days</div>
-          <div class="heading-4">$40</div>
-        </div>
-        <ul class="bullet-dots-block">
-          <li class="dots-item"><span>&#x2714;</span> Unlimited Revisions</li>
-          <li class="dots-item"><span>&#x2714;</span> PSD Source File</li>
-          <li class="dots-item">
-            <span>&#x2714;</span> Print Ready PDF or JPEG File
-          </li>
-        </ul>
-        <div class="extra-delivery">
-          <div class="extra-delivery-text">Extra-fast 1-day delivery</div>
-          <div class="extra-delivery-price">$10</div>
-        </div>
-        <div class="total-price-block">
-          <div class="total-price-text">Total</div>
-          <div class="total-price">$50</div>
-        </div>
-      </div>
+      <table
+        border="1"
+        style="width: 100%; border-color: rgba(128, 128, 128, 0.3)"
+        cellspacing="0"
+        cellpadding="10"
+      >
+        <thead>
+          <tr>
+            <th style="width: 49%; border: none; text-align: left">Item</th>
+            <th
+              style="
+                width: 17%;
+                border: none;
+                border-left: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              Qty
+            </th>
+            <th style="width: 17%; border-top: none; border-bottom: none">
+              Dur
+            </th>
+            <th style="width: 17%; border: none">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="vertical-align: top">
+            <td
+              style="
+                width: 49%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              <h1 style="font-size: 16px; font-weight: 600">
+                Door Hanger Design
+              </h1>
+              <p style="color: rgba(0, 0, 0, 0.8)">Double sided design</p>
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                border-right: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              1
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              2 days
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $40
+            </td>
+          </tr>
+          <tr>
+            <td
+              colspan="4"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              <ul style="list-style: none; padding-left: 0">
+                <li>
+                  <span
+                    style="
+                      display: inline-block;
+                      height: 16px;
+                      width: 16px;
+                      line-height: 16px;
+                      font-size: 10px;
+                      text-align: center;
+                      border-radius: 50%;
+                      background-color: #1b8cdc;
+                      color: #fff;
+                      margin-right: 5px;
+                    "
+                    >&#x2714;</span
+                  >
+                  Unlimited Revisions
+                </li>
+                <li>
+                  <span
+                    style="
+                      display: inline-block;
+                      height: 16px;
+                      width: 16px;
+                      line-height: 16px;
+                      font-size: 10px;
+                      text-align: center;
+                      border-radius: 50%;
+                      background-color: #1b8cdc;
+                      color: #fff;
+                      margin-right: 5px;
+                    "
+                    >&#x2714;</span
+                  >
+                  PSD Source File
+                </li>
+                <li>
+                  <span
+                    style="
+                      display: inline-block;
+                      height: 16px;
+                      width: 16px;
+                      line-height: 16px;
+                      font-size: 10px;
+                      text-align: center;
+                      border-radius: 50%;
+                      background-color: #1b8cdc;
+                      color: #fff;
+                      margin-right: 5px;
+                    "
+                    >&#x2714;</span
+                  >
+                  Print Ready PDF or JPEG File
+                </li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td
+              colspan="3"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              Extra-fast 1-day delivery
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $10
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td
+              colspan="3"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                font-weight: 500;
+              "
+            >
+              Total
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $50
+            </td>
+          </tr>
+        </tfoot>
+      </table>
 
       <div style="margin-top: 20px">
         The buyer has provided the following project requirements:

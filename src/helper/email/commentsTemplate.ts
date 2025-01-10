@@ -7,7 +7,7 @@ interface data {
 export const commentsTemplate = (data: data) => {
   const { projectNumber, clientName, commentLength } = data;
 
-  return `<!doctype html>
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -19,17 +19,8 @@ export const commentsTemplate = (data: data) => {
         box-sizing: border-box;
       }
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          Roboto,
-          Oxygen,
-          Ubuntu,
-          Cantarell,
-          'Open Sans',
-          'Helvetica Neue',
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
           sans-serif;
         background-color: #f4f4f4;
         margin: 0;
@@ -100,19 +91,20 @@ export const commentsTemplate = (data: data) => {
         list-style: none;
         margin: 40px 0 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
+        text-align: center;
+      }
+      .social li {
+        display: inline-block;
+        margin-left: 3px;
+        margin-right: 3px;
       }
       .social a {
         width: 30px;
         height: 30px;
         border-radius: 50%;
         border: 1px solid #ccc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        line-height: 28px;
+        display: inline-block;
       }
 
       @media only screen and (max-width: 600px) {
@@ -133,13 +125,12 @@ export const commentsTemplate = (data: data) => {
       </div>
       <h2 class="title">${clientName} left you new comments</h2>
       <span class="divider"></span>
-      <!-- replace commented length and client name -->
       <p class="messageText">
         ${clientName} left you ${commentLength} new comments in your project files. View the
         conversation to reply.
       </p>
       <div style="text-align: center">
-        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">View Conversation</a>
+        <a href="https://mahfujurrahm535.com/inbox" class="button">View Conversation</a>
       </div>
       <ul class="social">
         <li>
