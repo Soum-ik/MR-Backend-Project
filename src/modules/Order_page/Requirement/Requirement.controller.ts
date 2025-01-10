@@ -25,7 +25,7 @@ const calculateDeliveryDate = (
 };
 
 const answerRequirements = catchAsync(async (req: Request, res: Response) => {
-  const { user_id } = req.user as TokenCredential;
+  const { user_id, role } = req.user as TokenCredential;
   const { orderId, requirements, isRequirementsFullFilled } = req.body;
   // Check if order exists
   const order = await prisma.order.findUnique({ where: { id: orderId } });
@@ -63,16 +63,21 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
     });
 
     if (user_id) {
-      const userData = (await userFinder(user_id)) as User;
+      let userData;
+      if (role === 'USER') {
+        userData = (await userFinder(user_id)) as User;
+      } else {
+        userData = (await userFinder(order?.userId)) as User;
+      }
 
       const payload = {
         avatar: userData?.image,
         userId: userData?.id,
-        senderUserName: userData.userName,
+        senderUserName: userData?.userName,
         thumbnailUrl: order?.projectImage,
         type: NotificationTypes.Instructions,
         createdAt: new Date(),
-        projectNumber: updateRequirements.projectNumber
+        projectNumber: updateRequirements.projectNumber,
       };
       const payload1 = {
         avatar: userData?.image,
@@ -81,7 +86,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         type: NotificationTypes.OrderStart,
         createdAt: new Date(),
         senderUserName: 'mahfujurrahm535',
-        projectNumber: updateRequirements.projectNumber
+        projectNumber: updateRequirements.projectNumber,
       };
 
       await prisma.notification.create({
@@ -96,9 +101,9 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
       PublicMessageHandler(
         {
           msg: ``,
-          avatar: userData.image,
-          userId: userData.id,
-          senderUserName: userData.userName,
+          avatar: userData?.image,
+          userId: userData?.id,
+          senderUserName: userData?.userName,
           thumbnailUrl: order.projectImage,
           type: NotificationTypes.Instructions,
           projectNumber: updateRequirements.projectNumber,
