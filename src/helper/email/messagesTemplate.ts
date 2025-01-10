@@ -1,7 +1,7 @@
 interface data {
   messageText: string;
   clientName: string;
-  attachments: [];
+  attachments?: [];
 }
 
 export const messagesTemplate = (data: data) => {

@@ -7,8 +7,8 @@ export const JWT_EXPIRATION_TIME = 30 * 24 * 60 * 60; // 30 Days
 
 
 export const EMAIL_HOST = "sarkarsoumik215@gmail.com";
-export const EMAIL_USER = "sarkarsoumik215@gmail.com";
-export const EMAIL_PASSWORD = "unyn oiqq kavj awzj";
+export const EMAIL_USER = "mrproject321@gmail.com";
+export const EMAIL_PASSWORD = "brus rfgh hkua uyog";
 
 export const MAX_JSON_SIZE = "50mb";
 export const URL_ENCODED = true;

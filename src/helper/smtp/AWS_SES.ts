@@ -1,11 +1,6 @@
 import httpStatus from 'http-status';
 import nodemailer, { SendMailOptions } from 'nodemailer';
-import { mailServer } from '../../config/config';
-
-
-
-
-
+import { EMAIL_USER, EMAIL_PASSWORD } from '../../config/config';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { print } from '../colorConsolePrint.ts/colorizedConsole';
 import AppError from '../../errors/AppError';
@@ -13,27 +8,21 @@ import AppError from '../../errors/AppError';
 export const sendMail = async (options: SendMailOptions) => {
     try {
         const nodeMailerOptions: SMTPTransport | SMTPTransport.Options | string = {
-            host: mailServer.host,
-            port: parseInt(mailServer.port),
+            service: "gmail",
             auth: {
-                user: mailServer.auth.user,
-                pass: mailServer.auth.pass,
-            },
-            secure: false,
-            // Add these options to ignore certificate errors
-            tls: {
-                rejectUnauthorized: false,
+                user: EMAIL_USER,
+                pass: EMAIL_PASSWORD,
             },
         };
 
         // 1. create transporter
         const transporter = nodemailer.createTransport(nodeMailerOptions);
         console.log(transporter, 'checking transporter');
-        
+
 
         // 2. define email options
         const mailOptions = {
-            from: mailServer.sendingEmail,
+            from: EMAIL_USER,
             ...options,
         };
 

@@ -55,6 +55,13 @@ import { sendMessageForChat } from '../modules/send_message_from_admin/sendMessa
 import uploadImage from '../modules/uploadImage/uploadController';
 import { USER_ROLE } from '../modules/user/user.constant';
 import { UserRoute } from '../modules/user/userRotue';
+import { emailTemplate } from '../helper/email/additionalOfferandExtendDate';
+import { twelveHoursDelivery } from '../helper/email/twelveHoursDelivery';
+import { emailVerficationTemplate } from '../helper/email/EmailVerificationTemplate';
+import { messagesTemplate } from '../helper/email/messagesTemplate';
+import { tipsTemplate } from '../helper/email/tipsTemplate';
+// import { messagesTemplate } from '../helper/email/messagesTemplate';
+// import { messagesTemplate } from '../helper/email/messagesTemplate';
 
 const router = express.Router();
 router.get(
@@ -222,11 +229,16 @@ router.post('/verify-email', async (req, res) => {
 router.post('/send-email', async (req, res) => {
   const { email, subject, body } = req.body;
 
+  const data = {
+    projectNumber: 'wur87ew8r7',
+    clientName: 'wur87ew8r7'
+  }
+
   try {
     await sendMail({
       to: email,
       subject: subject,
-      // html: emailTemplate(data),
+      html: tipsTemplate(data),
     });
 
     res.status(200).json({ message: 'Email sent successfully' });

@@ -89,6 +89,7 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
         isNewMessage: user.isNewMessage,
         isBlocked: user.block_for_chat,
         isArchived: user.archive,
+        isClock: user.isClock,
         isBookMarked: user.book_mark,
         lastmessageinfo: {
           timeAndDate: userMessages[0]?.timeAndDate,

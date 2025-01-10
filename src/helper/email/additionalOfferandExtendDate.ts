@@ -1,7 +1,7 @@
 interface data {
   projectNumber: string;
   clientName: string;
-  items: [];
+  items?: [];
 }
 
 export const emailTemplate = (data: data) => {

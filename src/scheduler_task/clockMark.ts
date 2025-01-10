@@ -33,7 +33,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
 
         for (const user of useList) {
             if (user.receivedMessages.length > 0) {
-                await prisma.user.update({
+                const updateUserClockStatus = await prisma.user.update({
                     where: {
                         id: user.id
                     },
@@ -41,8 +41,10 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                         isClock: true
                     }
                 })
+                if (updateUserClockStatus) {
+                    print.green(`Scheduler updated isClock status for user ID: ${updateUserClockStatus.id}`);
+                }
             }
-            print.green('Scheduler updated isClock status');
         }
     } catch (error) {
         print.red(`Error in scheduler: ${error}`, error);
