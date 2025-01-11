@@ -120,8 +120,8 @@ export const directProjectRequirements = (data: data) => {
         height: 30px;
         border-radius: 50%;
         border: 1px solid #ccc;
-        line-height: 28px;
         display: inline-block;
+        vertical-align: middle;
       }
 
       .requirements-block {
@@ -434,7 +434,7 @@ export const directProjectRequirements = (data: data) => {
           "
         ></span>
         <p style="margin-block: 15px">Got everything you need?</p>
-        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button">Review Requirements</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button" style="color: #ffffff!important;">Review Requirements</a>
       </div>
       <ul class="social">
         <li>
@@ -442,7 +442,7 @@ export const directProjectRequirements = (data: data) => {
             <img
               src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/81341.png"
               alt=""
-              style="height: 16px"
+              style="height: 16px; vertical-align: middle"
             />
           </a>
         </li>
@@ -451,7 +451,7 @@ export const directProjectRequirements = (data: data) => {
             <img
               src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/instagram-53.png"
               alt=""
-              style="height: 16px"
+              style="height: 16px; vertical-align: middle"
             />
           </a>
         </li>
@@ -460,7 +460,7 @@ export const directProjectRequirements = (data: data) => {
             <img
               src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/x-social-media-black-icon.png"
               alt=""
-              style="height: 16px"
+              style="height: 14px; vertical-align: middle"
             />
           </a>
         </li>
@@ -469,7 +469,7 @@ export const directProjectRequirements = (data: data) => {
             <img
               src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/black-pinterest-icon.png"
               alt=""
-              style="height: 20px"
+              style="height: 20px; vertical-align: middle"
             />
           </a>
         </li>
@@ -478,7 +478,7 @@ export const directProjectRequirements = (data: data) => {
             <img
               src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/free-linkedin-icon-130-thumb.png"
               alt=""
-              style="height: 16px"
+              style="height: 16px; vertical-align: middle"
             />
           </a>
         </li>
