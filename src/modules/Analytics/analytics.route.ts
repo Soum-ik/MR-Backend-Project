@@ -14,6 +14,7 @@ const analyticsRouter = Router();
 
 analyticsRouter.get('/return-buyes', ReturnBuyesController);
 analyticsRouter.get('/visitors', authenticateToken(USER_ROLE.USER), visitros.increaseVisitors);
+analyticsRouter.get('/user-visitor', authenticateToken(USER_ROLE.USER), visitros.increaseVisitorByUserType);
 analyticsRouter.get('/visitors/total', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN), visitros.getVisitors);
 analyticsRouter.get('/world-domination', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN), worldDomination.getWorldDomination);
 analyticsRouter.get('/cetegorys', authenticateToken(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN), Cetagorys);

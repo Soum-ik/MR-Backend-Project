@@ -30,6 +30,28 @@ const increaseVisitors = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const increaseVisitorByUserType = catchAsync(async (req: Request, res: Response) => {
+  const { userType } = req.body
+  const visitor = await prisma.visitors.create({
+    data: {
+      status: userType as VisitorStatus,
+    },
+  });
+
+  const totalVisitors = await prisma.visitors.count();
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Visitors increased successfully',
+    data: {
+      visitor,
+      totalVisitors,
+    },
+  });
+});
+
+
 const formatDate = (date: Date): string => {
   return date.toLocaleDateString('en-US', {
     month: 'short',
@@ -108,9 +130,9 @@ const getVisitors = catchAsync(async (req: Request, res: Response) => {
   const { startDate, endDate } =
     timeFilter === TIME_FILTER_OPTIONS.ALL_TIME
       ? {
-          startDate: new Date(2024, 0, 1),
-          endDate: new Date(),
-        }
+        startDate: new Date(2024, 0, 1),
+        endDate: new Date(),
+      }
       : calculateDateRange(timeFilter);
 
   let visitorData;
@@ -394,4 +416,5 @@ function calculatePeriods(
 export const visitros = {
   increaseVisitors,
   getVisitors,
+  increaseVisitorByUserType
 };
