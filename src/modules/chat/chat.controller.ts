@@ -14,6 +14,9 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
       contactForChat: {
         some: {},
       },
+      role: {
+        equals: "USER"
+      }
     },
   });
 
