@@ -5,7 +5,7 @@ import { USER_ROLE } from '../modules/user/user.constant';
 
 
 
-schedule.scheduleJob('*/10  * * * * *', async () => {
+schedule.scheduleJob('* * * * * *', async () => {
     print.blue('Scheduler running to update isClock status');
 
     try {
