@@ -19,6 +19,7 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
   // Check if order exists
   const order = await prisma.order.findMany({
     where: {
+      paymentStatus: "PAID",
       ...(search && {
         OR: [
           {
@@ -73,11 +74,24 @@ const findOrder = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
-  const sortedOrders = order.sort((a, b) => {
-    const aPriority = PRIORITY_ORDER.indexOf(a.projectStatus.toLowerCase());
-    const bPriority = PRIORITY_ORDER.indexOf(b.projectStatus.toLowerCase());
-    return aPriority - bPriority;
-  });
+  // Sort orders by priority and then by time
+  const sortedOrders = order
+    .sort((a, b) => {
+      const aPriority = PRIORITY_ORDER.indexOf(a.projectStatus.toLowerCase());
+      const bPriority = PRIORITY_ORDER.indexOf(b.projectStatus.toLowerCase());
+
+      // First, sort by priority
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority;
+      }
+
+      // If priorities are the same, sort by deliveryDate (earliest first)
+      const aTime = a?.deliveryDate ? new Date(a.deliveryDate).getTime() : Infinity;
+      const bTime = b?.deliveryDate ? new Date(b.deliveryDate).getTime() : Infinity;
+
+      // Orders with no deliveryDate (Infinity) will appear last
+      return aTime - bTime;
+    });
 
 
   if (!sortedOrders) {
@@ -240,7 +254,11 @@ export const getOrderCount = catchAsync(
 );
 
 const projectStatus = catchAsync(async (req: Request, res: Response) => {
-  const order = await prisma.order.findMany();
+  const order = await prisma.order.findMany({
+    where: {
+      paymentStatus: "PAID",
+    }
+  });
   // Initialize with all possible project statuses
   const initialStatusCounts = {
     Waiting: { count: 0, totalPrice: 0 },
