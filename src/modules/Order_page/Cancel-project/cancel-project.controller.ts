@@ -58,7 +58,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
     },
     data: {
       projectStatus: ProjectStatus.CANCELED,
-      finishedDate: new Date(),
+      cancelledDate: new Date(),
     },
   });
 

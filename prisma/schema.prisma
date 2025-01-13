@@ -504,6 +504,7 @@ model Order {
   projectType              ProjectType
   projectImage             String?
   completedDate            DateTime?
+  cancelledDate            DateTime?
   trackProjectStatus       trackProjectStatus      @default(PENDING)
   clientApproval           Boolean?                @default(false)
   adminDeliveryRequest     Boolean?                @default(false)
@@ -526,7 +527,6 @@ model Order {
   projectThumbnail         String?
   deliveryAttempt          Int?                    @default(0)
   tags                     tags[]
-  finishedDate             DateTime?
 }
 
 model tags {

@@ -48,7 +48,7 @@ export const CompletedProject = catchAsync(async (req: Request, res: Response) =
             projectStatus: 'Completed',
             projectThumbnail,
             trackProjectStatus: 'COMPLETE_PROJECT',
-            finishedDate: new Date(),
+            completedDate: new Date(),
         }
     })
 
