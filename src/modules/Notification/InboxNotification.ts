@@ -74,8 +74,7 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         payload.type !== 'Message'
       );
     });
-
-    console.log(filteredNotifications, 'filtered notifications');
+ 
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,

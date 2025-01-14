@@ -134,33 +134,33 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         const hasNewComment = image.comments?.some(
           (comment) => comment.newComment === true
         );
-    
+
         // Check if any comment has replies with newReply: true
         const hasNewReply = image.comments?.some((comment) =>
           comment.replies?.some((reply) => reply.newReply === true)
         );
-    
+
         // Return true if either hasNewComment or hasNewReply is true
         return hasNewComment || hasNewReply;
       }) || [];
-    
+
       // Calculate total new comments
       const totalNewComments = filteredImages.reduce((total, img) => {
         const newCommentsCount = img.comments?.filter((c) => c.newComment).length || 0;
-    
+
         const newRepliesCount = img.comments
           ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
           .reduce((sum, count) => sum + count, 0) || 0;
-    
+
         return total + newCommentsCount + newRepliesCount;
       }, 0);
-    
+
       return totalNewComments;
     };
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
 
 
-    if (message?.imageComments  && total > 0) {
+    if (message?.imageComments && total > 0) {
 
       PublicMessageHandler(
         {
@@ -184,7 +184,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         message: 'Image Comments',
         userId: user_id,
         projectNumber: projectNumber,
-        commentQuantity:total
+        commentQuantity: total
       }
       await prisma.notification.create({
         data: {
@@ -218,16 +218,47 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         message: messageText,
         senderId: user_id,
         projectNumber: projectNumber,
-      }
-      await prisma.notification.create({
-        data: {
+      };
+
+      // Check if a notification already exists for the sender and recipient
+      const existingNotification = await prisma.notification.findFirst({
+        where: {
           senderId: user_id as string,
           recipient: 'ADMIN',
-          payload: payload,
-          message: messageText, // Associate the message with the notification
-          isClientSeen: true
         },
       });
+
+      if (existingNotification) {
+        // Check if isClientSeen is already true
+        const isClientAlreadySeen = existingNotification.isClientSeen === true;
+
+        // Prepare the data for the update
+        const updateData = {
+          payload: payload, // Update the payload
+          message: messageText, // Update the message
+          createdAt: new Date(), // Update the timestamp
+          ...(!isClientAlreadySeen && { isClientSeen: true }), // Only update isClientSeen if it's not already true
+        };
+
+        // Update the existing notification
+        await prisma.notification.update({
+          where: {
+            id: existingNotification.id, // Use the ID of the existing notification
+          },
+          data: updateData,
+        });
+      } else {
+        // Create a new notification if it doesn't exist
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: messageText,
+            isClientSeen: true, // Initialize isClientSeen as true for new notifications
+          },
+        });
+      }
     }
 
     return sendResponse(res, {
@@ -269,27 +300,27 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         const hasNewComment = image.comments?.some(
           (comment) => comment.newComment === true
         );
-    
+
         // Check if any comment has replies with newReply: true
         const hasNewReply = image.comments?.some((comment) =>
           comment.replies?.some((reply) => reply.newReply === true)
         );
-    
+
         // Return true if either hasNewComment or hasNewReply is true
         return hasNewComment || hasNewReply;
       }) || [];
-    
+
       // Calculate total new comments
       const totalNewComments = filteredImages.reduce((total, img) => {
         const newCommentsCount = img.comments?.filter((c) => c.newComment).length || 0;
-    
+
         const newRepliesCount = img.comments
           ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
           .reduce((sum, count) => sum + count, 0) || 0;
-    
+
         return total + newCommentsCount + newRepliesCount;
       }, 0);
-    
+
       return totalNewComments;
     };
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
@@ -385,7 +416,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
-    } else if (message.imageComments && total)   {
+    } else if (message.imageComments && total) {
       PublicMessageHandler({
         type: NotificationTypes.Comment,
         createdAt: new Date(),
@@ -434,94 +465,127 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
-      }
-      await prisma.notification.create({
-        data: {
+      };
+
+      // Check if a notification already exists for the sender and recipient
+      const existingNotification = await prisma.notification.findFirst({
+        where: {
           senderId: user_id as string,
           recipient: 'USER',
-          payload: payload,
-          recipientId: recipientId, // Notification goes to each admin
-          message: messageText, // Associate the message with the notification
-          isAdminSeen: [user_id],
+          recipientId: recipientId, // Ensure the notification is for the same recipient
         },
       });
+
+      if (existingNotification) {
+        // Check if the user_id already exists in the isAdminSeen array
+        const isUserAlreadySeen = existingNotification.isAdminSeen.includes(user_id);
+
+        // Update the existing notification
+        await prisma.notification.update({
+          where: {
+            id: existingNotification.id, // Use the ID of the existing notification
+          },
+          data: {
+            payload: payload, // Update the payload
+            message: messageText, // Update the message
+            createdAt: new Date(), // Update the timestamp
+            isAdminSeen: isUserAlreadySeen
+              ? existingNotification.isAdminSeen // If already seen, keep the array as is
+              : {
+                push: user_id, // If not seen, add the user_id to the isAdminSeen array
+              },
+          },
+        });
+      } else {
+        // Create a new notification if it doesn't exist
+        await prisma.notification.create({
+          data: {
+            senderId: user_id as string,
+            recipient: 'USER',
+            payload: payload,
+            recipientId: recipientId, // Notification goes to the specific recipient
+            message: messageText, // Associate the message with the notification
+            isAdminSeen: [user_id], // Initialize the isAdminSeen array with the user_id
+          },
+        });
+      }
     }
 
 
 
     // Send message to all admins
-    for (const admin of admins) {
-      if (admin.id !== user_id) {
-        // If the admin is not the sender
-        const messageToAdmin = await prisma.orderMessage.create({
-          data: {
-            senderId: user_id as string,
-            userImage: user?.image,
-            senderName: user?.fullName,
-            senderUserName: user?.userName,
-            recipientId: admin.id,
-            messageText,
-            attachment,
-            replyTo,
-            isFromAdmin: role as Role,
-            customOffer,
-            timeAndDate: timeAndDate.toString(),
-            commonKey: commonkey,
-            projectNumber: projectNumber,
-            imageComments,
-            deliverProject,
-            extendDeliveryTime,
-            additionalOffer,
-            cancelProject,
-            uniqueId,
-            isAdminSeen: true
-          },
-        });
+    // for (const admin of admins) {
+    //   if (admin.id !== user_id) {
+    //     // If the admin is not the sender
+    //     const messageToAdmin = await prisma.orderMessage.create({
+    //       data: {
+    //         senderId: user_id as string,
+    //         userImage: user?.image,
+    //         senderName: user?.fullName,
+    //         senderUserName: user?.userName,
+    //         recipientId: admin.id,
+    //         messageText,
+    //         attachment,
+    //         replyTo,
+    //         isFromAdmin: role as Role,
+    //         customOffer,
+    //         timeAndDate: timeAndDate.toString(),
+    //         commonKey: commonkey,
+    //         projectNumber: projectNumber,
+    //         imageComments,
+    //         deliverProject,
+    //         extendDeliveryTime,
+    //         additionalOffer,
+    //         cancelProject,
+    //         uniqueId,
+    //         isAdminSeen: true
+    //       },
+    //     });
 
-        const userData = (await userFinder(recipientId)) as User;
+    //     const userData = (await userFinder(recipientId)) as User;
 
-        if (messageToAdmin.additionalOffer) {
-          PublicMessageHandler({
-            type: NotificationTypes.AdditionalOffer,
-            createdAt: new Date(),
-            senderUserName: "mahfujurrahm535",
-            avatar: ADMINLOGO,
-            message: messageText,
-            userId: recipientId,
+    //     if (messageToAdmin.additionalOffer) {
+    //       PublicMessageHandler({
+    //         type: NotificationTypes.AdditionalOffer,
+    //         createdAt: new Date(),
+    //         senderUserName: "mahfujurrahm535",
+    //         avatar: ADMINLOGO,
+    //         message: messageText,
+    //         userId: recipientId,
 
-          }, 'ADMINS')
-        } else {
-          PublicMessageHandler({
-            type: NotificationTypes.Message,
-            createdAt: new Date(),
-            senderUserName: "mahfujurrahm535",
-            avatar: ADMINLOGO,
-            message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
-            admindId: user_id
-          }, 'ADMINS')
+    //       }, 'ADMINS')
+    //     } else {
+    //       PublicMessageHandler({
+    //         type: NotificationTypes.Message,
+    //         createdAt: new Date(),
+    //         senderUserName: "mahfujurrahm535",
+    //         avatar: ADMINLOGO,
+    //         message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
+    //         admindId: user_id
+    //       }, 'ADMINS')
 
-          const payload = {
-            type: NotificationTypes.OrderMessage,
-            avatar: ADMINLOGO,
-            senderUserName: "mahfujurrahm535",
-            message: messageText,
-            recipientId: recipientId,
-            projectNumber: projectNumber,
-            createdAt: new Date(),
-          }
+    //       const payload = {
+    //         type: NotificationTypes.OrderMessage,
+    //         avatar: ADMINLOGO,
+    //         senderUserName: "mahfujurrahm535",
+    //         message: messageText,
+    //         recipientId: recipientId,
+    //         projectNumber: projectNumber,
+    //         createdAt: new Date(),
+    //       }
 
-          await prisma.notification.create({
-            data: {
-              senderId: user_id as string,
-              recipient: 'ADMIN',
-              payload: payload,
-              message: messageText, // Associate the message with the notification
-            },
-          });
-        }
+    //       await prisma.notification.create({
+    //         data: {
+    //           senderId: user_id as string,
+    //           recipient: 'ADMIN',
+    //           payload: payload,
+    //           message: messageText, // Associate the message with the notification
+    //         },
+    //       });
+    //     }
 
-      }
-    }
+    //   }
+    // }
 
     return sendResponse(res, {
       statusCode: httpStatus.CREATED,
