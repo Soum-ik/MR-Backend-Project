@@ -87,6 +87,13 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   projectThumbnail: updateOffer?.thumbnailImage
                     ?.watermark as unknown as string,
                   completedDate: new Date(),
+                  user: {
+                    update: {
+                      totalOrder: {
+                        increment: 1
+                      }
+                    }
+                  }
                 },
               });
 

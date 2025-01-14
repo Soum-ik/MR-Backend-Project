@@ -49,7 +49,15 @@ export const CompletedProject = catchAsync(async (req: Request, res: Response) =
             projectThumbnail,
             trackProjectStatus: 'COMPLETE_PROJECT',
             completedDate: new Date(),
-        }
+            user: {
+                update: {
+                    totalOrder: {
+                        increment: 1
+                    }
+                }
+            }
+        },
+
     })
 
     // await prisma.user.update({
