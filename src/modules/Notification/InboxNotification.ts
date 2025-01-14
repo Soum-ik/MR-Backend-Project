@@ -64,8 +64,8 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         recipient: 'ADMIN',
       },
       orderBy: {
-        updateAt: 'desc'
-      }
+        updateAt: 'desc',
+      },
     });
 
     const filteredNotifications = allNotifications.filter((notification) => {
@@ -77,7 +77,6 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         payload.type !== 'Message'
       );
     });
-
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -92,8 +91,8 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         recipientId: user_id,
       },
       orderBy: {
-        updateAt: 'asc'
-      }
+        updateAt: 'desc',
+      },
     });
 
     const filteredNotifications = allNotifications.filter((notification) => {
@@ -125,11 +124,18 @@ const getUnseenMessageController = catchAsync(
         where: {
           id: notificationId,
           recipientId: user_id,
-          isClientSeen: false
+          isClientSeen: false,
         },
         data: {
           isClientSeen: true,
         },
+      });
+
+      return sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: {},
+        message: 'update your seen message...',
       });
     } else {
       const admin = await prisma.notification.findMany({
@@ -183,7 +189,6 @@ const notficationCount = catchAsync(async (req: Request, res: Response) => {
     const payload = data.payload as { type?: string };
     return payload && payload.type !== 'Message';
   }).length;
-
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
