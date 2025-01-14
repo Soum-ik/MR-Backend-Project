@@ -30,7 +30,10 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
     if (!order) {
       throw new Error('Order not found');
     }
+    const extension = "." + updatedMessage?.deliverProject?.thumbnailImage?.name?.split(".").pop();
 
+    // Remove the last occurrence of the extension
+    const nameWithoutExtName = updatedMessage?.deliverProject?.thumbnailImage?.name?.replace(new RegExp(`${extension}$`), "");
     // Update order with delivery request
     const updateOrder = await prisma.order.update({
       where: {
@@ -43,9 +46,17 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         trackProjectStatus: OrderStatus.COMPLETE_PROJECT,
         submittedData: updatedMessage,
         deliveryAttempt: 2,
+        completedProjectName: nameWithoutExtName,
         projectThumbnail:
           updatedMessage?.deliverProject?.thumbnailImage?.watermark,
         completedDate: new Date(),
+        user: {
+          update: {
+            totalOrder: {
+              increment: 1
+            }
+          }
+        }
       },
     });
 

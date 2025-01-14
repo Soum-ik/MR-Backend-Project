@@ -527,6 +527,7 @@ model Order {
   projectThumbnail         String?
   deliveryAttempt          Int?                    @default(0)
   tags                     tags[]
+  completedProjectName     String?
 }
 
 model tags {
