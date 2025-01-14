@@ -11,6 +11,7 @@ import AppError from '../../../errors/AppError';
 import PublicMessageHandler, { ADMINLOGO } from '../../../socket/handlers/PublicMessageHandler';
 import { NotificationTypes } from '../../../constants/Notification';
 import { userFinder } from '../../../utils/userFinder';
+import { inboxUpdatePayload } from '../../Notification/InboxNotification.interface';
 
 interface ExtendDelivery {
   isAccepted: boolean,
@@ -221,29 +222,31 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
 
       // Check if a notification already exists for the sender and recipient
-      const existingNotification = await prisma.notification.findFirst({
+      const existingNotification = await prisma.notification.findMany({
         where: {
-          senderId: user_id as string,
+
           recipient: 'ADMIN',
         },
       });
 
-      if (existingNotification) {
-        // Check if isClientSeen is already true
-        const isClientAlreadySeen = existingNotification.isClientSeen === true;
+      const existingPayload = existingNotification.find((d) => (d.payload as unknown as inboxUpdatePayload).type === NotificationTypes.OrderMessage)
+      console.log(existingPayload, 'existingPayload checking');
+      
 
+
+      if (existingPayload) {
         // Prepare the data for the update
         const updateData = {
           payload: payload, // Update the payload
           message: messageText, // Update the message
-          createdAt: new Date(), // Update the timestamp
-          ...(!isClientAlreadySeen && { isClientSeen: true }), // Only update isClientSeen if it's not already true
+          createdAt: new Date(), // Update the timestamp 
+          isAdminSeen: [],
         };
 
         // Update the existing notification
         await prisma.notification.update({
           where: {
-            id: existingNotification.id, // Use the ID of the existing notification
+            id: existingPayload.id, // Use the ID of the existing notification
           },
           data: updateData,
         });
@@ -476,9 +479,13 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
 
+
+
       if (existingNotification) {
         // Check if the user_id already exists in the isAdminSeen array
         const isUserAlreadySeen = existingNotification.isAdminSeen.includes(user_id);
+
+
 
         // Update the existing notification
         await prisma.notification.update({
@@ -494,6 +501,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
               : {
                 push: user_id, // If not seen, add the user_id to the isAdminSeen array
               },
+            isClientSeen: false
           },
         });
       } else {

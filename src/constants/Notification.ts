@@ -36,3 +36,5 @@ export const NotificationTypes = {
     CancelOfferReject: "CancelOfferReject",
     CancelOfferWithdraw: "CancelOfferWithdraw"
 };
+
+export type NotificationType = typeof NotificationTypes[keyof typeof NotificationTypes];
