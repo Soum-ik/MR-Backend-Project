@@ -63,6 +63,9 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
       where: {
         recipient: 'ADMIN',
       },
+      orderBy: {
+        updateAt: 'desc'
+      }
     });
 
     const filteredNotifications = allNotifications.filter((notification) => {
@@ -88,6 +91,9 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         recipient: 'USER',
         recipientId: user_id,
       },
+      orderBy: {
+        updateAt: 'asc'
+      }
     });
 
     const filteredNotifications = allNotifications.filter((notification) => {
@@ -119,7 +125,7 @@ const getUnseenMessageController = catchAsync(
         where: {
           id: notificationId,
           recipientId: user_id,
-          isClientSeen : false
+          isClientSeen: false
         },
         data: {
           isClientSeen: true,
