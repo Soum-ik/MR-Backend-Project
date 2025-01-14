@@ -342,6 +342,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           avatar: ADMINLOGO,
           message: messageText,
           userId: recipientId,
+          projectNumber : projectNumber,
         },
         'ADMIN',
       );
@@ -374,6 +375,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           avatar: ADMINLOGO,
           message: messageText,
           userId: recipientId,
+          projectNumber,
         },
         'ADMIN',
       );
@@ -411,6 +413,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           avatar: ADMINLOGO,
           message: messageText,
           userId: recipientId,
+          projectNumber,
         },
         'ADMIN',
       );
@@ -443,6 +446,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           avatar: ADMINLOGO,
           message: messageText,
           userId: recipientId,
+          projectNumber,
         },
         'ADMIN',
       );
@@ -475,6 +479,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           avatar: ADMINLOGO,
           message: messageText,
           userId: recipientId,
+          projectNumber,
         },
         'ADMIN',
       );
