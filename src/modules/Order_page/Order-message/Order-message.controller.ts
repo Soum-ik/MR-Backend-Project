@@ -2,21 +2,23 @@ import { Role, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
+import { NotificationTypes } from '../../../constants/Notification';
+import AppError from '../../../errors/AppError';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import { USER_ROLE } from '../../user/user.constant';
-import AppError from '../../../errors/AppError';
-import PublicMessageHandler, { ADMINLOGO } from '../../../socket/handlers/PublicMessageHandler';
-import { NotificationTypes } from '../../../constants/Notification';
+import PublicMessageHandler, {
+  ADMINLOGO,
+} from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { inboxUpdatePayload } from '../../Notification/InboxNotification.interface';
+import { USER_ROLE } from '../../user/user.constant';
 
 interface ExtendDelivery {
-  isAccepted: boolean,
-  isRejected: boolean,
-  isWithdrawn: boolean,
+  isAccepted: boolean;
+  isRejected: boolean;
+  isWithdrawn: boolean;
 }
 
 interface Reply {
@@ -36,11 +38,9 @@ interface Message {
   imageComments?: Image[];
 }
 
-
 // Controller: Send a message
 const sendMessage = catchAsync(async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
-
 
   if (!user_id) {
     return sendResponse<any>(res, {
@@ -95,7 +95,6 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
-
   const commonkey = uuidv4();
 
   if (role === 'USER') {
@@ -123,35 +122,38 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           additionalOffer,
           cancelProject,
           uniqueId,
-          isClientSeen: true
+          isClientSeen: true,
         },
       });
     }
     const userData = (await userFinder(user_id)) as User;
 
     const calculateNewCommentsAndReplies = (message: Message) => {
-      const filteredImages = message.imageComments?.filter((image) => {
-        // Check if any comment in this image has newComment: true
-        const hasNewComment = image.comments?.some(
-          (comment) => comment.newComment === true
-        );
+      const filteredImages =
+        message.imageComments?.filter((image) => {
+          // Check if any comment in this image has newComment: true
+          const hasNewComment = image.comments?.some(
+            (comment) => comment.newComment === true,
+          );
 
-        // Check if any comment has replies with newReply: true
-        const hasNewReply = image.comments?.some((comment) =>
-          comment.replies?.some((reply) => reply.newReply === true)
-        );
+          // Check if any comment has replies with newReply: true
+          const hasNewReply = image.comments?.some((comment) =>
+            comment.replies?.some((reply) => reply.newReply === true),
+          );
 
-        // Return true if either hasNewComment or hasNewReply is true
-        return hasNewComment || hasNewReply;
-      }) || [];
+          // Return true if either hasNewComment or hasNewReply is true
+          return hasNewComment || hasNewReply;
+        }) || [];
 
       // Calculate total new comments
       const totalNewComments = filteredImages.reduce((total, img) => {
-        const newCommentsCount = img.comments?.filter((c) => c.newComment).length || 0;
+        const newCommentsCount =
+          img.comments?.filter((c) => c.newComment).length || 0;
 
-        const newRepliesCount = img.comments
-          ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
-          .reduce((sum, count) => sum + count, 0) || 0;
+        const newRepliesCount =
+          img.comments
+            ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
+            .reduce((sum, count) => sum + count, 0) || 0;
 
         return total + newCommentsCount + newRepliesCount;
       }, 0);
@@ -160,9 +162,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     };
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
 
-
     if (message?.imageComments && total > 0) {
-
       PublicMessageHandler(
         {
           type: NotificationTypes.Comment,
@@ -172,9 +172,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText,
           userId: user_id,
           projectNumber: projectNumber,
-          commentQuantity: total
+          commentQuantity: total,
         },
-        'USER'
+        'USER',
       );
 
       const payload = {
@@ -185,15 +185,15 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         message: 'Image Comments',
         userId: user_id,
         projectNumber: projectNumber,
-        commentQuantity: total
-      }
+        commentQuantity: total,
+      };
       await prisma.notification.create({
         data: {
           senderId: user_id as string,
           recipient: 'ADMIN',
           payload: payload,
           message: messageText, // Associate the message with the notification
-          isClientSeen: true
+          isClientSeen: true,
         },
       });
     } else {
@@ -206,9 +206,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           senderId: user_id,
           message: messageText,
           projectNumber: projectNumber,
-          projectImage: "testing images"
+          projectImage: 'testing images',
         },
-        "USER"
+        'USER',
       );
 
       const payload = {
@@ -224,22 +224,24 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       // Check if a notification already exists for the sender and recipient
       const existingNotification = await prisma.notification.findMany({
         where: {
-
           recipient: 'ADMIN',
         },
       });
 
-      const existingPayload = existingNotification.find((d) => (d.payload as unknown as inboxUpdatePayload).type === NotificationTypes.OrderMessage)
-      console.log(existingPayload, 'existingPayload checking');
-      
-
+      const existingPayload = existingNotification.find((d) => {
+        const payload = d.payload as unknown as inboxUpdatePayload;
+        return (
+          payload.type === NotificationTypes.OrderMessage &&
+          payload.projectNumber === projectNumber
+        );
+      });
 
       if (existingPayload) {
         // Prepare the data for the update
         const updateData = {
           payload: payload, // Update the payload
           message: messageText, // Update the message
-          createdAt: new Date(), // Update the timestamp 
+          createdAt: new Date(), // Update the timestamp
           isAdminSeen: [],
         };
 
@@ -258,7 +260,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             recipient: 'ADMIN',
             payload: payload,
             message: messageText,
-            isClientSeen: true, // Initialize isClientSeen as true for new notifications
+            isClientSeen: true,
           },
         });
       }
@@ -291,35 +293,38 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         additionalOffer,
         cancelProject,
         uniqueId,
-        isAdminSeen: true
+        isAdminSeen: true,
       },
     });
     const userData = (await userFinder(user_id)) as User;
-    const offer = message?.extendDeliveryTime as unknown as ExtendDelivery
+    const offer = message?.extendDeliveryTime as unknown as ExtendDelivery;
 
     const calculateNewCommentsAndReplies = (message: Message) => {
-      const filteredImages = message.imageComments?.filter((image) => {
-        // Check if any comment in this image has newComment: true
-        const hasNewComment = image.comments?.some(
-          (comment) => comment.newComment === true
-        );
+      const filteredImages =
+        message.imageComments?.filter((image) => {
+          // Check if any comment in this image has newComment: true
+          const hasNewComment = image.comments?.some(
+            (comment) => comment.newComment === true,
+          );
 
-        // Check if any comment has replies with newReply: true
-        const hasNewReply = image.comments?.some((comment) =>
-          comment.replies?.some((reply) => reply.newReply === true)
-        );
+          // Check if any comment has replies with newReply: true
+          const hasNewReply = image.comments?.some((comment) =>
+            comment.replies?.some((reply) => reply.newReply === true),
+          );
 
-        // Return true if either hasNewComment or hasNewReply is true
-        return hasNewComment || hasNewReply;
-      }) || [];
+          // Return true if either hasNewComment or hasNewReply is true
+          return hasNewComment || hasNewReply;
+        }) || [];
 
       // Calculate total new comments
       const totalNewComments = filteredImages.reduce((total, img) => {
-        const newCommentsCount = img.comments?.filter((c) => c.newComment).length || 0;
+        const newCommentsCount =
+          img.comments?.filter((c) => c.newComment).length || 0;
 
-        const newRepliesCount = img.comments
-          ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
-          .reduce((sum, count) => sum + count, 0) || 0;
+        const newRepliesCount =
+          img.comments
+            ?.map((c) => c.replies?.filter((r) => r.newReply).length || 0)
+            .reduce((sum, count) => sum + count, 0) || 0;
 
         return total + newCommentsCount + newRepliesCount;
       }, 0);
@@ -329,24 +334,27 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
 
     if (message.additionalOffer) {
-      PublicMessageHandler({
-        type: NotificationTypes.AdditionalOffer,
-        createdAt: new Date(),
-        senderUserName: "mahfujurrahm535",
-        avatar: ADMINLOGO,
-        message: messageText,
-        userId: recipientId
-      }, 'ADMIN')
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.AdditionalOffer,
+          createdAt: new Date(),
+          senderUserName: 'mahfujurrahm535',
+          avatar: ADMINLOGO,
+          message: messageText,
+          userId: recipientId,
+        },
+        'ADMIN',
+      );
 
       const payload = {
         type: NotificationTypes.AdditionalOffer,
         avatar: ADMINLOGO,
-        senderUserName: "mahfujurrahm535",
+        senderUserName: 'mahfujurrahm535',
         message: messageText,
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
-      }
+      };
       await prisma.notification.create({
         data: {
           senderId: user_id as string,
@@ -357,27 +365,28 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
-
-
     } else if (message.cancelProject && !message.isCancelled) {
-      PublicMessageHandler({
-        type: NotificationTypes.CancelOffer,
-        createdAt: new Date(),
-        senderUserName: "mahfujurrahm535",
-        avatar: ADMINLOGO,
-        message: messageText,
-        userId: recipientId
-      }, 'ADMIN')
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.CancelOffer,
+          createdAt: new Date(),
+          senderUserName: 'mahfujurrahm535',
+          avatar: ADMINLOGO,
+          message: messageText,
+          userId: recipientId,
+        },
+        'ADMIN',
+      );
 
       const payload = {
         type: NotificationTypes.CancelOffer,
         avatar: ADMINLOGO,
-        senderUserName: "mahfujurrahm535",
+        senderUserName: 'mahfujurrahm535',
         message: messageText,
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
-      }
+      };
       await prisma.notification.create({
         data: {
           senderId: user_id as string,
@@ -388,27 +397,33 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
-
-
-    } else if (message.extendDeliveryTime && !offer.isAccepted && !offer.isRejected && !offer.isWithdrawn) {
-      PublicMessageHandler({
-        type: NotificationTypes.OrderExtend,
-        createdAt: new Date(),
-        senderUserName: "mahfujurrahm535",
-        avatar: ADMINLOGO,
-        message: messageText,
-        userId: recipientId
-      }, 'ADMIN')
+    } else if (
+      message.extendDeliveryTime &&
+      !offer.isAccepted &&
+      !offer.isRejected &&
+      !offer.isWithdrawn
+    ) {
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.OrderExtend,
+          createdAt: new Date(),
+          senderUserName: 'mahfujurrahm535',
+          avatar: ADMINLOGO,
+          message: messageText,
+          userId: recipientId,
+        },
+        'ADMIN',
+      );
 
       const payload = {
         type: NotificationTypes.OrderExtend,
         avatar: ADMINLOGO,
-        senderUserName: "mahfujurrahm535",
+        senderUserName: 'mahfujurrahm535',
         message: messageText,
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
-      }
+      };
       await prisma.notification.create({
         data: {
           senderId: user_id as string,
@@ -420,24 +435,27 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
     } else if (message.imageComments && total) {
-      PublicMessageHandler({
-        type: NotificationTypes.Comment,
-        createdAt: new Date(),
-        senderUserName: "mahfujurrahm535",
-        avatar: ADMINLOGO,
-        message: messageText,
-        userId: recipientId
-      }, 'ADMIN')
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.Comment,
+          createdAt: new Date(),
+          senderUserName: 'mahfujurrahm535',
+          avatar: ADMINLOGO,
+          message: messageText,
+          userId: recipientId,
+        },
+        'ADMIN',
+      );
 
       const payload = {
         type: NotificationTypes.Comment,
         avatar: ADMINLOGO,
-        senderUserName: "mahfujurrahm535",
+        senderUserName: 'mahfujurrahm535',
         message: messageText,
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
-      }
+      };
       await prisma.notification.create({
         data: {
           senderId: user_id as string,
@@ -448,22 +466,23 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
-    }
-    else {
-      PublicMessageHandler({
-        type: NotificationTypes.OrderMessage,
-        createdAt: new Date(),
-        senderUserName: "mahfujurrahm535",
-        avatar: ADMINLOGO,
-        message: messageText,
-        userId: recipientId
-      }, 'ADMIN')
-
+    } else {
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.OrderMessage,
+          createdAt: new Date(),
+          senderUserName: 'mahfujurrahm535',
+          avatar: ADMINLOGO,
+          message: messageText,
+          userId: recipientId,
+        },
+        'ADMIN',
+      );
 
       const payload = {
         type: NotificationTypes.OrderMessage,
         avatar: ADMINLOGO,
-        senderUserName: "mahfujurrahm535",
+        senderUserName: 'mahfujurrahm535',
         message: messageText,
         recipientId: recipientId,
         projectNumber: projectNumber,
@@ -471,37 +490,32 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
 
       // Check if a notification already exists for the sender and recipient
-      const existingNotification = await prisma.notification.findFirst({
+      const existingNotification = await prisma.notification.findMany({
         where: {
-          senderId: user_id as string,
           recipient: 'USER',
           recipientId: recipientId, // Ensure the notification is for the same recipient
         },
       });
 
-
-
-      if (existingNotification) {
-        // Check if the user_id already exists in the isAdminSeen array
-        const isUserAlreadySeen = existingNotification.isAdminSeen.includes(user_id);
-
-
-
+      const existingPayload = existingNotification.find((d) => {
+        const payload = d.payload as unknown as inboxUpdatePayload;
+        return (
+          payload.type === NotificationTypes.OrderMessage &&
+          payload.projectNumber === projectNumber &&
+          payload.recipientId === recipientId
+        );
+      });
+      if (existingPayload) {
         // Update the existing notification
         await prisma.notification.update({
           where: {
-            id: existingNotification.id, // Use the ID of the existing notification
+            id: existingPayload.id, // Use the ID of the existing notification
           },
           data: {
-            payload: payload, // Update the payload
-            message: messageText, // Update the message
-            createdAt: new Date(), // Update the timestamp
-            isAdminSeen: isUserAlreadySeen
-              ? existingNotification.isAdminSeen // If already seen, keep the array as is
-              : {
-                push: user_id, // If not seen, add the user_id to the isAdminSeen array
-              },
-            isClientSeen: false
+            payload: payload,
+            message: messageText,
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       } else {
@@ -518,8 +532,6 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         });
       }
     }
-
-
 
     // Send message to all admins
     // for (const admin of admins) {
@@ -602,7 +614,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       message: `Message sent to recipient ID: ${recipientId}`,
     });
   }
-})
+});
 
 // Controller: Reply to a message
 export const replyToMessage = async (req: Request, res: Response) => {
@@ -748,8 +760,8 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
   const message = await prisma.orderMessage.findMany({
     where: {
       uniqueId: uniqueId as string,
-      projectNumber: projectNumber
-    }
+      projectNumber: projectNumber,
+    },
   });
 
   // Check if message exists
@@ -764,13 +776,12 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
   const deleteMessage = await prisma.orderMessage.deleteMany({
     where: {
       uniqueId: uniqueId as string,
-      projectNumber: projectNumber
+      projectNumber: projectNumber,
     },
   });
 
-
   if (!deleteMessage) {
-    throw new AppError(httpStatus.NOT_FOUND, "Message not found!");
+    throw new AppError(httpStatus.NOT_FOUND, 'Message not found!');
   }
 
   return sendResponse(res, {
@@ -778,7 +789,7 @@ const deleteMessage = catchAsync(async (req: Request, res: Response) => {
     success: true,
     message: 'Message deleted successfully',
   });
-})
+});
 
 export const updateProjectMessage = catchAsync(
   async (req: Request, res: Response) => {
@@ -797,30 +808,32 @@ export const updateProjectMessage = catchAsync(
     const updateMessage = await prisma.orderMessage.updateMany({
       where: { projectNumber: projectNumber, uniqueId: uniqueId },
       data: {
-        ...updateBody
+        ...updateBody,
       },
     });
-
 
     const userData = (await userFinder(user_id)) as User;
     const findOrder = await prisma.orderMessage.findMany({
       where: {
-        uniqueId: uniqueId
+        uniqueId: uniqueId,
       },
-      take: 1
-    })
-    const offer = findOrder[0].extendDeliveryTime as unknown as ExtendDelivery
+      take: 1,
+    });
+    const offer = findOrder[0].extendDeliveryTime as unknown as ExtendDelivery;
 
     if (role === 'USER') {
       if (findOrder[0].cancelProject) {
-        PublicMessageHandler({
-          type: NotificationTypes.CancelOfferReject,
-          createdAt: new Date(),
-          senderUserName: userData.userName,
-          avatar: userData.image,
-          projectNumber: projectNumber,
-          userId: user_id
-        }, 'USER')
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.CancelOfferReject,
+            createdAt: new Date(),
+            senderUserName: userData.userName,
+            avatar: userData.image,
+            projectNumber: projectNumber,
+            userId: user_id,
+          },
+          'USER',
+        );
 
         const payload = {
           type: NotificationTypes.CancelOfferReject,
@@ -829,7 +842,7 @@ export const updateProjectMessage = catchAsync(
           message: `${userData.userName} Cancel Offer Reject`,
           projectNumber: projectNumber,
           createdAt: new Date(),
-        }
+        };
 
         await prisma.notification.create({
           data: {
@@ -839,16 +852,23 @@ export const updateProjectMessage = catchAsync(
             message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
           },
         });
-
-      } else if (findOrder[0].extendDeliveryTime && !offer.isAccepted && !offer.isRejected && offer.isWithdrawn) {
-        PublicMessageHandler({
-          type: NotificationTypes.OrderExtendWithdraw,
-          createdAt: new Date(),
-          senderUserName: userData.userName,
-          avatar: userData.image,
-          projectNumber: projectNumber,
-          userId: user_id
-        }, 'USER')
+      } else if (
+        findOrder[0].extendDeliveryTime &&
+        !offer.isAccepted &&
+        !offer.isRejected &&
+        offer.isWithdrawn
+      ) {
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.OrderExtendWithdraw,
+            createdAt: new Date(),
+            senderUserName: userData.userName,
+            avatar: userData.image,
+            projectNumber: projectNumber,
+            userId: user_id,
+          },
+          'USER',
+        );
 
         const payload = {
           type: NotificationTypes.OrderExtendWithdraw,
@@ -857,7 +877,7 @@ export const updateProjectMessage = catchAsync(
           message: `${userData.userName} withdraw the extension request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
-        }
+        };
 
         await prisma.notification.create({
           data: {
@@ -868,15 +888,18 @@ export const updateProjectMessage = catchAsync(
           },
         });
       } else {
-        PublicMessageHandler({
-          type: NotificationTypes.OfferReject,
-          createdAt: new Date(),
-          senderUserName: userData.userName,
-          avatar: userData.image,
-          projectNumber: projectNumber,
-          // message: messageText,
-          userId: user_id
-        }, 'USER')
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.OfferReject,
+            createdAt: new Date(),
+            senderUserName: userData.userName,
+            avatar: userData.image,
+            projectNumber: projectNumber,
+            // message: messageText,
+            userId: user_id,
+          },
+          'USER',
+        );
 
         const payload = {
           type: NotificationTypes.OfferReject,
@@ -885,7 +908,7 @@ export const updateProjectMessage = catchAsync(
           message: `${userData.userName} reject the addition offer request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
-        }
+        };
 
         await prisma.notification.create({
           data: {
@@ -896,37 +919,39 @@ export const updateProjectMessage = catchAsync(
           },
         });
       }
-
     } else {
       const findOrderMessage = await prisma.orderMessage.findMany({
         where: {
-          uniqueId: uniqueId
+          uniqueId: uniqueId,
         },
-        take: 1
-      })
+        take: 1,
+      });
       const findOrder = await prisma.order.findUnique({
         where: {
-          projectNumber: projectNumber
-        }
-      })
-      if (findOrderMessage[0].cancelProject) {
-        PublicMessageHandler({
-          type: NotificationTypes.CancelOfferWithdraw,
-          createdAt: new Date(),
-          senderUserName: "mahfujurrahm535",
-          avatar: ADMINLOGO,
           projectNumber: projectNumber,
-          userId: findOrder?.userId
-        }, 'ADMIN')
+        },
+      });
+      if (findOrderMessage[0].cancelProject) {
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.CancelOfferWithdraw,
+            createdAt: new Date(),
+            senderUserName: 'mahfujurrahm535',
+            avatar: ADMINLOGO,
+            projectNumber: projectNumber,
+            userId: findOrder?.userId,
+          },
+          'ADMIN',
+        );
 
         const payload = {
           type: NotificationTypes.CancelOfferWithdraw,
-          senderUserName: "mahfujurrahm535",
+          senderUserName: 'mahfujurrahm535',
           avatar: ADMINLOGO,
           message: `mahfujurrahm535 withdrawn the offer`,
           projectNumber: projectNumber,
           createdAt: new Date(),
-        }
+        };
 
         await prisma.notification.create({
           data: {
@@ -937,24 +962,32 @@ export const updateProjectMessage = catchAsync(
             message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
           },
         });
-      } else if (findOrderMessage[0].extendDeliveryTime && !offer.isAccepted && offer.isRejected && !offer.isWithdrawn) {
-        PublicMessageHandler({
-          type: NotificationTypes.OrderExtendReject,
-          createdAt: new Date(),
-          senderUserName: "mahfujurrahm535",
-          avatar: ADMINLOGO,
-          projectNumber: projectNumber,
-          userId: findOrder?.userId
-        }, 'ADMIN')
+      } else if (
+        findOrderMessage[0].extendDeliveryTime &&
+        !offer.isAccepted &&
+        offer.isRejected &&
+        !offer.isWithdrawn
+      ) {
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.OrderExtendReject,
+            createdAt: new Date(),
+            senderUserName: 'mahfujurrahm535',
+            avatar: ADMINLOGO,
+            projectNumber: projectNumber,
+            userId: findOrder?.userId,
+          },
+          'ADMIN',
+        );
 
         const payload = {
           type: NotificationTypes.OrderExtendReject,
-          senderUserName: "mahfujurrahm535",
+          senderUserName: 'mahfujurrahm535',
           avatar: ADMINLOGO,
           message: `mahfujurrahm535 rejected the extension request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
-        }
+        };
 
         await prisma.notification.create({
           data: {
@@ -966,24 +999,32 @@ export const updateProjectMessage = catchAsync(
             message: `mahfujurrahm535 rejected the extension request`, // Associate the message with the notification
           },
         });
-      } else if (findOrderMessage[0].extendDeliveryTime && !offer.isAccepted && !offer.isRejected && offer.isWithdrawn) {
-        PublicMessageHandler({
-          type: NotificationTypes.OrderExtendWithdraw,
-          createdAt: new Date(),
-          senderUserName: "mahfujurrahm535",
-          avatar: ADMINLOGO,
-          projectNumber: projectNumber,
-          userId: findOrder?.userId
-        }, 'ADMIN')
+      } else if (
+        findOrderMessage[0].extendDeliveryTime &&
+        !offer.isAccepted &&
+        !offer.isRejected &&
+        offer.isWithdrawn
+      ) {
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.OrderExtendWithdraw,
+            createdAt: new Date(),
+            senderUserName: 'mahfujurrahm535',
+            avatar: ADMINLOGO,
+            projectNumber: projectNumber,
+            userId: findOrder?.userId,
+          },
+          'ADMIN',
+        );
 
         const payload = {
           type: NotificationTypes.OrderExtendWithdraw,
-          senderUserName: "mahfujurrahm535",
+          senderUserName: 'mahfujurrahm535',
           avatar: ADMINLOGO,
           message: `mahfujurrahm535 withdrawn the extension request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
-        }
+        };
 
         await prisma.notification.create({
           data: {
@@ -998,27 +1039,30 @@ export const updateProjectMessage = catchAsync(
       } else {
         const findOrder = await prisma.order.findUnique({
           where: {
-            projectNumber: projectNumber
-          }
-        })
+            projectNumber: projectNumber,
+          },
+        });
 
-        PublicMessageHandler({
-          type: NotificationTypes.AdditionalOfferWithdraw,
-          createdAt: new Date(),
-          senderUserName: "mahfujurrahm535",
-          avatar: ADMINLOGO,
-          projectNumber: projectNumber,
-          userId: findOrder?.userId
-        }, 'ADMIN')
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.AdditionalOfferWithdraw,
+            createdAt: new Date(),
+            senderUserName: 'mahfujurrahm535',
+            avatar: ADMINLOGO,
+            projectNumber: projectNumber,
+            userId: findOrder?.userId,
+          },
+          'ADMIN',
+        );
 
         const payload = {
           type: NotificationTypes.AdditionalOfferWithdraw,
-          senderUserName: "mahfujurrahm535",
+          senderUserName: 'mahfujurrahm535',
           avatar: ADMINLOGO,
           message: `mahfujurrahm535 withdrawn the offer`,
           projectNumber: projectNumber,
           createdAt: new Date(),
-        }
+        };
 
         await prisma.notification.create({
           data: {
@@ -1031,7 +1075,6 @@ export const updateProjectMessage = catchAsync(
         });
       }
     }
-
 
     if (!updateMessage) {
       return sendResponse(res, {
@@ -1055,7 +1098,9 @@ const updateUnseenMessage = catchAsync(async (req: Request, res: Response) => {
 
   const updateData = {
     isClientSeen: role === 'USER' ? true : undefined,
-    isAdminSeen: ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(role as string) ? true : undefined,
+    isAdminSeen: ['ADMIN', 'SUB_ADMIN', 'SUPER_ADMIN'].includes(role as string)
+      ? true
+      : undefined,
   };
 
   const updateUnseenMessage = await prisma.orderMessage.updateMany({
@@ -1081,5 +1126,5 @@ export const orderMessageController = {
   getMessages,
   deleteMessage,
   updateProjectMessage,
-  updateUnseenMessage
+  updateUnseenMessage,
 };

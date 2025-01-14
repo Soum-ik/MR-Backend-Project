@@ -116,7 +116,10 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 ? durationHours.toString()
                 : '',
               deliveryDate: UpdatedDeliveryDate,
-              totalPrice: ((parseFloat(orderData?.totalPrice as string) || 0) + parseInt(updateMessage.price || '0')).toString(),
+              totalPrice: (
+                (parseFloat(orderData?.totalPrice as string) || 0) +
+                parseInt(updateMessage.price || '0')
+              ).toString(),
             },
           });
 
@@ -178,7 +181,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               customOffer: updateMessage,
             },
           });
-
 
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
@@ -254,17 +256,19 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
             console.log(orderData, 'order data checking ');
 
-
             if (orderData) {
               const userData = (await userFinder(orderData?.userId)) as User;
 
-              PublicMessageHandler({
-                type: NotificationTypes.OrderExtend,
-                createdAt: new Date(),
-                senderUserName: userData.userName,
-                avatar: userData.image,
-                message: '',
-              }, 'USER')
+              PublicMessageHandler(
+                {
+                  type: NotificationTypes.OrderExtend,
+                  createdAt: new Date(),
+                  senderUserName: userData.userName,
+                  avatar: userData.image,
+                  message: '',
+                },
+                'USER',
+              );
 
               const payload = {
                 type: NotificationTypes.OrderExtend,
@@ -273,14 +277,14 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 message: '',
                 projectNumber: orderData.projectNumber,
                 createdAt: new Date(),
-              }
+              };
               await prisma.notification.create({
                 data: {
                   senderId: userData.id as string,
                   recipient: 'ADMIN',
                   payload: payload,
                   message: '',
-                  isClientSeen: true
+                  isClientSeen: true,
                 },
               });
             }
@@ -381,7 +385,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                     ? durationHours.toString()
                     : '',
                   deliveryDate: updatedDeliveryDate,
-                  totalPrice: (parseInt(orderData?.totalPrice as string) || 0) + (updateMessage.amount || 0).toString(),
+                  totalPrice:
+                    (parseInt(orderData?.totalPrice as string) || 0) +
+                    (updateMessage.amount || 0).toString(),
                 },
               });
             } else {
@@ -389,14 +395,22 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             }
           }
         } else if (session?.metadata?.paymentType === PaymentType.TIPS) {
-
           const updateTips = { amount: data?.ammount || 0 };
+          const order = await prisma.order.findUnique({
+            where: {
+              projectNumber: data?.projectNumber,
+            },
+          });
           const orderData = await prisma.order.update({
             where: {
               projectNumber: data?.projectNumber,
             },
             data: {
               projectTips: updateTips,
+              totalPrice: (
+                (parseFloat(order?.totalPrice as string) || 0) +
+                parseInt(data?.ammount || '0')
+              ).toString(),
             },
           });
 
@@ -411,7 +425,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             senderUserName: userData.userName,
             avatar: userData.image,
             createdAt: new Date(),
-
           };
 
           await prisma.notification.create({
@@ -496,7 +509,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 type: NotificationTypes.Order,
                 createdAt: new Date(),
               },
-              "USER",
+              'USER',
             );
           }
         }
