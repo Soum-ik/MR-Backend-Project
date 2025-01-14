@@ -74,7 +74,7 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         payload.type !== 'Message'
       );
     });
- 
+
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -112,11 +112,14 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
 const getUnseenMessageController = catchAsync(
   async (req: Request, res: Response) => {
     const { user_id, role } = req.user as TokenCredential;
+    const { notificationId } = req.params;
 
     if (role === 'USER') {
-      await prisma.notification.updateMany({
+      await prisma.notification.update({
         where: {
+          id: notificationId,
           recipientId: user_id,
+          isClientSeen : false
         },
         data: {
           isClientSeen: true,
@@ -128,8 +131,11 @@ const getUnseenMessageController = catchAsync(
         select: { isAdminSeen: true },
       });
 
-      await prisma.notification.updateMany({
-        where: { recipient: 'ADMIN' },
+      await prisma.notification.update({
+        where: {
+          id: notificationId,
+          recipient: 'ADMIN',
+        },
         data: {
           isAdminSeen: { push: user_id }, // `push` appends to the array
         },

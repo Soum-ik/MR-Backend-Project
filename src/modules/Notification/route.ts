@@ -40,7 +40,7 @@ router.get(
 );
 
 router.put(
-  '/update',
+  '/update/:notificationId',
   authenticateToken(
     USER_ROLE.ADMIN,
     USER_ROLE.SUB_ADMIN,
