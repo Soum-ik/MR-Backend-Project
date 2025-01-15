@@ -64,7 +64,7 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         recipient: 'ADMIN',
       },
       orderBy: {
-        updateAt: 'desc',
+        createdAt: 'desc',
       },
     });
 
@@ -91,7 +91,7 @@ const getNotifications = catchAsync(async (req: Request, res: Response) => {
         recipientId: user_id,
       },
       orderBy: {
-        updateAt: 'desc',
+        createdAt: 'desc',
       },
     });
 
