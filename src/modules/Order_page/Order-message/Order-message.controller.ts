@@ -161,7 +161,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       return totalNewComments;
     };
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
-
+    const offer = message?.extendDeliveryTime as unknown as ExtendDelivery;
     if (message?.imageComments && total > 0) {
       PublicMessageHandler(
         {
@@ -196,7 +196,16 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isClientSeen: true,
         },
       });
-    } else {
+    } else if (
+      message?.extendDeliveryTime &&
+      !offer.isAccepted &&
+      !offer.isRejected &&
+      !offer.isWithdrawn
+    ) {
+      console.log('Extend delivery from user request');
+      
+    }
+    else {
       PublicMessageHandler(
         {
           type: NotificationTypes.OrderMessage,
@@ -342,7 +351,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           avatar: ADMINLOGO,
           message: messageText,
           userId: recipientId,
-          projectNumber : projectNumber,
+          projectNumber: projectNumber,
         },
         'ADMIN',
       );
@@ -447,6 +456,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText,
           userId: recipientId,
           projectNumber,
+          commentQuantity: total,
         },
         'ADMIN',
       );
@@ -459,6 +469,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
+        commentQuantity: total,
       };
       await prisma.notification.create({
         data: {
