@@ -210,6 +210,39 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       console.log('Extend delivery from user request');
     } else if (message?.deliverProject) {
       console.log('Delivery project from user request');
+    } else if (message?.attachment && message?.attachment?.length > 0) {
+      const payload = {
+        type: NotificationTypes.OrderAttchFile,
+        createdAt: new Date(),
+        senderUserName: userData.userName,
+        avatar: userData.image,
+        message: 'Image Comments',
+        userId: user_id,
+        projectNumber: projectNumber,
+      };
+
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.OrderAttchFile,
+          createdAt: new Date(),
+          senderUserName: userData.userName,
+          avatar: userData.image,
+          senderId: user_id,
+          message: messageText,
+          projectNumber: projectNumber,
+          projectImage: 'testing images',
+        },
+        'USER',
+      );
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'ADMIN',
+          payload: payload,
+          message: messageText,
+          isClientSeen: true,
+        },
+      });
     } else {
       PublicMessageHandler(
         {
@@ -267,7 +300,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           data: updateData,
         });
       } else if (
-        (message?.cancelProject as CancelOffer).extendType === 'requestByMe'
+        (message?.cancelProject as CancelOffer)?.extendType === 'requestByMe'
       ) {
         console.log('direct cancel');
       } else {
@@ -386,7 +419,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
     } else if (
-      (message?.cancelProject as CancelOffer).extendType === 'requestByMe'
+      (message?.cancelProject as CancelOffer)?.extendType === 'requestByMe'
     ) {
       console.log('direct cancel');
     } else if (message.cancelProject && !message.isCancelled) {
@@ -495,6 +528,44 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
           isAdminSeen: [user_id],
+        },
+      });
+    } else if (message?.attachment && message?.attachment?.length > 0) {
+
+      const orderInfo = await prisma.order.findUnique({ where: { projectNumber: projectNumber } })
+
+      const payload = {
+        type: NotificationTypes.OrderAttchFile,
+        createdAt: new Date(),
+        senderUserName: 'mahfujurrahm535',
+        avatar: ADMINLOGO,
+        message: 'Image Comments',
+        userId: orderInfo?.userId,
+        projectNumber: projectNumber,
+      };
+
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.OrderAttchFile,
+          createdAt: new Date(),
+          senderUserName: 'mahfujurrahm535',
+          avatar: ADMINLOGO,
+          senderId: user_id,
+          message: messageText,
+          projectNumber: projectNumber,
+          projectImage: 'testing images',
+          userId: orderInfo?.userId,
+        },
+        'ADMIN',
+      );
+      await prisma.notification.create({
+        data: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          recipientId: orderInfo?.userId,
+          payload: payload,
+          message: messageText,
+          isClientSeen: true,
         },
       });
     } else {
