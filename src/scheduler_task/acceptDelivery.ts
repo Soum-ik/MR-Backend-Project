@@ -5,7 +5,9 @@ import { print } from '../helper/colorConsolePrint.ts/colorizedConsole';
 import { prisma } from '../libs/prismaHelper';
 import { OrderStatus } from '../modules/Order_page/Order_page.constant';
 import { deliverProjectT } from '../modules/payment/payment.interface';
-import PublicMessageHandler from '../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, {
+  ADMINLOGO,
+} from '../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../utils/userFinder';
 
 function isDeliverProjectT(offer: unknown): offer is deliverProjectT {
@@ -90,10 +92,10 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   user: {
                     update: {
                       totalOrder: {
-                        increment: 1
-                      }
-                    }
-                  }
+                        increment: 1,
+                      },
+                    },
+                  },
                 },
               });
 
@@ -135,7 +137,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   projectNumber: order.projectNumber,
                   senderUserName: 'mahfujurrahm535',
                   createdAt: new Date(),
-                  avatar: '',
+                  avatar: ADMINLOGO,
                 };
 
                 await prisma.notification.create({
@@ -153,7 +155,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     type: NotificationTypes.CompleteOrderUser,
                     createdAt: new Date(),
                     senderUserName: 'mahfujurrahm535',
-                    avatar: '',
+                    avatar: ADMINLOGO,
                   },
                   'ADMIN',
                 );

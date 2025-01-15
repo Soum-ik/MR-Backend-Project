@@ -1,15 +1,21 @@
+import { User } from '@prisma/client';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../../config/config';
+import { NotificationTypes } from '../../../constants/Notification';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import { ProjectStatus } from '../Order_page.constant';
-import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, {
+  ADMINLOGO,
+} from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
-import { User } from '@prisma/client';
-import { NotificationTypes } from '../../../constants/Notification';
+import { ProjectStatus } from '../Order_page.constant';
+
+interface CancelOffer {
+  extendType?: string;
+}
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 export const CancelProject = catchAsync(async (req: Request, res: Response) => {
@@ -64,19 +70,28 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
 
   const userData = (await userFinder(orderData?.userId as string)) as User;
 
+  const isAdminType =
+    (findMessagee[0]?.cancelProject as CancelOffer).extendType ===
+    'requestByMe';
+
+  console.log(isAdminType, 'kaj korray niba');
+
   const payload = {
     thumbnailUrl: orderData?.projectImage,
-    type: NotificationTypes.CancelAccept,
+    type: isAdminType
+      ? NotificationTypes.DirectCancel
+      : NotificationTypes.CancelAccept,
     projectNumber: orderData?.projectNumber,
-    senderUserName: userData.userName,
-    avatar: userData.image,
+    senderUserName: isAdminType ? 'mahfujurrahm535' : userData.userName,
+    avatar: isAdminType ? ADMINLOGO : userData.image,
     createdAt: new Date(),
   };
 
   await prisma.notification.create({
     //
     data: {
-      recipient: 'ADMIN',
+      recipient: isAdminType ? 'USER' : 'ADMIN',
+      recipientId: isAdminType ? orderData?.userId : '',
       message: ``,
       senderId: orderData?.id as string,
       isAdminSent: true,
@@ -86,20 +101,23 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
   PublicMessageHandler(
     {
       thumbnailUrl: orderData?.projectImage,
-      type: NotificationTypes.CancelAccept,
+      type: isAdminType
+        ? NotificationTypes.DirectCancel
+        : NotificationTypes.CancelAccept,
       projectNumber: orderData?.projectNumber,
       createdAt: new Date(),
-      senderUserName: userData.userName,
-      avatar: userData.image,
+      senderUserName: isAdminType ? 'mahfujurrahm535' : userData.userName,
+      avatar: isAdminType ? ADMINLOGO : userData.image,
+      userId: isAdminType ? orderData?.userId : '',
     },
-    'USER',
+    isAdminType ? 'ADMIN' : 'USER',
   );
 
   const payload2 = {
     thumbnailUrl: orderData?.projectImage,
     type: NotificationTypes.CancelAcceptUser,
     projectNumber: orderData?.projectNumber,
-    senderUserName: "mahfujurrahm535",
+    senderUserName: 'mahfujurrahm535',
     createdAt: new Date(),
   };
 
@@ -119,11 +137,10 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
       type: NotificationTypes.CancelAcceptUser,
       projectNumber: orderData?.projectNumber,
       createdAt: new Date(),
-      senderUserName: "mahfujurrahm535",
+      senderUserName: 'mahfujurrahm535',
     },
     'ADMIN',
   );
-
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,

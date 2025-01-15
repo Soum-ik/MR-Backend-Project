@@ -7,7 +7,9 @@ import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, {
+  ADMINLOGO,
+} from '../../../socket/handlers/PublicMessageHandler';
 import { daysToHours } from '../../../utils/dayToHours';
 import { userFinder } from '../../../utils/userFinder';
 import { extendDeliveryTimeT } from '../../payment/payment.interface';
@@ -104,7 +106,7 @@ const approveExtensionRequest = catchAsync(
           hours: orderData.durationHours ? orderRes?.durationHours : null,
           createdAt: new Date(),
           senderUserName: 'mahfujurrahm535',
-          avatar: '',
+          avatar: ADMINLOGO,
         };
 
         await prisma.notification.create({
@@ -126,7 +128,7 @@ const approveExtensionRequest = catchAsync(
             hours: orderData.durationHours ? orderRes?.durationHours : null,
             userId: orderData.userId,
             senderUserName: 'mahfujurrahm535',
-            avatar: '',
+            avatar: ADMINLOGO,
             createdAt: new Date(),
           },
           'ADMIN',
