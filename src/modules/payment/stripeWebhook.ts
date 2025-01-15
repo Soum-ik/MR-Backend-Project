@@ -9,7 +9,6 @@ import AppError from '../../errors/AppError';
 import { prisma } from '../../libs/prismaHelper';
 import catchAsync from '../../libs/utlitys/catchSynch';
 import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
-import { daysToHours } from '../../utils/dayToHours';
 import { userFinder } from '../../utils/userFinder';
 import { updateDeliveryDate } from '../Order_page/ExtendDelivery/ExtendDelivary.utils';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
@@ -56,9 +55,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           const { isAccepted, ...rest } =
             messageData?.additionalOffer as unknown as additionalOfferT;
 
-          const { duration: Days } = rest
-          console.log(Days, 'Checking duration');
-          
+          const { duration: Days } = rest;
+
           const updateMessage = {
             isAccepted: true,
             ...rest,
@@ -88,13 +86,10 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           });
 
           if (!orderData) {
-            throw new Error('')
+            throw new Error('');
           }
           const { duration, durationHours, updatedDeliveryDate } =
             await updateDeliveryDate(orderData, parseInt(Days));
-
-          console.log(duration, durationHours, updateDeliveryDate, 'from update delivery function');
-          
 
           const updatedOrder = await prisma.order.update({
             where: {
@@ -240,13 +235,10 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           );
 
+          const orderData = await prisma.order.findUnique({
+            where: { id: data?.orderId },
+          });
           if (existingRequest) {
-            const orderData = await prisma.order.findUnique({
-              where: { id: data?.orderId },
-            });
-
-            console.log(orderData, 'order data checking ');
-
             if (orderData) {
               const userData = (await userFinder(orderData?.userId)) as User;
 
@@ -292,6 +284,37 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   data?.requestedByClient === 'false' ? false : true,
                 requestJSON: data,
                 paymentStatus: paymentStats.status,
+              },
+            });
+            const userData = (await userFinder(
+              orderData?.userId as string,
+            )) as User;
+            PublicMessageHandler(
+              {
+                type: NotificationTypes.OrderExtend,
+                createdAt: new Date(),
+                senderUserName: userData.userName,
+                avatar: userData.image,
+                message: '',
+              },
+              'USER',
+            );
+
+            const payload = {
+              type: NotificationTypes.OrderExtend,
+              avatar: userData.image,
+              senderUserName: userData.userName,
+              message: '',
+              projectNumber: orderData?.projectNumber,
+              createdAt: new Date(),
+            };
+            await prisma.notification.create({
+              data: {
+                senderId: userData.id as string,
+                recipient: 'ADMIN',
+                payload: payload,
+                message: '',
+                isClientSeen: true,
               },
             });
           } catch (error) {
@@ -346,7 +369,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 createdAt: new Date(),
               };
 
-              await prisma.notification.create({
+              const res = await prisma.notification.create({
                 data: {
                   recipient: 'ADMIN',
                   message: ``,

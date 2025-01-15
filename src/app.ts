@@ -5,26 +5,25 @@ import express, {
   type Request,
   type Response,
 } from 'express';
-import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import httpStatus from 'http-status';
+import moment from 'moment';
 import { createServer } from 'node:http';
 import { WEB_CACHE } from './config/config';
+import sendResponse from './libs/sendResponse';
+import globalError from './middleware/globalError';
 import morganLogger from './middleware/morganLogger';
 import { stripeWebhook } from './modules/payment/stripeWebhook';
 import router from './routes/route';
-import socketServer from './socket/socket-server';
-import globalError from './middleware/globalError';
-import moment from 'moment';
-import sendResponse from './libs/sendResponse';
+import './scheduler_task/Reminder';
+import './scheduler_task/acceptDelivery';
+import './scheduler_task/clockMark';
+import './scheduler_task/messageNotification';
+import './scheduler_task/onTimeDelivery';
+import './scheduler_task/orderMessageNotification';
+import './scheduler_task/scheduleCustomOfferUpdate';
 import './scheduler_task/scheduler';
-import './scheduler_task/scheduleCustomOfferUpdate'
-import './scheduler_task/acceptDelivery'
-import './scheduler_task/onTimeDelivery'
-import './scheduler_task/Reminder'
-import './scheduler_task/messageNotification'
-import './scheduler_task/orderMessageNotification'
-import './scheduler_task/clockMark'
+import socketServer from './socket/socket-server';
 // const limiter = rateLimit({
 //   windowMs: 1 * 60 * 1000, // 1 minute
 //   max: 100, // Limit each IP to 100 requests per windowMs
@@ -54,7 +53,7 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 // Apply morganLogger before other middlewares
-// app.use(morganLogger);
+app.use(morganLogger);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
@@ -62,7 +61,6 @@ app.use(helmet());
 // app.use(limiter);
 app.set('etag', WEB_CACHE);
 app.use('/api/v1', router);
-
 
 app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 

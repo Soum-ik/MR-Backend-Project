@@ -38,6 +38,10 @@ interface Message {
   imageComments?: Image[];
 }
 
+interface CancelOffer {
+  extendType?: string;
+}
+
 // Controller: Send a message
 const sendMessage = catchAsync(async (req: Request, res: Response) => {
   const { user_id, role } = req.user as TokenCredential;
@@ -162,6 +166,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     };
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
     const offer = message?.extendDeliveryTime as unknown as ExtendDelivery;
+    console.log(message, 'user');
     if (message?.imageComments && total > 0) {
       PublicMessageHandler(
         {
@@ -203,9 +208,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       !offer.isWithdrawn
     ) {
       console.log('Extend delivery from user request');
-      
-    }
-    else {
+    } else if (message?.deliverProject) {
+      console.log('Delivery project from user request');
+    } else {
       PublicMessageHandler(
         {
           type: NotificationTypes.OrderMessage,
@@ -261,6 +266,10 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           },
           data: updateData,
         });
+      } else if (
+        (message?.cancelProject as CancelOffer).extendType === 'requestByMe'
+      ) {
+        console.log('direct cancel');
       } else {
         // Create a new notification if it doesn't exist
         await prisma.notification.create({
@@ -307,6 +316,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     });
     const userData = (await userFinder(user_id)) as User;
     const offer = message?.extendDeliveryTime as unknown as ExtendDelivery;
+    console.log(message, 'admin');
 
     const calculateNewCommentsAndReplies = (message: Message) => {
       const filteredImages =
@@ -375,6 +385,10 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
+    } else if (
+      (message?.cancelProject as CancelOffer).extendType === 'requestByMe'
+    ) {
+      console.log('direct cancel');
     } else if (message.cancelProject && !message.isCancelled) {
       PublicMessageHandler(
         {
@@ -446,6 +460,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
+    } else if (message?.deliverProject) {
+      console.log('Delivery project from user request');
     } else if (message.imageComments && total) {
       PublicMessageHandler(
         {

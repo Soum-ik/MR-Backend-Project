@@ -30,10 +30,16 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
     if (!order) {
       throw new Error('Order not found');
     }
-    const extension = "." + updatedMessage?.deliverProject?.thumbnailImage?.name?.split(".").pop();
+    const extension =
+      '.' +
+      updatedMessage?.deliverProject?.thumbnailImage?.name?.split('.').pop();
 
     // Remove the last occurrence of the extension
-    const nameWithoutExtName = updatedMessage?.deliverProject?.thumbnailImage?.name?.replace(new RegExp(`${extension}$`), "");
+    const nameWithoutExtName =
+      updatedMessage?.deliverProject?.thumbnailImage?.name?.replace(
+        new RegExp(`${extension}$`),
+        '',
+      );
     // Update order with delivery request
     const updateOrder = await prisma.order.update({
       where: {
@@ -53,10 +59,10 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         user: {
           update: {
             totalOrder: {
-              increment: 1
-            }
-          }
-        }
+              increment: 1,
+            },
+          },
+        },
       },
     });
 
@@ -330,6 +336,7 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
       message: ``,
       senderId: order.userId as string,
       payload: payload,
+      recipientId: order.userId as string,
     },
   });
   PublicMessageHandler(
