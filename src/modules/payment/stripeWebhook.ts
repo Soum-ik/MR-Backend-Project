@@ -56,6 +56,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           const { isAccepted, ...rest } =
             messageData?.additionalOffer as unknown as additionalOfferT;
 
+          const { duration: Days } = rest
+          console.log(Days, 'Checking duration');
+          
           const updateMessage = {
             isAccepted: true,
             ...rest,
@@ -84,27 +87,15 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
           });
 
-          const hours = daysToHours(data?.duration || '0');
-
-          const duration =
-            parseInt(orderData?.duration || '0') +
-            parseInt(data?.duration || '0');
-          const durationHours =
-            parseInt(orderData?.durationHours || '0') + hours;
-
-          let UpdatedDeliveryDate;
-
-          if (orderData?.deliveryDate && orderData?.durationHours) {
-            UpdatedDeliveryDate = new Date(orderData?.deliveryDate); //+
-            UpdatedDeliveryDate.setHours(
-              UpdatedDeliveryDate.getHours() + durationHours,
-            ); //+
-          } else if (orderData?.deliveryDate && orderData?.duration) {
-            UpdatedDeliveryDate = new Date(orderData?.deliveryDate); //+
-            UpdatedDeliveryDate.setDate(
-              UpdatedDeliveryDate.getDate() + duration,
-            ); //+
+          if (!orderData) {
+            throw new Error('')
           }
+          const { duration, durationHours, updatedDeliveryDate } =
+            await updateDeliveryDate(orderData, parseInt(Days));
+
+          console.log(duration, durationHours, updateDeliveryDate, 'from update delivery function');
+          
+
           const updatedOrder = await prisma.order.update({
             where: {
               id: data?.orderId,
@@ -115,7 +106,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               durationHours: orderData?.durationHours
                 ? durationHours.toString()
                 : '',
-              deliveryDate: UpdatedDeliveryDate,
+              deliveryDate: updatedDeliveryDate,
               totalPrice: (
                 (parseFloat(orderData?.totalPrice as string) || 0) +
                 parseInt(updateMessage.price || '0')
