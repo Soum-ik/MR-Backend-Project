@@ -286,6 +286,31 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 paymentStatus: paymentStats.status,
               },
             });
+            const findMessage = await prisma.orderMessage.findMany({
+              where: {
+                uniqueId: data?.updateMessageId,
+              },
+              take: 1,
+            });
+
+            const messageData = findMessage[0];
+            const { isPending, ...rest } =
+              messageData?.extendDeliveryTime as unknown as extendDeliveryTimeT;
+
+            const updateMessage = {
+              isPending: false,
+              ...rest,
+            };
+
+            await prisma.orderMessage.updateMany({
+              where: {
+                uniqueId: data?.updateMessageId,
+              },
+              data: {
+                extendDeliveryTime: updateMessage,
+              },
+            });
+
             const userData = (await userFinder(
               orderData?.userId as string,
             )) as User;

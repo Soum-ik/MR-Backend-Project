@@ -25,6 +25,7 @@ interface extendDeliveryTimeT {
   extendType: string;
   isAccepted: boolean;
   isRejected: boolean;
+  isPending: boolean;
   amount?: number;
 }
 
