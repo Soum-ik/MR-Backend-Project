@@ -18,26 +18,13 @@ import {
   customOfferT,
   extendDeliveryTimeT,
 } from './payment.interface';
+import { sendMail } from '../../helper/smtp/AWS_SES';
+import { tipsTemplate } from '../../helper/email/tipsTemplate';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
 const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
   const event = req.body;
-  // console.log(event, 'checking data from custom offer after confirm ');
-
-  // console.log('all event', event);
-
-  // try {
-  //     event = stripe.webhooks.constructEvent(
-  //         req.body,
-  //         sig,
-  //         "whsec_1b45b1e0b2fe103a4a09e4f70e00a4d5cba39ea51a8f126b5486f03466a646c3"
-  //     );
-  //     console.log("iseventrunning ❗", event);
-  // } catch (error: any) {
-  //     console.error("Webhook signature verification failed:", error.message);
-  //     return res.status(400).send(`Webhook Error: ${error.message}`);
-  // }
   switch (event.type) {
     case 'checkout.session.completed':
       {
@@ -487,6 +474,22 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
             'USER',
           );
+
+
+          const emailData = {
+            projectNumber: orderData.projectNumber,
+            clientName: userData.userName
+          }
+
+          const email = await sendMail({
+            from: 'ratulsarkar216@gmail.com',
+            to: 'sarkarsoumik215@gmail.com',
+            subject: `You've just been tipped!`,
+            html: tipsTemplate(emailData),
+          });
+
+          console.log(email, ' email checking');
+          
 
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
