@@ -13,10 +13,6 @@ const cancelTemplate = (data: CancelTemplateData): string => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email Sign-Up Confirmation</title>
     <style>
-      * {
-        margin: 0;
-        box-sizing: border-box;
-      }
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
@@ -114,6 +110,15 @@ const cancelTemplate = (data: CancelTemplateData): string => {
     </style>
   </head>
   <body>
+  <table
+      border="0"
+      align="center"
+      width="600"
+      cellspacing="0"
+      cellpadding="0"
+    >
+      <tr>
+        <td>
     <div class="container">
       <div class="logo-box">
         <img
@@ -180,6 +185,9 @@ const cancelTemplate = (data: CancelTemplateData): string => {
         </li>
       </ul>
     </div>
+    </td>
+      </tr>
+    </table>
   </body>
 </html>
 `;

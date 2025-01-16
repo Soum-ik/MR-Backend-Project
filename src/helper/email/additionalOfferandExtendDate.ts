@@ -115,6 +115,15 @@ export const emailTemplate = (data: data) => {
     </style>
   </head>
   <body>
+  <table
+      border="0"
+      align="center"
+      width="600"
+      cellspacing="0"
+      cellpadding="0"
+    >
+      <tr>
+        <td>
     <div class="container">
       <div class="logo-box">
         <img
@@ -260,6 +269,9 @@ export const emailTemplate = (data: data) => {
         </li>
       </ul>
     </div>
+    </td>
+      </tr>
+    </table>
   </body>
 </html>
 `;
