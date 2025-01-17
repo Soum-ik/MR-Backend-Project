@@ -14,10 +14,6 @@ export const commentsTemplate = (data: data) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email Sign-Up Confirmation</title>
     <style>
-      * {
-        margin: 0;
-        box-sizing: border-box;
-      }
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
@@ -101,6 +97,7 @@ export const commentsTemplate = (data: data) => {
       .social a {
         width: 30px;
         height: 30px;
+        line-height: 30px;
         border-radius: 50%;
         border: 1px solid #ccc;
         display: inline-block;
@@ -115,6 +112,15 @@ export const commentsTemplate = (data: data) => {
     </style>
   </head>
   <body>
+  <table
+      border="0"
+      align="center"
+      width="600"
+      cellspacing="0"
+      cellpadding="0"
+    >
+      <tr>
+        <td>
     <div class="container">
       <div class="logo-box">
         <img
@@ -180,6 +186,9 @@ export const commentsTemplate = (data: data) => {
         </li>
       </ul>
     </div>
+    </td>
+      </tr>
+    </table>
   </body>
 </html>
 `;
