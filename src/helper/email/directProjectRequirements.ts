@@ -1,8 +1,8 @@
 interface data {
   projectNumber: string;
   clientName: string;
-  items: [];
-  requirements: [];
+  items?: [];
+  requirements?: [];
   orderCreateDate: Date;
 }
 

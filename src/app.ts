@@ -15,14 +15,14 @@ import globalError from './middleware/globalError';
 import morganLogger from './middleware/morganLogger';
 import { stripeWebhook } from './modules/payment/stripeWebhook';
 import router from './routes/route';
-import './scheduler_task/Reminder';
-import './scheduler_task/acceptDelivery';
-import './scheduler_task/clockMark';
-import './scheduler_task/messageNotification';
-import './scheduler_task/onTimeDelivery';
-import './scheduler_task/orderMessageNotification';
-import './scheduler_task/scheduleCustomOfferUpdate';
-import './scheduler_task/scheduler';
+// import './scheduler_task/Reminder';
+// import './scheduler_task/acceptDelivery';
+// import './scheduler_task/clockMark';
+// import './scheduler_task/messageNotification';
+// import './scheduler_task/onTimeDelivery';
+// import './scheduler_task/orderMessageNotification';
+// import './scheduler_task/scheduleCustomOfferUpdate';
+// import './scheduler_task/scheduler';
 import socketServer from './socket/socket-server';
 // const limiter = rateLimit({
 //   windowMs: 1 * 60 * 1000, // 1 minute
@@ -53,7 +53,7 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 // Apply morganLogger before other middlewares
-app.use(morganLogger);
+// app.use(morganLogger);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());

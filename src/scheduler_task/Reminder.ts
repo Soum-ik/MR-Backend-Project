@@ -3,6 +3,8 @@ import { print } from '../helper/colorConsolePrint.ts/colorizedConsole';
 import { prisma } from '../libs/prismaHelper';
 import PublicMessageHandler from '../socket/handlers/PublicMessageHandler';
 import { NotificationTypes } from '../constants/Notification';
+import { sendMail } from '../helper/smtp/AWS_SES';
+import { twelveHoursDelivery } from '../helper/email/twelveHoursDelivery';
 
 
 
@@ -28,6 +30,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                 projectName: true,
                 userId: true,
                 projectImage: true,
+                user: true
             },
         });
 
@@ -36,7 +39,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
         if (orderList.length > 0) {
             await Promise.all(
                 orderList.map(async (message) => {
-                    const { deliveryDate, projectNumber, projectName } = message;
+                    const { deliveryDate, projectNumber, projectName, user } = message;
 
                     print.yellow(`Sending delivery reminder for project: ${projectNumber}.`);
 
@@ -66,6 +69,18 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                             createdAt: new Date(),
                         }, 'USER');
 
+
+                        const emailData = {
+                            clientName: user.userName,
+                            projectNumber: projectNumber,
+                        }
+
+
+                        await sendMail({
+                            to: 'sarkarsoumik215@gmail.com',
+                            subject: `Your delivery deadline is coming up`,
+                            html: twelveHoursDelivery(emailData),
+                        });
 
 
                         print.green(`Delivery reminder sent for project: ${projectNumber}.`);

@@ -1,10 +1,7 @@
-interface TemplateCredentials {
-  name: string;
-  code: number;
-}
+ 
 
-export const emailVerficationTemplate = (data: TemplateCredentials) => {
-  return `
+export const emailVerficationTemplate = (code: number) => {
+    return `
     <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -83,7 +80,7 @@ export const emailVerficationTemplate = (data: TemplateCredentials) => {
             <p>Please use the following One Time Password (OTP)</p>
             <div class="verification-code">
                 <!-- Replace this text with the actual verification code dynamically generated in your application -->
-                656757
+                ${code}
             </div>
             <p>
                 If you did not sign up for this service, please ignore this

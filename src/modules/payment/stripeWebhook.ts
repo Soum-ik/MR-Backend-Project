@@ -20,6 +20,8 @@ import {
 } from './payment.interface';
 import { sendMail } from '../../helper/smtp/AWS_SES';
 import { tipsTemplate } from '../../helper/email/tipsTemplate';
+import { emailTemplate } from '../../helper/email/additionalOfferandExtendDate';
+import { directProjectPlace } from '../../helper/email/directProjectPlace';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -130,6 +132,19 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             },
             'USER',
           );
+
+
+          const emailData = {
+            clientName: userData.userName,
+            projectNumber: orderData?.projectNumber,
+          }
+
+          await sendMail({
+            to: 'sarkarsoumik215@gmail.com',
+            subject: `Your offer has been accepted`,
+            html: emailTemplate(emailData),
+          });
+
         } else if (
           session?.metadata?.paymentType === PaymentType.CUSTOM_OFFER
         ) {
@@ -482,14 +497,13 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           }
 
           const email = await sendMail({
-            from: 'ratulsarkar216@gmail.com',
             to: 'sarkarsoumik215@gmail.com',
             subject: `You've just been tipped!`,
             html: tipsTemplate(emailData),
           });
 
           console.log(email, ' email checking');
-          
+
 
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
@@ -532,7 +546,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               createdAt: new Date(),
             };
 
-            await prisma.notification.create({
+            const notification = await prisma.notification.create({
               data: {
                 recipient: 'ADMIN',
                 message: ``,
@@ -540,6 +554,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 payload: payload,
               },
             });
+
+            
+
             PublicMessageHandler(
               {
                 msg: ``,
@@ -553,6 +570,17 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               },
               'USER',
             );
+
+            const emailData = {
+              clientName: userData.userName,
+              projectNumber: order.projectNumber,
+            }
+
+            await sendMail({
+              to: 'sarkarsoumik215@gmail.com',
+              subject: `You've received a project from ${emailData.clientName}`,
+              html: directProjectPlace(emailData),
+            });
           }
         }
       }

@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
-import sendVeficationEmail from "../helper/email/emailSend";
+// import sendVeficationEmail from "../helper/email/emailSend";
 import { createToken } from "../libs/authHelper";
 import { prisma } from "../libs/prismaHelper";
 import sendResponse from "../libs/sendResponse";
@@ -193,12 +193,12 @@ const forgotPass = async (req: Request, res: Response) => {
             data: { otp: verfiyCode }, // Update the OTP field
         });
         // Send verification email
-        await sendVeficationEmail({
-            name: fullName,
-            receiver: email,
-            subject: "Email Verfication",
-            code: verfiyCode,
-        });
+        // await sendVeficationEmail({
+        //     name: fullName,
+        //     receiver: email,
+        //     subject: "Email Verfication",
+        //     code: verfiyCode,
+        // });
         return sendResponse<any>(res, {
             statusCode: httpStatus.OK,
             success: true,

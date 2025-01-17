@@ -14,6 +14,9 @@ import PublicMessageHandler, {
 import { userFinder } from '../../../utils/userFinder';
 import { inboxUpdatePayload } from '../../Notification/InboxNotification.interface';
 import { USER_ROLE } from '../../user/user.constant';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
+import { commentsTemplate } from '../../../helper/email/commentsTemplate';
+import { cancelTemplate } from '../../../helper/email/cancelTemplate';
 
 interface ExtendDelivery {
   isAccepted: boolean;
@@ -99,6 +102,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
+  console.log(admins, "checking admins");
+
+
   const commonkey = uuidv4();
 
   if (role === 'USER') {
@@ -166,7 +172,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     };
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
     const offer = message?.extendDeliveryTime as unknown as ExtendDelivery;
-    console.log(message, 'user');
+
     if (message?.imageComments && total > 0) {
       PublicMessageHandler(
         {
@@ -201,6 +207,19 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isClientSeen: true,
         },
       });
+
+      const emailData = {
+        projectNumber,
+        clientName: userData.userName,
+        commentLength: total
+      }
+
+      await sendMail({
+        to: 'sarkarsoumik215@gmail.com',
+        subject: `${emailData.clientName} left you new comments`,
+        html: commentsTemplate(emailData),
+      });
+
     } else if (
       message?.extendDeliveryTime &&
       !offer.isAccepted &&
@@ -455,6 +474,18 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
+
+      const emailData = {
+        projectNumber: projectNumber,
+        clientName: 'mahfujurrahm535'
+      }
+      await sendMail({
+        // from: 'ratulsarkar216@gmail.com',
+        to: userData.email,
+        subject: `mahfujurrahm535 has sent a cancellation request`,
+        html: cancelTemplate(emailData),
+      });
+
     } else if (
       message.extendDeliveryTime &&
       !offer.isAccepted &&
@@ -530,6 +561,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [user_id],
         },
       });
+
+      // commentsTemplate
     } else if (message?.attachment && message?.attachment?.length > 0) {
 
       const orderInfo = await prisma.order.findUnique({ where: { projectNumber: projectNumber } })
@@ -637,78 +670,78 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     }
 
     // Send message to all admins
-    // for (const admin of admins) {
-    //   if (admin.id !== user_id) {
-    //     // If the admin is not the sender
-    //     const messageToAdmin = await prisma.orderMessage.create({
-    //       data: {
-    //         senderId: user_id as string,
-    //         userImage: user?.image,
-    //         senderName: user?.fullName,
-    //         senderUserName: user?.userName,
-    //         recipientId: admin.id,
-    //         messageText,
-    //         attachment,
-    //         replyTo,
-    //         isFromAdmin: role as Role,
-    //         customOffer,
-    //         timeAndDate: timeAndDate.toString(),
-    //         commonKey: commonkey,
-    //         projectNumber: projectNumber,
-    //         imageComments,
-    //         deliverProject,
-    //         extendDeliveryTime,
-    //         additionalOffer,
-    //         cancelProject,
-    //         uniqueId,
-    //         isAdminSeen: true
-    //       },
-    //     });
+    for (const admin of admins) {
+      if (admin.id !== user_id) {
+        // If the admin is not the sender
+        const messageToAdmin = await prisma.orderMessage.create({
+          data: {
+            senderId: user_id as string,
+            userImage: user?.image,
+            senderName: user?.fullName,
+            senderUserName: user?.userName,
+            recipientId: admin.id,
+            messageText,
+            attachment,
+            replyTo,
+            isFromAdmin: role as Role,
+            customOffer,
+            timeAndDate: timeAndDate.toString(),
+            commonKey: commonkey,
+            projectNumber: projectNumber,
+            imageComments,
+            deliverProject,
+            extendDeliveryTime,
+            additionalOffer,
+            cancelProject,
+            uniqueId,
+            isAdminSeen: true
+          },
+        });
 
-    //     const userData = (await userFinder(recipientId)) as User;
+        const userData = (await userFinder(recipientId)) as User;
 
-    //     if (messageToAdmin.additionalOffer) {
-    //       PublicMessageHandler({
-    //         type: NotificationTypes.AdditionalOffer,
-    //         createdAt: new Date(),
-    //         senderUserName: "mahfujurrahm535",
-    //         avatar: ADMINLOGO,
-    //         message: messageText,
-    //         userId: recipientId,
+        if (messageToAdmin.additionalOffer) {
+          PublicMessageHandler({
+            type: NotificationTypes.AdditionalOffer,
+            createdAt: new Date(),
+            senderUserName: "mahfujurrahm535",
+            avatar: ADMINLOGO,
+            message: messageText,
+            userId: recipientId,
 
-    //       }, 'ADMINS')
-    //     } else {
-    //       PublicMessageHandler({
-    //         type: NotificationTypes.Message,
-    //         createdAt: new Date(),
-    //         senderUserName: "mahfujurrahm535",
-    //         avatar: ADMINLOGO,
-    //         message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
-    //         admindId: user_id
-    //       }, 'ADMINS')
+          }, 'ADMINS')
+        } else {
+          PublicMessageHandler({
+            type: NotificationTypes.Message,
+            createdAt: new Date(),
+            senderUserName: "mahfujurrahm535",
+            avatar: ADMINLOGO,
+            message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
+            admindId: user_id
+          }, 'ADMINS')
 
-    //       const payload = {
-    //         type: NotificationTypes.OrderMessage,
-    //         avatar: ADMINLOGO,
-    //         senderUserName: "mahfujurrahm535",
-    //         message: messageText,
-    //         recipientId: recipientId,
-    //         projectNumber: projectNumber,
-    //         createdAt: new Date(),
-    //       }
+          // const payload = {
+          //   type: NotificationTypes.OrderMessage,
+          //   avatar: ADMINLOGO,
+          //   senderUserName: "mahfujurrahm535",
+          //   message: messageText,
+          //   recipientId: recipientId,
+          //   projectNumber: projectNumber,
+          //   createdAt: new Date(),
+          // }
 
-    //       await prisma.notification.create({
-    //         data: {
-    //           senderId: user_id as string,
-    //           recipient: 'ADMIN',
-    //           payload: payload,
-    //           message: messageText, // Associate the message with the notification
-    //         },
-    //       });
-    //     }
+          // await prisma.notification.create({
+          //   data: {
+          //     senderId: user_id as string,
+          //     recipient: 'ADMIN',
+          //     payload: payload,
+          //     message: messageText, // Associate the message with the notification
+          //   },
+          // });
+        }
 
-    //   }
-    // }
+      }
+    }
 
     return sendResponse(res, {
       statusCode: httpStatus.CREATED,

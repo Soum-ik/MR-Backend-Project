@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import sendVeficationEmail from '../../helper/email/emailSend';
+// import sendVeficationEmail from '../../helper/email/emailSend';
 import { createToken, TokenCredential } from '../../libs/authHelper';
 import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
@@ -10,6 +10,8 @@ import { SignupRequestBody } from './user.interface';
 import bcrypt from 'bcrypt'
 import catchAsync from '../../libs/utlitys/catchSynch';
 import { promise } from 'zod';
+import { emailVerficationTemplate } from '../../helper/email/EmailVerificationTemplate';
+import { sendMail } from '../../helper/smtp/AWS_SES';
 export interface User {
   user_id?: string;
   role?: string;
@@ -245,13 +247,14 @@ const forgotPass = async (req: Request, res: Response) => {
       where: { email }, // Specify the user to update
       data: { otp: verfiyCode }, // Update the OTP field
     });
-    // Send verification email
-    await sendVeficationEmail({
-      name: fullName,
-      receiver: email,
-      subject: 'Email Verfication',
-      code: verfiyCode,
+
+    
+    await sendMail({
+      to: email,
+      subject: 'Verification Code',
+      html: emailVerficationTemplate(verfiyCode),
     });
+
     return sendResponse<any>(res, {
       statusCode: httpStatus.OK,
       success: true,
@@ -590,7 +593,7 @@ const getSingelUser = async (
 };
 
 const profile = catchAsync(async (req: Request, res: Response) => {
-  const { user_id } = req.params;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+  const { user_id } = req.params;
 
   const [CP, CR, ART, ARV, LP] = await Promise.all([
     prisma.order.findMany({

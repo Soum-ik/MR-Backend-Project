@@ -1,5 +1,5 @@
 interface data {
-  messageText: string;
+  messageText?: string | null;
   clientName: string;
   attachments?: [];
 }

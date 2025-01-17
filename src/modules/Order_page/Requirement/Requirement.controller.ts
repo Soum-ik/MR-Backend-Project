@@ -11,6 +11,8 @@ import PublicMessageHandler, {
 } from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { OrderStatus, ProjectStatus } from '../Order_page.constant';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
+import { directProjectRequirements } from '../../../helper/email/directProjectRequirements';
 
 const calculateDeliveryDate = (
   duration: string | null,
@@ -136,6 +138,22 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         },
         'ADMIN',
       );
+
+      if (role === 'USER') {
+        const emailData = {
+          clientName: userData.userName,
+          projectNumber: updateRequirements.projectNumber,
+          // items: [],
+          // requirements: [],
+          orderCreateDate: new Date(),
+        }
+
+        await sendMail({
+          to: 'sarkarsoumik215@gmail.com',
+          subject: `You've received a project from ${emailData.clientName}`,
+          html: directProjectRequirements(emailData),
+        });
+      }
     }
 
     return sendResponse<any>(res, {

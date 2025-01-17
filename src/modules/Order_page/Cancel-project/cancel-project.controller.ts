@@ -12,6 +12,9 @@ import PublicMessageHandler, {
 } from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { ProjectStatus } from '../Order_page.constant';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
+import { cancelTemplate } from '../../../helper/email/cancelTemplate';
+
 
 interface CancelOffer {
   extendType?: string;
@@ -141,6 +144,17 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
     },
     'ADMIN',
   );
+
+  const emailData = {
+    clientName: userData.userName,
+    projectNumber: orderData?.projectNumber,
+  }
+
+  await sendMail({
+    to: 'sarkarsoumik215@gmail.com',
+    subject: `${emailData.clientName} has sent a cancellation request`,
+    html: cancelTemplate(emailData),
+  });
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,

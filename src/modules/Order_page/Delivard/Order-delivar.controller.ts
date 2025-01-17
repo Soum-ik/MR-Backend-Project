@@ -9,6 +9,8 @@ import catchAsync from '../../../libs/utlitys/catchSynch';
 import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { OrderStatus, ProjectStatus } from '../Order_page.constant';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
+import { revisionTemplate } from '../../../helper/email/revisionTemplate';
 
 interface deliverProjectT {
   isRevision: boolean;
@@ -241,6 +243,7 @@ const handleDeliveryResponse = catchAsync(
         },
       });
 
+
       const { isRevision, ...other } =
         updatedMessage?.deliverProject as unknown as deliverProjectT;
 
@@ -293,6 +296,18 @@ const handleDeliveryResponse = catchAsync(
         data: {
           deliverProject: updateMessage,
         },
+      });
+
+      const emailData = {
+        clientName: userData.userName,
+        projectNumber: projectNumber,
+        projectName: order.projectName
+      }
+
+      await sendMail({
+        to: 'sarkarsoumik215@gmail.com',
+        subject: `${emailData.clientName} has requested a revision`,
+        html: revisionTemplate(emailData),
       });
 
       return order;

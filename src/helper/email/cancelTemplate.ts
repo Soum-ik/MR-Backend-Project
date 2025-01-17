@@ -3,7 +3,7 @@ interface CancelTemplateData {
   projectNumber: string;
 }
 
-const cancelTemplate = (data: CancelTemplateData): string => {
+export const cancelTemplate = (data: CancelTemplateData): string => {
   const { clientName, projectNumber } = data;
 
   return `<!DOCTYPE html>

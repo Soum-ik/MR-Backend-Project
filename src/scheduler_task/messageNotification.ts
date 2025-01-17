@@ -5,21 +5,23 @@ import PublicMessageHandler from '../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../utils/userFinder';
 import { User, Role } from '@prisma/client';
 import { NotificationTypes } from '../constants/Notification';
+import { sendMail } from '../helper/smtp/AWS_SES';
+import { messagesTemplate } from '../helper/email/messagesTemplate';
 
 
 schedule.scheduleJob('*/10 * * * * *', async () => {
     print.blue('Scheduler running to sending notification...');
 
     try {
-        // const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        const fiveSecondsAgo = new Date(Date.now() - 10 * 1000);
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        // const fiveSecondsAgo = new Date(Date.now() - 10 * 1000);
 
 
         const messageList = await prisma.message.findMany({
             where: {
                 sendNotification: false,
                 createdAt: {
-                    lte: fiveSecondsAgo
+                    lte: fiveMinutesAgo
                 },
                 NOT: {
                     AND: [
@@ -38,6 +40,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                         userName: true,
                         email: true,
                         image: true,
+
                     }
                 },
                 sender: {
@@ -52,6 +55,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                 messageText: true,
                 uniqueId: true,
                 isFromClient: true,
+                attachment: true
             }
         });
 
@@ -63,38 +67,24 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
 
             await Promise.all(uniqueMessages.map(async (message) => {
 
-                const { uniqueId, messageText, sender: { id: SenderId, role, userName }, isFromClient } = message
+                const { uniqueId, messageText, sender: { id: SenderId, role, userName }, isFromClient, attachment } = message
 
                 const userData = (await userFinder(SenderId)) as User;
 
 
-                const payload = {
-                    type: NotificationTypes.Message,
-                    avatar: userData.image,
-                    message: messageText,
-                    createdAt: new Date(),
-                };
+                const emailData = {
+                    clientName: userData.userName,
+                    messageText: messageText,
+                    attachment
+                }
 
-                // await prisma.notification.create({
-                //     data: {
-                //         recipient: isFromClient ? "ADMIN" : "USER",
-                //         message: messageText,
-                //         senderId: SenderId,
-                //         payload: payload,
-                //     },
-                // });
-
-                // PublicMessageHandler(
-                //     {
-                //         type: NotificationTypes.Message,
-                //         createdAt: new Date(),
-                //         senderUserName: userData.userName,
-                //         avatar: userData.image,
-                //         senderId: SenderId,
-                //         message: messageText
-                //     },
-                //     isFromClient ? "USER" : "ADMIN"
-                // );
+                await sendMail({
+                    to: 'sarkarsoumik215@gmail.com',
+                    subject: `You've recieved messages from ${emailData.clientName}`,
+                    html: messagesTemplate(
+                        emailData
+                    ),
+                });
 
                 await prisma.message.updateMany({
                     where: {
