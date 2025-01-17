@@ -105,6 +105,7 @@ export const revisionTemplate = (data: data) => {
       .social a {
         width: 30px;
         height: 30px;
+        line-height: 30px;
         border-radius: 50%;
         border: 1px solid #ccc;
         display: inline-block;
