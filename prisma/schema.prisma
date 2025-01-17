@@ -108,6 +108,7 @@ model Affiliate {
   amount Float  @default(0)
   clicks Int    @default(0)
   link   String @unique
+  url    String
 
   paymentMethod String?
   paymentDate   DateTime?
