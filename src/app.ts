@@ -48,6 +48,8 @@ const corsOptions = {
   credentials: true,
 };
 
+app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+
 // middlewares
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -62,7 +64,7 @@ app.use(helmet());
 app.set('etag', WEB_CACHE);
 app.use('/api/v1', router);
 
-app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+
 
 // Middleware to handle CORS headers for unsupported routes
 app.use((req: Request, res: Response, next: NextFunction) => {
