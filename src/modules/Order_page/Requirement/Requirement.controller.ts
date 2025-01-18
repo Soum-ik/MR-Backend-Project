@@ -2,6 +2,8 @@ import { User } from '@prisma/client';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { NotificationTypes } from '../../../constants/Notification';
+import { directProjectRequirements } from '../../../helper/email/directProjectRequirements';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
@@ -11,8 +13,6 @@ import PublicMessageHandler, {
 } from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { OrderStatus, ProjectStatus } from '../Order_page.constant';
-import { sendMail } from '../../../helper/smtp/AWS_SES';
-import { directProjectRequirements } from '../../../helper/email/directProjectRequirements';
 
 const calculateDeliveryDate = (
   duration: string | null,
@@ -96,10 +96,9 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
       await prisma.notification.upsert({
         where: {
           projectNumber: updateRequirements.projectNumber,
-          recipient: 'ADMIN'
+          recipient: 'ADMIN',
         },
         create: {
-
           projectNumber: updateRequirements.projectNumber,
           recipient: 'ADMIN',
           message: ``,
@@ -111,7 +110,9 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
           recipient: 'ADMIN',
           message: ``,
           senderId: userData?.id as string,
-
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
           payload: payload,
         },
       });
@@ -132,7 +133,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
       await prisma.notification.upsert({
         where: {
           recipient: 'USER',
-          projectNumber: updateRequirements.projectNumber
+          projectNumber: updateRequirements.projectNumber,
         },
         create: {
           recipient: 'USER',
@@ -140,7 +141,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
           senderId: userData?.id as string,
           recipientId: order.userId,
           payload: payload1,
-          projectNumber: updateRequirements.projectNumber
+          projectNumber: updateRequirements.projectNumber,
         },
         update: {
           recipient: 'USER',
@@ -148,6 +149,9 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
           senderId: userData?.id as string,
           recipientId: order.userId,
           payload: payload1,
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
         },
       });
       PublicMessageHandler(
@@ -171,7 +175,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
           // items: [],
           // requirements: [],
           orderCreateDate: new Date(),
-        }
+        };
 
         await sendMail({
           to: 'sarkarsoumik215@gmail.com',

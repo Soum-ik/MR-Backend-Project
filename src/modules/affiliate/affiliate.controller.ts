@@ -484,13 +484,16 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
       message: ``,
       senderId: user_id as string,
       payload: payload,
-      projectNumber: ''
+      projectNumber: '',
     },
     update: {
       recipient: 'ADMIN',
       message: ``,
       senderId: user_id as string,
       payload: payload,
+      createdAt: new Date(),
+      isAdminSeen: [],
+      isClientSeen: false,
     },
   });
   PublicMessageHandler(

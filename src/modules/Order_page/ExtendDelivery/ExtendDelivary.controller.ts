@@ -127,6 +127,9 @@ const approveExtensionRequest = catchAsync(
             recipientId: orderData.userId as string,
             message: ``,
             senderId: user_id,
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
             payload: payload,
           },
         });
@@ -172,6 +175,9 @@ const approveExtensionRequest = catchAsync(
             message: ``,
             senderId: orderData.userId as string,
             payload: payload2,
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
         PublicMessageHandler(
@@ -291,6 +297,9 @@ const ExtendDeliveryMessageOption = catchAsync(
           senderId: orderData?.userId as string,
           isAdminSent: true,
           payload: payload,
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
         },
       });
       PublicMessageHandler(
@@ -334,4 +343,4 @@ const ExtendDeliveryMessageOption = catchAsync(
   },
 );
 
-export { ExtendDeliveryMessageOption, approveExtensionRequest };
+export { approveExtensionRequest, ExtendDeliveryMessageOption };

@@ -6,6 +6,10 @@ import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
 import { NotificationTypes } from '../../constants/Notification';
 import AppError from '../../errors/AppError';
+import { emailTemplate } from '../../helper/email/additionalOfferandExtendDate';
+import { directProjectPlace } from '../../helper/email/directProjectPlace';
+import { tipsTemplate } from '../../helper/email/tipsTemplate';
+import { sendMail } from '../../helper/smtp/AWS_SES';
 import { prisma } from '../../libs/prismaHelper';
 import catchAsync from '../../libs/utlitys/catchSynch';
 import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
@@ -18,10 +22,6 @@ import {
   customOfferT,
   extendDeliveryTimeT,
 } from './payment.interface';
-import { sendMail } from '../../helper/smtp/AWS_SES';
-import { tipsTemplate } from '../../helper/email/tipsTemplate';
-import { emailTemplate } from '../../helper/email/additionalOfferandExtendDate';
-import { directProjectPlace } from '../../helper/email/directProjectPlace';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -104,8 +104,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             thumbnailUrl: orderData?.projectImage,
             type: NotificationTypes.AdditionalOfferAccept,
             projectNumber: orderData?.projectNumber,
-            days: orderData?.duration,
-            hours: orderData?.durationHours,
+            days: orderData?.duration ? updatedOrder.duration : '',
+            hours: orderData?.durationHours ? updatedOrder.durationHours : '',
             senderUserName: userData?.userName,
             avatar: userData.image,
             createdAt: new Date(),
@@ -128,6 +128,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               message: ``,
               senderId: userData.id as string,
               payload: payload,
+              createdAt: new Date(),
+              isAdminSeen: [],
+              isClientSeen: false,
             },
           });
           PublicMessageHandler(
@@ -135,8 +138,8 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               thumbnailUrl: orderData?.projectImage,
               type: NotificationTypes.AdditionalOfferAccept,
               projectNumber: orderData?.projectNumber,
-              days: orderData?.duration,
-              hours: orderData?.durationHours,
+              days: orderData?.duration ? updatedOrder.duration : '',
+              hours: orderData?.durationHours ? updatedOrder.durationHours : '',
               createdAt: new Date(),
               senderUserName: userData.userName,
               avatar: userData.image,
@@ -144,18 +147,16 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             'USER',
           );
 
-
           const emailData = {
             clientName: userData.userName,
             projectNumber: orderData?.projectNumber,
-          }
+          };
 
           await sendMail({
             to: 'sarkarsoumik215@gmail.com',
             subject: `Your offer has been accepted`,
             html: emailTemplate(emailData),
           });
-
         } else if (
           session?.metadata?.paymentType === PaymentType.CUSTOM_OFFER
         ) {
@@ -227,6 +228,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               message: ``,
               senderId: orderData.userId as string,
               payload: payload,
+              createdAt: new Date(),
+              isAdminSeen: [],
+              isClientSeen: false,
             },
           });
           PublicMessageHandler(
@@ -303,7 +307,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   recipient: 'ADMIN',
                   payload: payload,
                   message: '',
-                  isClientSeen: true,
+                  createdAt: new Date(),
+                  isAdminSeen: [],
+                  isClientSeen: false,
                 },
               });
             }
@@ -373,7 +379,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               where: {
                 projectNumber: orderData?.projectNumber,
                 recipient: 'ADMIN',
-
               },
               create: {
                 senderId: userData.id as string,
@@ -388,7 +393,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 recipient: 'ADMIN',
                 payload: payload,
                 message: '',
-                isClientSeen: true,
+                createdAt: new Date(),
+                isAdminSeen: [],
+                isClientSeen: false,
               },
             });
           } catch (error) {
@@ -447,7 +454,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 where: {
                   projectNumber: orderData.projectNumber,
                   recipient: 'ADMIN',
-
                 },
                 create: {
                   recipient: 'ADMIN',
@@ -461,6 +467,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   message: ``,
                   senderId: orderData.userId as string,
                   payload: payload,
+                  createdAt: new Date(),
+                  isAdminSeen: [],
+                  isClientSeen: false,
                 },
               });
               PublicMessageHandler(
@@ -545,6 +554,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               message: ``,
               senderId: orderData.userId as string,
               payload: payload,
+              createdAt: new Date(),
+              isAdminSeen: [],
+              isClientSeen: false,
             },
           });
           PublicMessageHandler(
@@ -573,7 +585,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           });
 
           console.log(email, ' email checking');
-
 
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },
@@ -633,10 +644,11 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 message: ``,
                 senderId: data?.userId as string,
                 payload: payload,
+                createdAt: new Date(),
+                isAdminSeen: [],
+                isClientSeen: false,
               },
             });
-
-
 
             PublicMessageHandler(
               {
@@ -655,7 +667,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             const emailData = {
               clientName: userData.userName,
               projectNumber: order.projectNumber,
-            }
+            };
 
             await sendMail({
               to: 'sarkarsoumik215@gmail.com',

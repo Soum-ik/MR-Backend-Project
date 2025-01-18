@@ -2,6 +2,8 @@ import { User } from '@prisma/client';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { NotificationTypes } from '../../../constants/Notification';
+import { revisionTemplate } from '../../../helper/email/revisionTemplate';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
@@ -9,8 +11,6 @@ import catchAsync from '../../../libs/utlitys/catchSynch';
 import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { OrderStatus, ProjectStatus } from '../Order_page.constant';
-import { sendMail } from '../../../helper/smtp/AWS_SES';
-import { revisionTemplate } from '../../../helper/email/revisionTemplate';
 
 interface deliverProjectT {
   isRevision: boolean;
@@ -171,6 +171,9 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         message: ``,
         senderId: userData?.id as string,
         payload: payload,
+        createdAt: new Date(),
+        isAdminSeen: [],
+        isClientSeen: false,
       },
     });
     PublicMessageHandler(
@@ -204,12 +207,14 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         senderId: userData?.id as string,
         payload: payload2,
         projectNumber: order.projectNumber,
-
       },
       update: {
         recipient: 'USER',
         message: ``,
         senderId: userData?.id as string,
+        createdAt: new Date(),
+        isAdminSeen: [],
+        isClientSeen: false,
         payload: payload2,
       },
     });
@@ -264,7 +269,6 @@ const handleDeliveryResponse = catchAsync(
         },
       });
 
-
       const { isRevision, ...other } =
         updatedMessage?.deliverProject as unknown as deliverProjectT;
 
@@ -287,10 +291,16 @@ const handleDeliveryResponse = catchAsync(
       };
 
       await prisma.notification.upsert({
+        where: {
+          projectNumber: order.projectNumber,
+        },
         update: {
           recipient: 'ADMIN',
           message: ``,
           senderId: userData?.id as string,
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
           payload: payload,
         },
         create: {
@@ -300,10 +310,6 @@ const handleDeliveryResponse = catchAsync(
           payload: payload,
           projectNumber: order.projectNumber,
         },
-        where: {
-          projectNumber: order.projectNumber,
-
-        }
       });
       PublicMessageHandler(
         {
@@ -333,8 +339,8 @@ const handleDeliveryResponse = catchAsync(
       const emailData = {
         clientName: userData.userName,
         projectNumber: projectNumber,
-        projectName: order.projectName
-      }
+        projectName: order.projectName,
+      };
 
       await sendMail({
         to: 'sarkarsoumik215@gmail.com',
@@ -396,6 +402,9 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
       senderId: order.userId as string,
       payload: payload,
       recipientId: order.userId as string,
+      createdAt: new Date(),
+      isAdminSeen: [],
+      isClientSeen: false,
     },
   });
   PublicMessageHandler(

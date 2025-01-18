@@ -4,6 +4,9 @@ import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
 import { NotificationTypes } from '../../../constants/Notification';
 import AppError from '../../../errors/AppError';
+import { cancelTemplate } from '../../../helper/email/cancelTemplate';
+import { commentsTemplate } from '../../../helper/email/commentsTemplate';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
@@ -14,9 +17,6 @@ import PublicMessageHandler, {
 import { userFinder } from '../../../utils/userFinder';
 import { inboxUpdatePayload } from '../../Notification/InboxNotification.interface';
 import { USER_ROLE } from '../../user/user.constant';
-import { sendMail } from '../../../helper/smtp/AWS_SES';
-import { commentsTemplate } from '../../../helper/email/commentsTemplate';
-import { cancelTemplate } from '../../../helper/email/cancelTemplate';
 
 interface ExtendDelivery {
   isAccepted: boolean;
@@ -103,8 +103,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
-  console.log(admins, "checking admins");
-
+  console.log(admins, 'checking admins');
 
   const commonkey = uuidv4();
 
@@ -199,8 +198,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         userId: user_id,
         projectNumber: projectNumber,
         commentQuantity: total,
-      }
-
+      };
 
       await prisma.notification.upsert({
         where: {
@@ -211,7 +209,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           senderId: user_id as string,
           payload: payload,
           message: messageText,
-          isClientSeen: true, // Update existing notification
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
         },
         create: {
           senderId: user_id as string,
@@ -226,15 +226,14 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       const emailData = {
         projectNumber,
         clientName: userData.userName,
-        commentLength: total
-      }
+        commentLength: total,
+      };
 
       await sendMail({
         to: 'sarkarsoumik215@gmail.com',
         subject: `${emailData.clientName} left you new comments`,
         html: commentsTemplate(emailData),
       });
-
     } else if (
       message?.extendDeliveryTime &&
       !offer.isAccepted &&
@@ -288,8 +287,10 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           recipient: 'ADMIN',
           payload: payload,
           message: messageText,
-          isClientSeen: true,
-        }
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
+        },
       });
     } else {
       PublicMessageHandler(
@@ -363,7 +364,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             recipient: 'ADMIN',
             payload: payload,
             message: messageText,
-            isClientSeen: true,
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
           create: {
             senderId: user_id as string,
@@ -371,8 +374,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             payload: payload,
             message: messageText,
             isClientSeen: true,
-            projectNumber: projectNumber
-          }
+            projectNumber: projectNumber,
+          },
         });
       }
     }
@@ -489,7 +492,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           payload: payload,
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
-          isAdminSeen: [user_id],
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
         },
       });
     } else if (
@@ -531,28 +536,30 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
           isAdminSeen: [user_id],
-          projectNumber
-        }, update: {
+          projectNumber,
+        },
+        update: {
           senderId: user_id as string,
           recipient: 'USER',
           payload: payload,
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
-          isAdminSeen: [user_id],
-        }
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
+        },
       });
 
       const emailData = {
         projectNumber: projectNumber,
-        clientName: 'mahfujurrahm535'
-      }
+        clientName: 'mahfujurrahm535',
+      };
       await sendMail({
         // from: 'ratulsarkar216@gmail.com',
         to: userData.email,
         subject: `mahfujurrahm535 has sent a cancellation request`,
         html: cancelTemplate(emailData),
       });
-
     } else if (
       message.extendDeliveryTime &&
       !offer.isAccepted &&
@@ -592,7 +599,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           payload: payload,
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
-          isAdminSeen: [user_id],
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
         },
         create: {
           projectNumber,
@@ -602,7 +611,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
           isAdminSeen: [user_id],
-        }
+        },
       });
     } else if (message?.deliverProject) {
       console.log('Delivery project from user request');
@@ -645,7 +654,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
           isAdminSeen: [user_id],
-          projectNumber: projectNumber
+          projectNumber: projectNumber,
         },
         update: {
           senderId: user_id as string,
@@ -653,7 +662,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           payload: payload,
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
-          isAdminSeen: [user_id],
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
         },
       });
 
@@ -707,7 +718,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           recipientId: orderInfo?.userId,
           payload: payload,
           message: messageText,
-          isClientSeen: true,
+          createdAt: new Date(),
+          isAdminSeen: [],
+          isClientSeen: false,
         },
       });
     } else {
@@ -776,9 +789,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             payload: payload,
             recipientId: recipientId, // Notification goes to the specific recipient
             message: messageText, // Associate the message with the notification
-            isAdminSeen: [user_id], // Initialize the isAdminSeen arra 
+            isAdminSeen: [user_id], // Initialize the isAdminSeen arra
             projectNumber: projectNumber,
-
           },
           update: {
             senderId: user_id as string,
@@ -786,7 +798,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             payload: payload,
             recipientId: recipientId, // Notification goes to the specific recipient
             message: messageText, // Associate the message with the notification
-            isAdminSeen: [user_id], // Initialize the isAdminSeen array with the user_id
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       }
@@ -817,31 +831,38 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
             additionalOffer,
             cancelProject,
             uniqueId,
-            isAdminSeen: true
+            isAdminSeen: true,
           },
         });
 
         const userData = (await userFinder(recipientId)) as User;
 
         if (messageToAdmin.additionalOffer) {
-          PublicMessageHandler({
-            type: NotificationTypes.AdditionalOffer,
-            createdAt: new Date(),
-            senderUserName: "mahfujurrahm535",
-            avatar: ADMINLOGO,
-            message: messageText,
-            userId: recipientId,
-
-          }, 'ADMINS')
+          PublicMessageHandler(
+            {
+              type: NotificationTypes.AdditionalOffer,
+              createdAt: new Date(),
+              senderUserName: 'mahfujurrahm535',
+              avatar: ADMINLOGO,
+              message: messageText,
+              userId: recipientId,
+            },
+            'ADMINS',
+          );
         } else {
-          PublicMessageHandler({
-            type: NotificationTypes.Message,
-            createdAt: new Date(),
-            senderUserName: "mahfujurrahm535",
-            avatar: ADMINLOGO,
-            message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
-            admindId: user_id
-          }, 'ADMINS')
+          PublicMessageHandler(
+            {
+              type: NotificationTypes.Message,
+              createdAt: new Date(),
+              senderUserName: 'mahfujurrahm535',
+              avatar: ADMINLOGO,
+              message:
+                `Admin: ${user?.fullName} send to ${userData.userName} -> ` +
+                messageText,
+              admindId: user_id,
+            },
+            'ADMINS',
+          );
 
           // const payload = {
           //   type: NotificationTypes.OrderMessage,
@@ -862,7 +883,6 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           //   },
           // });
         }
-
       }
     }
 
@@ -1120,6 +1140,9 @@ export const updateProjectMessage = catchAsync(
             recipient: 'ADMIN',
             payload: payload,
             message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       } else if (
@@ -1166,6 +1189,9 @@ export const updateProjectMessage = catchAsync(
             recipient: 'ADMIN',
             payload: payload,
             message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       } else {
@@ -1208,6 +1234,9 @@ export const updateProjectMessage = catchAsync(
             recipient: 'ADMIN',
             payload: payload,
             message: `${userData.userName} reject the addition offer request`, // Associate the message with the notification
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       }
@@ -1264,6 +1293,9 @@ export const updateProjectMessage = catchAsync(
             recipientId: findOrder?.userId,
             payload: payload,
             message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       } else if (
@@ -1305,7 +1337,7 @@ export const updateProjectMessage = catchAsync(
 
             payload: payload,
             message: `mahfujurrahm535 rejected the extension request`, // Associate the message with the notification
-            projectNumber
+            projectNumber,
           },
           update: {
             senderId: user_id as string,
@@ -1314,6 +1346,9 @@ export const updateProjectMessage = catchAsync(
 
             payload: payload,
             message: `mahfujurrahm535 rejected the extension request`, // Associate the message with the notification
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       } else if (
@@ -1365,6 +1400,9 @@ export const updateProjectMessage = catchAsync(
 
             payload: payload,
             message: `mahfujurrahm535 withdrawn the extension request`, // Associate the message with the notification
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       } else {
@@ -1396,11 +1434,11 @@ export const updateProjectMessage = catchAsync(
         };
 
         await prisma.notification.upsert({
-          where : {
+          where: {
             projectNumber: projectNumber,
             recipient: 'USER',
           },
-          create : {
+          create: {
             senderId: user_id as string,
             recipientId: findOrder?.userId,
             recipient: 'USER',
@@ -1414,6 +1452,9 @@ export const updateProjectMessage = catchAsync(
             recipient: 'USER',
             payload: payload,
             message: `mahfujurrahm535 withdrawn the offer`, // Associate the message with the notification
+            createdAt: new Date(),
+            isAdminSeen: [],
+            isClientSeen: false,
           },
         });
       }

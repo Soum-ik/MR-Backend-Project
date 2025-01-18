@@ -128,6 +128,9 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     message: ``,
                     senderId: userData?.id as string,
                     payload: payload,
+                    createdAt: new Date(),
+                    isAdminSeen: [],
+                    isClientSeen: false,
                   },
                 });
                 PublicMessageHandler(
@@ -168,6 +171,9 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     message: ``,
                     senderId: userData?.id as string,
                     payload: payload2,
+                    createdAt: new Date(),
+                    isAdminSeen: [],
+                    isClientSeen: false,
                   },
                 });
                 PublicMessageHandler(

@@ -4,6 +4,8 @@ import httpStatus from 'http-status';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../../config/config';
 import { NotificationTypes } from '../../../constants/Notification';
+import { cancelTemplate } from '../../../helper/email/cancelTemplate';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
@@ -12,9 +14,6 @@ import PublicMessageHandler, {
 } from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { ProjectStatus } from '../Order_page.constant';
-import { sendMail } from '../../../helper/smtp/AWS_SES';
-import { cancelTemplate } from '../../../helper/email/cancelTemplate';
-
 
 interface CancelOffer {
   extendType?: string;
@@ -100,7 +99,9 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
       recipientId: isAdminType ? orderData?.userId : '',
       message: ``,
       senderId: orderData?.id as string,
-      isAdminSent: true,
+      createdAt: new Date(),
+      isAdminSeen: [],
+      isClientSeen: false,
       payload: payload,
     },
     create: {
@@ -111,8 +112,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
       isAdminSent: true,
       payload: payload,
       projectNumber: orderData?.projectNumber,
-
-    }
+    },
   });
   PublicMessageHandler(
     {
@@ -146,7 +146,9 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
       recipient: 'USER',
       message: ``,
       senderId: orderData?.id as string,
-      isAdminSent: true,
+      createdAt: new Date(),
+      isAdminSeen: [],
+      isClientSeen: false,
       payload: payload2,
     },
     create: {
@@ -155,8 +157,8 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
       senderId: orderData?.id as string,
       isAdminSent: true,
       payload: payload2,
-      projectNumber: orderData?.projectNumber
-    }
+      projectNumber: orderData?.projectNumber,
+    },
   });
   PublicMessageHandler(
     {
@@ -172,7 +174,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
   const emailData = {
     clientName: userData.userName,
     projectNumber: orderData?.projectNumber,
-  }
+  };
 
   await sendMail({
     to: 'sarkarsoumik215@gmail.com',
