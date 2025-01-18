@@ -12,16 +12,18 @@ schedule.scheduleJob('* * * * * *', async () => {
     print.blue('Scheduler running to send order delivery reminder...');
 
     try {
-        // Get the current date and time
         const now = new Date();
+        const twelveHoursFromNow = new Date(now.getTime() + 12 * 60 * 60 * 1000);
 
         // Find messages with expired custom offers (created more than 48 hours ago)
         const orderList = await prisma.order.findMany({
             where: {
+                isReminderDone: false,
                 projectStatus: 'Ongoing',
-                deliveryDate:
-                {
-                    equals: new Date(now.getTime() + 12 * 60 * 60 * 1000)
+                deliveryDate: {
+                    not: null,
+                    gt: now,
+                    lte: twelveHoursFromNow,
                 },
             },
             select: {
@@ -30,11 +32,13 @@ schedule.scheduleJob('* * * * * *', async () => {
                 projectName: true,
                 userId: true,
                 projectImage: true,
-                user: true
+                user: true,
+                id: true,
             },
         });
 
-
+        console.log(orderList, 'orderList');
+        
 
         if (orderList.length > 0) {
             await Promise.all(
@@ -46,7 +50,7 @@ schedule.scheduleJob('* * * * * *', async () => {
                     try {
                         const payload = {
                             thumbnailUrl: message?.projectImage,
-                            type: NotificationTypes.Order,
+                            type: NotificationTypes.Reminder,
                             projectNumber: message.projectNumber,
                             projectName: message.projectName,
                             createdAt: new Date(),
@@ -90,6 +94,14 @@ schedule.scheduleJob('* * * * * *', async () => {
                             to: 'sarkarsoumik215@gmail.com',
                             subject: `Your delivery deadline is coming up`,
                             html: twelveHoursDelivery(emailData),
+                        });
+                        await prisma.order.update({
+                            where: {
+                                id: message.id,
+                            },
+                            data: {
+                                isReminderDone: true
+                            },
                         });
 
 
