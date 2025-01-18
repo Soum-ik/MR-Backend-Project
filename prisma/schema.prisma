@@ -163,6 +163,7 @@ model OrderMessage {
   deliverProject        Json?
   extendDeliveryTime    Json?
   cancelProject         Json?
+  revisionProject         Json?
   OrderExtensionRequest OrderExtensionRequest[]
   isClientSeen          Boolean                 @default(false)
   isAdminSeen           Boolean                 @default(false)
