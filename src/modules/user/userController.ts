@@ -2,14 +2,13 @@ import crypto from 'crypto';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import sendVeficationEmail from '../../helper/email/emailSend';
-import { createToken, TokenCredential } from '../../libs/authHelper';
+import { TokenCredential, createToken } from '../../libs/authHelper';
 import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 
-import { SignupRequestBody } from './user.interface';
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
 import catchAsync from '../../libs/utlitys/catchSynch';
-import { promise } from 'zod';
+import { SignupRequestBody } from './user.interface';
 export interface User {
   user_id?: string;
   role?: string;
@@ -27,7 +26,8 @@ const SignUp = async (
   res: Response,
 ) => {
   try {
-    const { country, fullName, userName, email, password, affiliate_link } = req.body;
+    const { country, fullName, userName, email, password, affiliate_link } =
+      req.body;
 
     // Validate request body
     if (!email || !password) {
@@ -75,7 +75,7 @@ const SignUp = async (
         userName,
         email,
         password: hashedPassword,
-        affiliateId: affiliate_link
+        affiliateId: affiliate_link,
       },
     });
 
@@ -86,14 +86,13 @@ const SignUp = async (
       await prisma.affiliateJoin.create({
         data: {
           affiliateLink: affiliate_link,
-          userId: id
-        }
+          userId: id,
+        },
       });
     }
 
     // Create the token
     const token = createToken({ role, user_id: id, email: Useremail });
-
 
     return sendResponse<any>(res, {
       statusCode: httpStatus.CREATED,
@@ -112,13 +111,16 @@ const SignUp = async (
   }
 };
 
-const SignIn = async (req: Request<object, object, SignupRequestBody>, res: Response) => {
+const SignIn = async (
+  req: Request<object, object, SignupRequestBody>,
+  res: Response,
+) => {
   try {
     const { email, password } = req.body;
 
     // Find user by email
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) {
@@ -131,7 +133,10 @@ const SignIn = async (req: Request<object, object, SignupRequestBody>, res: Resp
     }
 
     // Compare the hashed password with the provided password
-    const isPasswordValid = await bcrypt.compare(password, user.password as string);
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.password as string,
+    );
 
     if (!isPasswordValid) {
       return sendResponse(res, {
@@ -175,14 +180,14 @@ const SignIn = async (req: Request<object, object, SignupRequestBody>, res: Resp
   }
 };
 
-
 const getUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
   console.log(id);
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id }, select: {
+      where: { id },
+      select: {
         address: true,
         city: true,
         country: true,
@@ -197,7 +202,7 @@ const getUserById = async (req: Request, res: Response) => {
         SocialMediaLinks: true,
         role: true,
         language: true,
-      }
+      },
     });
     if (!user) {
       return sendResponse(res, {
@@ -404,8 +409,6 @@ const setNewPass = async (req: Request, res: Response) => {
         message: 'Your current password is wrong!',
       });
     } else {
-
-
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const updateNewPass = await prisma.user.update({
@@ -590,15 +593,15 @@ const getSingelUser = async (
 };
 
 const profile = catchAsync(async (req: Request, res: Response) => {
-  const { user_id } = req.params;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+  const { user_id } = req.params;
 
   const [CP, CR, ART, ARV, LP] = await Promise.all([
     prisma.order.findMany({
       where: {
         userId: user_id,
         paymentStatus: 'PAID',
-        projectStatus: 'Completed'
-      }
+        projectStatus: 'Completed',
+      },
     }),
 
     prisma.order.findMany({
@@ -606,8 +609,8 @@ const profile = catchAsync(async (req: Request, res: Response) => {
         userId: user_id,
       },
       select: {
-        projectStatus: true
-      }
+        projectStatus: true,
+      },
     }),
 
     prisma.review.aggregate({
@@ -633,33 +636,35 @@ const profile = catchAsync(async (req: Request, res: Response) => {
     prisma.order.findMany({
       where: {
         userId: user_id,
-        projectStatus: 'Completed'
+        projectStatus: 'Completed',
       },
       take: 1,
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       select: {
-        createdAt: true
-      }
-    })
-
+        createdAt: true,
+      },
+    }),
   ]);
 
-
-  const totalProjects = CR.length;
-  const completedProjects = CR.filter(project => project.projectStatus === 'Completed').length;
+  // const totalProjects = CR.length;
+  const completedProjects = CR.filter(
+    (project) => project.projectStatus === 'Completed',
+  ).length;
+  const cancelledProjects = CR.filter(
+    (project) => project.projectStatus === 'Canceled',
+  ).length;
+  const totalProjects = completedProjects + cancelledProjects;
   const ProjectCompletedRate = (completedProjects / totalProjects) * 100;
-
 
   const result = {
     CompletedProjects: CP.length,
     ProjectCompletedRate: ProjectCompletedRate,
     AvgRatingTaken: ART._avg.rating || 0,
     AvgRatingGiven: ARV._avg.rating || 0,
-    LastProjectOn: LP[0]?.createdAt
-  }
-
+    LastProjectOn: LP[0]?.createdAt,
+  };
 
   return sendResponse<any>(res, {
     statusCode: httpStatus.OK,
@@ -667,8 +672,7 @@ const profile = catchAsync(async (req: Request, res: Response) => {
     data: result,
     message: 'User profile successfully fetched',
   });
-
-})
+});
 
 export const User = {
   SignUp,
@@ -681,5 +685,5 @@ export const User = {
   getAllUser,
   updateUser,
   getSingelUser,
-  profile
+  profile,
 };
