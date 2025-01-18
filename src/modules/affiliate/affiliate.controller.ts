@@ -470,8 +470,19 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
     createdAt: new Date(),
   };
 
-  await prisma.notification.create({
-    data: {
+  await prisma.notification.upsert({
+    where: {
+      projectNumber: '2',
+      recipient: 'ADMIN',
+    },
+    create: {
+      recipient: 'ADMIN',
+      message: ``,
+      senderId: user_id as string,
+      payload: payload,
+      projectNumber: ''
+    },
+    update: {
       recipient: 'ADMIN',
       message: ``,
       senderId: user_id as string,

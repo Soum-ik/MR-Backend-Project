@@ -154,9 +154,19 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       createdAt: new Date(),
     };
 
-    await prisma.notification.create({
-      //
-      data: {
+    await prisma.notification.upsert({
+      where: {
+        projectNumber: order.projectNumber,
+        recipient: 'ADMIN',
+      },
+      create: {
+        recipient: 'ADMIN',
+        message: ``,
+        senderId: userData?.id as string,
+        payload: payload,
+        projectNumber: order.projectNumber,
+      },
+      update: {
         recipient: 'ADMIN',
         message: ``,
         senderId: userData?.id as string,
@@ -183,9 +193,20 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       createdAt: new Date(),
     };
 
-    await prisma.notification.create({
-      //
-      data: {
+    await prisma.notification.upsert({
+      where: {
+        projectNumber: order.projectNumber,
+        recipient: 'USER',
+      },
+      create: {
+        recipient: 'USER',
+        message: ``,
+        senderId: userData?.id as string,
+        payload: payload2,
+        projectNumber: order.projectNumber,
+
+      },
+      update: {
         recipient: 'USER',
         message: ``,
         senderId: userData?.id as string,
@@ -265,13 +286,24 @@ const handleDeliveryResponse = catchAsync(
         createdAt: new Date(),
       };
 
-      await prisma.notification.create({
-        data: {
+      await prisma.notification.upsert({
+        update: {
           recipient: 'ADMIN',
           message: ``,
           senderId: userData?.id as string,
           payload: payload,
         },
+        create: {
+          recipient: 'ADMIN',
+          message: ``,
+          senderId: userData?.id as string,
+          payload: payload,
+          projectNumber: order.projectNumber,
+        },
+        where: {
+          projectNumber: order.projectNumber,
+
+        }
       });
       PublicMessageHandler(
         {
@@ -345,8 +377,20 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
     createdAt: new Date(),
   };
 
-  await prisma.notification.create({
-    data: {
+  await prisma.notification.upsert({
+    where: {
+      projectNumber: order.projectNumber,
+      recipient: 'USER',
+    },
+    create: {
+      recipient: 'USER',
+      message: ``,
+      senderId: order.userId as string,
+      payload: payload,
+      recipientId: order.userId as string,
+      projectNumber: order.projectNumber,
+    },
+    update: {
       recipient: 'USER',
       message: ``,
       senderId: order.userId as string,

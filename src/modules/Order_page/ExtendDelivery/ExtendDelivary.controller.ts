@@ -109,9 +109,20 @@ const approveExtensionRequest = catchAsync(
           avatar: ADMINLOGO,
         };
 
-        await prisma.notification.create({
-          //
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: orderData.projectNumber,
+            recipient: 'USER',
+          },
+          create: {
+            recipient: 'USER',
+            recipientId: orderData.userId as string,
+            message: ``,
+            senderId: user_id,
+            payload: payload,
+            projectNumber: orderData.projectNumber,
+          },
+          update: {
             recipient: 'USER',
             recipientId: orderData.userId as string,
             message: ``,
@@ -144,9 +155,19 @@ const approveExtensionRequest = catchAsync(
           avatar: userData?.image,
         };
 
-        await prisma.notification.create({
-          //
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: orderData.projectNumber,
+            recipient: 'ADMIN',
+          },
+          create: {
+            recipient: 'ADMIN',
+            message: ``,
+            senderId: orderData.userId as string,
+            payload: payload2,
+            projectNumber: orderData.projectNumber,
+          },
+          update: {
             recipient: 'ADMIN',
             message: ``,
             senderId: orderData.userId as string,
@@ -251,9 +272,20 @@ const ExtendDeliveryMessageOption = catchAsync(
         createdAt: new Date(),
       };
 
-      await prisma.notification.create({
-        
-        data: {
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: orderData?.projectNumber,
+          recipient: 'ADMIN',
+        },
+        create: {
+          recipient: 'ADMIN',
+          message: ``,
+          senderId: orderData?.userId as string,
+          isAdminSent: true,
+          payload: payload,
+          projectNumber: orderData?.projectNumber as string,
+        },
+        update: {
           recipient: 'ADMIN',
           message: ``,
           senderId: orderData?.userId as string,

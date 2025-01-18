@@ -197,14 +197,27 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         userId: user_id,
         projectNumber: projectNumber,
         commentQuantity: total,
-      };
-      await prisma.notification.create({
-        data: {
+      }
+
+
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: projectNumber, // Ensure this field is unique in your schema
+          recipient: 'ADMIN',
+        },
+        update: {
+          senderId: user_id as string,
+          payload: payload,
+          message: messageText,
+          isClientSeen: true, // Update existing notification
+        },
+        create: {
           senderId: user_id as string,
           recipient: 'ADMIN',
           payload: payload,
-          message: messageText, // Associate the message with the notification
+          message: messageText,
           isClientSeen: true,
+          projectNumber: projectNumber, // Include project number for the new notification
         },
       });
 
@@ -253,14 +266,26 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
         'USER',
       );
-      await prisma.notification.create({
-        data: {
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: projectNumber, // Ensure this field is unique in your schema
+          recipient: 'ADMIN',
+        },
+        create: {
+          projectNumber: projectNumber,
           senderId: user_id as string,
           recipient: 'ADMIN',
           payload: payload,
           message: messageText,
           isClientSeen: true,
         },
+        update: {
+          senderId: user_id as string,
+          recipient: 'ADMIN',
+          payload: payload,
+          message: messageText,
+          isClientSeen: true,
+        }
       });
     } else {
       PublicMessageHandler(
@@ -324,14 +349,26 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         console.log('direct cancel');
       } else {
         // Create a new notification if it doesn't exist
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber, // Ensure this field is unique in your schema
+            recipient: 'ADMIN',
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'ADMIN',
             payload: payload,
             message: messageText,
             isClientSeen: true,
           },
+          create: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: messageText,
+            isClientSeen: true,
+            projectNumber: projectNumber
+          }
         });
       }
     }
@@ -427,8 +464,21 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         projectNumber: projectNumber,
         createdAt: new Date(),
       };
-      await prisma.notification.create({
-        data: {
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: projectNumber,
+          recipient: 'USER',
+        },
+        create: {
+          projectNumber: projectNumber,
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        },
+        update: {
           senderId: user_id as string,
           recipient: 'USER',
           payload: payload,
@@ -464,15 +514,27 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         projectNumber: projectNumber,
         createdAt: new Date(),
       };
-      await prisma.notification.create({
-        data: {
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: projectNumber,
+          recipient: 'USER',
+        },
+        create: {
           senderId: user_id as string,
           recipient: 'USER',
           payload: payload,
           recipientId: recipientId, // Notification goes to each admin
           message: messageText, // Associate the message with the notification
           isAdminSeen: [user_id],
-        },
+          projectNumber
+        }, update: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        }
       });
 
       const emailData = {
@@ -514,8 +576,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         projectNumber: projectNumber,
         createdAt: new Date(),
       };
-      await prisma.notification.create({
-        data: {
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: projectNumber,
+          recipient: 'USER',
+        },
+        update: {
           senderId: user_id as string,
           recipient: 'USER',
           payload: payload,
@@ -523,6 +589,15 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText, // Associate the message with the notification
           isAdminSeen: [user_id],
         },
+        create: {
+          projectNumber,
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+        }
       });
     } else if (message?.deliverProject) {
       console.log('Delivery project from user request');
@@ -551,8 +626,21 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         createdAt: new Date(),
         commentQuantity: total,
       };
-      await prisma.notification.create({
-        data: {
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: projectNumber,
+          recipient: 'USER',
+        },
+        create: {
+          senderId: user_id as string,
+          recipient: 'USER',
+          payload: payload,
+          recipientId: recipientId, // Notification goes to each admin
+          message: messageText, // Associate the message with the notification
+          isAdminSeen: [user_id],
+          projectNumber: projectNumber
+        },
+        update: {
           senderId: user_id as string,
           recipient: 'USER',
           payload: payload,
@@ -591,8 +679,21 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
         'ADMIN',
       );
-      await prisma.notification.create({
-        data: {
+      await prisma.notification.upsert({
+        where: {
+          projectNumber: projectNumber,
+          recipient: 'USER',
+        },
+        create: {
+          projectNumber: projectNumber,
+          senderId: user_id as string,
+          recipient: 'USER',
+          recipientId: orderInfo?.userId,
+          payload: payload,
+          message: messageText,
+          isClientSeen: true,
+        },
+        update: {
           senderId: user_id as string,
           recipient: 'USER',
           recipientId: orderInfo?.userId,
@@ -656,8 +757,22 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         });
       } else {
         // Create a new notification if it doesn't exist
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber,
+            recipient: 'USER',
+          },
+          create: {
+            senderId: user_id as string,
+            recipient: 'USER',
+            payload: payload,
+            recipientId: recipientId, // Notification goes to the specific recipient
+            message: messageText, // Associate the message with the notification
+            isAdminSeen: [user_id], // Initialize the isAdminSeen arra 
+            projectNumber: projectNumber,
+
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'USER',
             payload: payload,
@@ -980,8 +1095,19 @@ export const updateProjectMessage = catchAsync(
           createdAt: new Date(),
         };
 
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber,
+            recipient: 'ADMIN',
+          },
+          create: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+            projectNumber: projectNumber,
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'ADMIN',
             payload: payload,
@@ -1015,8 +1141,19 @@ export const updateProjectMessage = catchAsync(
           createdAt: new Date(),
         };
 
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber,
+            recipient: 'ADMIN',
+          },
+          create: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+            projectNumber: projectNumber,
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'ADMIN',
             payload: payload,
@@ -1046,8 +1183,19 @@ export const updateProjectMessage = catchAsync(
           createdAt: new Date(),
         };
 
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber,
+            recipient: 'ADMIN',
+          },
+          create: {
+            senderId: user_id as string,
+            recipient: 'ADMIN',
+            payload: payload,
+            message: `${userData.userName} reject the addition offer request`, // Associate the message with the notification
+            projectNumber: projectNumber,
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'ADMIN',
             payload: payload,
@@ -1089,8 +1237,20 @@ export const updateProjectMessage = catchAsync(
           createdAt: new Date(),
         };
 
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber,
+            recipient: 'USER',
+          },
+          create: {
+            senderId: user_id as string,
+            recipient: 'USER',
+            recipientId: findOrder?.userId,
+            payload: payload,
+            message: `${userData.userName} Cancel Offer Reject`, // Associate the message with the notification
+            projectNumber: projectNumber,
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'USER',
             recipientId: findOrder?.userId,
@@ -1125,8 +1285,21 @@ export const updateProjectMessage = catchAsync(
           createdAt: new Date(),
         };
 
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber,
+            recipient: 'USER',
+          },
+          create: {
+            senderId: user_id as string,
+            recipient: 'USER',
+            recipientId: findOrder?.userId,
+
+            payload: payload,
+            message: `mahfujurrahm535 rejected the extension request`, // Associate the message with the notification
+            projectNumber
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'USER',
             recipientId: findOrder?.userId,
@@ -1162,8 +1335,22 @@ export const updateProjectMessage = catchAsync(
           createdAt: new Date(),
         };
 
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where: {
+            projectNumber: projectNumber,
+            recipient: 'USER',
+          },
+          create: {
+            projectNumber: projectNumber,
+
+            senderId: user_id as string,
+            recipient: 'USER',
+            recipientId: findOrder?.userId,
+
+            payload: payload,
+            message: `mahfujurrahm535 withdrawn the extension request`, // Associate the message with the notification
+          },
+          update: {
             senderId: user_id as string,
             recipient: 'USER',
             recipientId: findOrder?.userId,
@@ -1200,8 +1387,20 @@ export const updateProjectMessage = catchAsync(
           createdAt: new Date(),
         };
 
-        await prisma.notification.create({
-          data: {
+        await prisma.notification.upsert({
+          where : {
+            projectNumber: projectNumber,
+            recipient: 'USER',
+          },
+          create : {
+            senderId: user_id as string,
+            recipientId: findOrder?.userId,
+            recipient: 'USER',
+            payload: payload,
+            message: `mahfujurrahm535 withdrawn the offer`, // Associate the message with the notification
+            projectNumber: projectNumber,
+          },
+          update: {
             senderId: user_id as string,
             recipientId: findOrder?.userId,
             recipient: 'USER',

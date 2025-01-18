@@ -111,8 +111,19 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             createdAt: new Date(),
           };
 
-          await prisma.notification.create({
-            data: {
+          await prisma.notification.upsert({
+            where: {
+              projectNumber: orderData?.projectNumber,
+              recipient: 'ADMIN',
+            },
+            create: {
+              projectNumber: orderData?.projectNumber,
+              recipient: 'ADMIN',
+              message: ``,
+              senderId: userData.id as string,
+              payload: payload,
+            },
+            update: {
               recipient: 'ADMIN',
               message: ``,
               senderId: userData.id as string,
@@ -199,8 +210,19 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             createdAt: new Date(),
           };
 
-          await prisma.notification.create({
-            data: {
+          await prisma.notification.upsert({
+            where: {
+              projectNumber: orderData.projectNumber,
+              recipient: 'ADMIN',
+            },
+            create: {
+              projectNumber: orderData.projectNumber,
+              recipient: 'ADMIN',
+              message: ``,
+              senderId: orderData.userId as string,
+              payload: payload,
+            },
+            update: {
               recipient: 'ADMIN',
               message: ``,
               senderId: orderData.userId as string,
@@ -263,8 +285,20 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 projectNumber: orderData.projectNumber,
                 createdAt: new Date(),
               };
-              await prisma.notification.create({
-                data: {
+              await prisma.notification.upsert({
+                where: {
+                  projectNumber: orderData.projectNumber,
+                  recipient: 'ADMIN',
+                },
+                create: {
+                  projectNumber: orderData.projectNumber,
+                  senderId: userData.id as string,
+                  recipient: 'ADMIN',
+                  payload: payload,
+                  message: '',
+                  isClientSeen: true,
+                },
+                update: {
                   senderId: userData.id as string,
                   recipient: 'ADMIN',
                   payload: payload,
@@ -335,8 +369,21 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               projectNumber: orderData?.projectNumber,
               createdAt: new Date(),
             };
-            await prisma.notification.create({
-              data: {
+            await prisma.notification.upsert({
+              where: {
+                projectNumber: orderData?.projectNumber,
+                recipient: 'ADMIN',
+
+              },
+              create: {
+                senderId: userData.id as string,
+                recipient: 'ADMIN',
+                payload: payload,
+                message: '',
+                isClientSeen: true,
+                projectNumber: orderData?.projectNumber as string,
+              },
+              update: {
                 senderId: userData.id as string,
                 recipient: 'ADMIN',
                 payload: payload,
@@ -396,8 +443,20 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 createdAt: new Date(),
               };
 
-              const res = await prisma.notification.create({
-                data: {
+              const res = await prisma.notification.upsert({
+                where: {
+                  projectNumber: orderData.projectNumber,
+                  recipient: 'ADMIN',
+
+                },
+                create: {
+                  recipient: 'ADMIN',
+                  message: ``,
+                  senderId: orderData.userId as string,
+                  payload: payload,
+                  projectNumber: orderData.projectNumber,
+                },
+                update: {
                   recipient: 'ADMIN',
                   message: ``,
                   senderId: orderData.userId as string,
@@ -468,8 +527,19 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             createdAt: new Date(),
           };
 
-          await prisma.notification.create({
-            data: {
+          await prisma.notification.upsert({
+            where: {
+              projectNumber: orderData.projectNumber,
+              recipient: 'ADMIN',
+            },
+            create: {
+              projectNumber: orderData.projectNumber,
+              recipient: 'ADMIN',
+              message: ``,
+              senderId: orderData.userId as string,
+              payload: payload,
+            },
+            update: {
               recipient: 'ADMIN',
               message: ``,
               senderId: orderData.userId as string,
@@ -546,8 +616,19 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               createdAt: new Date(),
             };
 
-            const notification = await prisma.notification.create({
-              data: {
+            const notification = await prisma.notification.upsert({
+              where: {
+                projectNumber: order.projectNumber, // Ensure this field is unique in your schema
+                recipient: 'ADMIN',
+              },
+              create: {
+                projectNumber: order.projectNumber, // Ensure this field is unique in your schema
+                recipient: 'ADMIN',
+                message: ``,
+                senderId: data?.userId as string,
+                payload: payload,
+              },
+              update: {
                 recipient: 'ADMIN',
                 message: ``,
                 senderId: data?.userId as string,
@@ -555,7 +636,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               },
             });
 
-            
+
 
             PublicMessageHandler(
               {

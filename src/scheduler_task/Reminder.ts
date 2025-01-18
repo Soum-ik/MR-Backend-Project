@@ -8,7 +8,7 @@ import { twelveHoursDelivery } from '../helper/email/twelveHoursDelivery';
 
 
 
-schedule.scheduleJob('*/10 * * * * *', async () => {
+schedule.scheduleJob('* * * * * *', async () => {
     print.blue('Scheduler running to send order delivery reminder...');
 
     try {
@@ -51,13 +51,23 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                             projectName: message.projectName,
                             createdAt: new Date(),
                         }
-                        await prisma.notification.create({
-                            data: {
+                        await prisma.notification.upsert({
+                            where: {
+                                projectNumber: message.projectNumber,
+                                recipient: "ADMIN"
+                            },
+                            update: {
                                 recipient: 'ADMIN',
                                 message: ``,
                                 senderId: message.userId,
                                 payload: payload,
-
+                            },
+                            create: {
+                                recipient: 'ADMIN',
+                                message: ``,
+                                senderId: message.userId,
+                                payload: payload,
+                                projectNumber: message.projectNumber,
                             }
                         })
                         PublicMessageHandler({

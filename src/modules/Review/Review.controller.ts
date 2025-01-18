@@ -50,8 +50,12 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
     createdAt: new Date(),
   };
 
-  await prisma.notification.create({
-    data: {
+  await prisma.notification.upsert({
+    where: {
+      recipient: admins ? 'USER' : 'ADMIN',
+      projectNumber: orderData?.projectNumber
+    },
+    update: {
       recipient: admins ? 'USER' : 'ADMIN',
       message: ``,
       senderId: user_id as string,
@@ -59,6 +63,16 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
       createdAt: new Date(),
       recipientId: admins ? orderData?.userId : userData?.id,
     },
+    create: {
+      recipient: admins ? 'USER' : 'ADMIN',
+      message: ``,
+      senderId: user_id as string,
+      payload: payload,
+      createdAt: new Date(),
+      recipientId: admins ? orderData?.userId : userData?.id,
+      projectNumber: orderData?.projectNumber! as string
+
+    }
   });
 
   PublicMessageHandler(

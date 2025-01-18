@@ -111,8 +111,19 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   createdAt: new Date(),
                 };
 
-                await prisma.notification.create({
-                  data: {
+                await prisma.notification.upsert({
+                  where: {
+                    projectNumber: order.projectNumber,
+                    recipient: 'ADMIN',
+                  },
+                  create: {
+                    recipient: 'ADMIN',
+                    message: ``,
+                    senderId: userData?.id as string,
+                    payload: payload,
+                    projectNumber: order.projectNumber,
+                  },
+                  update: {
                     recipient: 'ADMIN',
                     message: ``,
                     senderId: userData?.id as string,
@@ -140,8 +151,19 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   avatar: ADMINLOGO,
                 };
 
-                await prisma.notification.create({
-                  data: {
+                await prisma.notification.upsert({
+                  where: {
+                    projectNumber: order.projectNumber,
+                    recipient: 'USER',
+                  },
+                  create: {
+                    projectNumber: order.projectNumber,
+                    recipient: 'USER',
+                    message: ``,
+                    senderId: userData?.id as string,
+                    payload: payload2,
+                  },
+                  update: {
                     recipient: 'USER',
                     message: ``,
                     senderId: userData?.id as string,

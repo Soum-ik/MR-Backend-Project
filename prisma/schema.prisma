@@ -184,7 +184,7 @@ model Notification {
   isAdminSeen  String[] @default([])
   isClientSeen Boolean  @default(false)
 
-  projectNumber String  @default("")
+  projectNumber String @unique
 
   recipient   NotifyRole
   isAdminSent Boolean?
