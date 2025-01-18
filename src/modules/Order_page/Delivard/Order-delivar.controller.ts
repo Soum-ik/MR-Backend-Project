@@ -293,6 +293,7 @@ const handleDeliveryResponse = catchAsync(
       await prisma.notification.upsert({
         where: {
           projectNumber: order.projectNumber,
+          recipient: 'ADMIN',
         },
         update: {
           recipient: 'ADMIN',

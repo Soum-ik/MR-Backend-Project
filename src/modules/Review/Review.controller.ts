@@ -48,6 +48,8 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
     type: NotificationTypes.Review,
     rating: rating,
     createdAt: new Date(),
+    projectNumber: orderData?.projectNumber,
+    thumbnailUrl: orderData?.projectImage,
   };
 
   await prisma.notification.upsert({
