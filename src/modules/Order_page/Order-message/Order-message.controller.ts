@@ -74,6 +74,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     deliverProject,
     extendDeliveryTime,
     cancelProject,
+    revisionProject,
     uniqueId,
   } = req.body;
 
@@ -131,6 +132,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           extendDeliveryTime,
           additionalOffer,
           cancelProject,
+          revisionProject,
           uniqueId,
           isClientSeen: true,
         },
@@ -242,6 +244,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       console.log('Extend delivery from user request');
     } else if (message?.deliverProject) {
       console.log('Delivery project from user request');
+    } else if (message?.revisionProject) {
+      console.log('Revision project from user request');
     } else if (message?.attachment && message?.attachment?.length > 0) {
       const payload = {
         type: NotificationTypes.OrderAttchFile,
@@ -399,6 +403,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         extendDeliveryTime,
         additionalOffer,
         cancelProject,
+        revisionProject,
         uniqueId,
         isAdminSeen: true,
       },
@@ -601,6 +606,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       });
     } else if (message?.deliverProject) {
       console.log('Delivery project from user request');
+    } else if (message?.revisionProject) {
+      console.log('Revision project from user request');
     } else if (message.imageComments && total) {
       PublicMessageHandler(
         {
@@ -652,8 +659,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 
       // commentsTemplate
     } else if (message?.attachment && message?.attachment?.length > 0) {
-
-      const orderInfo = await prisma.order.findUnique({ where: { projectNumber: projectNumber } })
+      const orderInfo = await prisma.order.findUnique({
+        where: { projectNumber: projectNumber },
+      });
 
       const payload = {
         type: NotificationTypes.OrderAttchFile,

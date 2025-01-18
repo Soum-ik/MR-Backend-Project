@@ -20,7 +20,7 @@ interface additionalOfferT {
 }
 
 interface extendDeliveryTimeT {
-  days: number;
+  days: string;
   explainWhyExtend: string;
   extendType: string;
   isAccepted: boolean;

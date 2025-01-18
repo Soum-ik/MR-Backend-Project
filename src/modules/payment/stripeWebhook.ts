@@ -415,7 +415,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
             if (orderData) {
               const { duration, durationHours, updatedDeliveryDate } =
-                await updateDeliveryDate(orderData, days);
+                await updateDeliveryDate(orderData, parseInt(days));
               const updateMessage = {
                 isAccepted: true,
                 ...rest,
@@ -485,9 +485,10 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                     ? durationHours.toString()
                     : '',
                   deliveryDate: updatedDeliveryDate,
-                  totalPrice:
+                  totalPrice: (
                     (parseInt(orderData?.totalPrice as string) || 0) +
-                    (updateMessage.amount || 0).toString(),
+                    (updateMessage.amount || 0)
+                  ).toString(),
                 },
               });
             } else {
@@ -560,11 +561,10 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             'USER',
           );
 
-
           const emailData = {
             projectNumber: orderData.projectNumber,
-            clientName: userData.userName
-          }
+            clientName: userData.userName,
+          };
 
           const email = await sendMail({
             to: 'sarkarsoumik215@gmail.com',

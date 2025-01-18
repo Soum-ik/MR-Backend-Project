@@ -4,10 +4,13 @@ import { z } from 'zod';
 
 export const createProjectSchema = z.object({
   id: z.string().optional(),
-  projectImage: z.object({
-    name : z.string(),
-    url : z.string()
-  }).optional(),
+  projectImage: z
+    .object({
+      name: z.string(),
+      url: z.string(),
+    })
+    .optional(),
+  title: z.string().optional(),
   originalAmount: z.string().optional(),
   offerAmount: z.string().optional(),
   delivery: z.string().optional(),
@@ -18,17 +21,19 @@ export const createProjectSchema = z.object({
   freeDesignName: z.string(),
   freeDesignTypographys: z.array(z.string()).default([]),
   // Add optional CreateProjectDesign fields if applicable
-  designs: z.array(z.object({
-    designName: z.string(),
-    designView: z.array(z.string()).default([]),
-  }))
+  designs: z.array(
+    z.object({
+      designName: z.string(),
+      designView: z.array(z.string()).default([]),
+    }),
+  ),
 });
 
 export const designs = z.object({
   id: z.string().optional(), // id is required during updates
   designName: z.string(),
   designTypogrphys: z.array(z.string()).default([]),
-})
+});
 
 export const updateProjectSchema = z.object({
   projectImage: z.string().url().optional(),
@@ -42,6 +47,5 @@ export const updateProjectSchema = z.object({
   freeDesignName: z.string(),
   freeDesignTypographys: z.array(z.string()).default([]),
   // In the update schema, each CreateProjectDesign requires an id
-  CreateProjectDesigns: z.array(designs).optional()
+  CreateProjectDesigns: z.array(designs).optional(),
 });
-

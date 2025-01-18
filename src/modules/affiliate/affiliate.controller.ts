@@ -1,16 +1,16 @@
 import { affiliateWithdrawType, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import { NotificationTypes } from '../../constants/Notification';
 import AppError from '../../errors/AppError';
 import { TokenCredential } from '../../libs/authHelper';
 import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 import catchAsync from '../../libs/utlitys/catchSynch';
+import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
+import { userFinder } from '../../utils/userFinder';
 import affiliateNumberCreator from '../Order_page/projectNumberGenarator.ts/affiliateNumberCreator';
 import { AFFILIATE_SUCCESS } from './affiliate.constant';
-import { userFinder } from '../../utils/userFinder';
-import { NotificationTypes } from '../../constants/Notification';
-import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
 
 const autoGenerate = catchAsync(async (req: Request, res: Response) => {
   const { user_id } = req.user as TokenCredential;
@@ -42,6 +42,7 @@ const autoGenerate = catchAsync(async (req: Request, res: Response) => {
     data: {
       userId: user_id,
       link: `aff-auto/${user?.userName}`,
+      url: 'https://mahfujurrahm535.com',
     },
   });
 
@@ -55,6 +56,7 @@ const autoGenerate = catchAsync(async (req: Request, res: Response) => {
 
 const createAffiliate = catchAsync(async (req: Request, res: Response) => {
   const { user_id } = req.user as TokenCredential;
+  const { link: providedURL } = req.body;
 
   const user = await prisma.user.findUnique({
     where: { id: user_id },
@@ -88,6 +90,7 @@ const createAffiliate = catchAsync(async (req: Request, res: Response) => {
     data: {
       userId: user_id,
       link: affiliateLink,
+      url: providedURL,
     },
   });
 
@@ -268,6 +271,7 @@ const usersAffiliate = catchAsync(async (req: Request, res: Response) => {
 
   const formattedAffiliates = affiliates.map((affiliate) => ({
     links: affiliate.link,
+    url: affiliate.url,
     totalClicks: affiliate.clicks,
     join: affiliate.AffiliateJoin.length,
     sales: affiliate.AffiliateJoin.reduce(

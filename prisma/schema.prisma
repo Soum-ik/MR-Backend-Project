@@ -108,6 +108,7 @@ model Affiliate {
   amount Float  @default(0)
   clicks Int    @default(0)
   link   String @unique
+  url    String
 
   paymentMethod String?
   paymentDate   DateTime?
@@ -162,6 +163,7 @@ model OrderMessage {
   deliverProject        Json?
   extendDeliveryTime    Json?
   cancelProject         Json?
+  revisionProject         Json?
   OrderExtensionRequest OrderExtensionRequest[]
   isClientSeen          Boolean                 @default(false)
   isAdminSeen           Boolean                 @default(false)
@@ -282,6 +284,7 @@ model SocialMediaLinks {
 model CreateOfferProject {
   id                      String   @id @default(auto()) @map("_id") @db.ObjectId
   projectImage            Json?
+  title          String?
   originalAmount          String?
   offerAmount             String?
   delivery                String?
