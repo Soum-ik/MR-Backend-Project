@@ -6,6 +6,8 @@ import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '../../config/config';
 import { NotificationTypes } from '../../constants/Notification';
 import AppError from '../../errors/AppError';
+import { tipsTemplate } from '../../helper/email/tipsTemplate';
+import { sendMail } from '../../helper/smtp/AWS_SES';
 import { prisma } from '../../libs/prismaHelper';
 import catchAsync from '../../libs/utlitys/catchSynch';
 import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
@@ -18,8 +20,6 @@ import {
   customOfferT,
   extendDeliveryTimeT,
 } from './payment.interface';
-import { sendMail } from '../../helper/smtp/AWS_SES';
-import { tipsTemplate } from '../../helper/email/tipsTemplate';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string);
 
@@ -353,7 +353,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
             if (orderData) {
               const { duration, durationHours, updatedDeliveryDate } =
-                await updateDeliveryDate(orderData, days);
+                await updateDeliveryDate(orderData, parseInt(days));
               const updateMessage = {
                 isAccepted: true,
                 ...rest,
@@ -411,9 +411,10 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                     ? durationHours.toString()
                     : '',
                   deliveryDate: updatedDeliveryDate,
-                  totalPrice:
+                  totalPrice: (
                     (parseInt(orderData?.totalPrice as string) || 0) +
-                    (updateMessage.amount || 0).toString(),
+                    (updateMessage.amount || 0)
+                  ).toString(),
                 },
               });
             } else {
@@ -475,11 +476,10 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             'USER',
           );
 
-
           const emailData = {
             projectNumber: orderData.projectNumber,
-            clientName: userData.userName
-          }
+            clientName: userData.userName,
+          };
 
           const email = await sendMail({
             from: 'ratulsarkar216@gmail.com',
@@ -489,7 +489,6 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
           });
 
           console.log(email, ' email checking');
-          
 
           await prisma.payment.update({
             where: { stripeId: session.id.split('_').join('') },

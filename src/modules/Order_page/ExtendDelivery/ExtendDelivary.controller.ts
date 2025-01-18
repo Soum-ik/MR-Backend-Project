@@ -66,7 +66,7 @@ const approveExtensionRequest = catchAsync(
 
       if (orderData) {
         const { duration, durationHours, updatedDeliveryDate } =
-          await updateDeliveryDate(orderData, days);
+          await updateDeliveryDate(orderData, parseInt(days));
         const updateMessage = {
           isAccepted: true,
           ...rest,
@@ -212,7 +212,7 @@ const ExtendDeliveryMessageOption = catchAsync(
       });
       const hours = daysToHours(data?.days || '0');
 
-      const duration = parseInt(orderData?.duration || '0') + days;
+      const duration = parseInt(orderData?.duration || '0') + parseInt(days);
       const durationHours = parseInt(orderData?.durationHours || '0') + hours;
 
       let UpdatedDeliveryDate;
@@ -252,7 +252,6 @@ const ExtendDeliveryMessageOption = catchAsync(
       };
 
       await prisma.notification.create({
-        
         data: {
           recipient: 'ADMIN',
           message: ``,

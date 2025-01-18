@@ -40,9 +40,8 @@ async function updateDeliveryDate(
 
     const hours = daysToHours(days || '0');
 
-    const totalDurationDays = parseInt(orderData.duration || '0', 10) + days;
-    const totalDurationHours =
-      parseInt(orderData.durationHours || '0', 10) + hours;
+    const totalDurationDays = parseInt(orderData.duration || '0') + days;
+    const totalDurationHours = parseInt(orderData.durationHours || '0') + hours;
 
     let updatedDeliveryDate: Date | null = null;
 
