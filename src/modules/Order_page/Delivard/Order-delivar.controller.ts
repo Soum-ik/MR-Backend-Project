@@ -192,7 +192,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       thumbnailUrl: order?.projectImage,
       type: NotificationTypes.CompleteOrderUser,
       projectNumber: order.projectNumber,
-      senderUserName: 'mahfujurrahm535',
+      senderUserName: 'You',
       createdAt: new Date(),
     };
 
@@ -224,7 +224,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         projectNumber: projectNumber,
         type: NotificationTypes.CompleteOrderUser,
         createdAt: new Date(),
-        senderUserName: 'mahfujurrahm535',
+        senderUserName: 'You',
       },
       'ADMIN',
     );

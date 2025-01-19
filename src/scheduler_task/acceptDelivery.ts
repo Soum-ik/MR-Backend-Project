@@ -180,7 +180,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   {
                     thumbnailUrl: order?.projectImage,
                     projectNumber: projectNumber,
-                    type: NotificationTypes.CompleteOrderUser,
+                    type: NotificationTypes.AutoCompleteOrderUser,
                     createdAt: new Date(),
                     senderUserName: 'mahfujurrahm535',
                     avatar: ADMINLOGO,
