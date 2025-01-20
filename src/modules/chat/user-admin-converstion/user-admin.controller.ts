@@ -2,15 +2,17 @@ import { Role, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
+import { NotificationTypes } from '../../../constants/Notification';
 import AppError from '../../../errors/AppError';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
-import { USER_ROLE } from '../../user/user.constant';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import PublicMessageHandler, { ADMINLOGO } from '../../../socket/handlers/PublicMessageHandler';
-import { NotificationTypes } from '../../../constants/Notification';
+import PublicMessageHandler, {
+  ADMINLOGO,
+} from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
+import { USER_ROLE } from '../../user/user.constant';
 
 // Send a message
 const sendMessage = async (req: Request, res: Response) => {
@@ -38,7 +40,7 @@ const sendMessage = async (req: Request, res: Response) => {
     uniqueId,
     seenBy,
     isClientSeen,
-    isAdminSeen
+    isAdminSeen,
   } = req.body;
 
   // If the role is admin, recipientId is required
@@ -92,7 +94,7 @@ const sendMessage = async (req: Request, res: Response) => {
             seenBy,
             isClientSeen,
             isAdminSeen,
-            isFromClient: true
+            isFromClient: true,
           },
         });
 
@@ -101,7 +103,7 @@ const sendMessage = async (req: Request, res: Response) => {
           avatar: user?.image,
           message: messageText,
           createdAt: new Date(),
-        }
+        };
         const userData = (await userFinder(user_id)) as User;
 
         // await prisma.notification.create({
@@ -114,14 +116,17 @@ const sendMessage = async (req: Request, res: Response) => {
         //   },
         // });
 
-        PublicMessageHandler({
-          type: NotificationTypes.Message,
-          createdAt: new Date(),
-          senderUserName: userData.userName,
-          avatar: userData.image,
-          senderId: user_id,
-          message: messageText
-        }, 'USER')
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.Message,
+            createdAt: new Date(),
+            senderUserName: userData.userName,
+            avatar: userData.image,
+            senderId: user_id,
+            message: messageText,
+          },
+          'USER',
+        );
       }
 
       return sendResponse(res, {
@@ -147,18 +152,21 @@ const sendMessage = async (req: Request, res: Response) => {
           uniqueId,
           seenBy,
           isClientSeen,
-          isAdminSeen
+          isAdminSeen,
         },
       });
 
-      PublicMessageHandler({
-        type: NotificationTypes.Message,
-        createdAt: new Date(),
-        senderUserName: "mahfujurrahm535",
-        avatar: ADMINLOGO,
-        message: messageText,
-        userId: recipientId
-      }, 'ADMIN')
+      PublicMessageHandler(
+        {
+          type: NotificationTypes.Message,
+          createdAt: new Date(),
+          senderUserName: 'mahfujurrahm535',
+          avatar: ADMINLOGO,
+          message: customOffer ? ' sent you a custom offer' : messageText,
+          userId: recipientId,
+        },
+        'ADMIN',
+      );
 
       // Send message to all admins
       for (const admin of admins) {
@@ -181,20 +189,25 @@ const sendMessage = async (req: Request, res: Response) => {
               uniqueId,
               seenBy,
               isClientSeen,
-              isAdminSeen
+              isAdminSeen,
             },
           });
 
           const userData = (await userFinder(recipientId)) as User;
 
-          PublicMessageHandler({
-            type: NotificationTypes.Message,
-            createdAt: new Date(),
-            senderUserName: "mahfujurrahm535",
-            avatar: ADMINLOGO,
-            message: `Admin: ${user?.fullName} send to ${userData.userName} -> ` + messageText,
-            admindId: user_id
-          }, 'ADMINS')
+          PublicMessageHandler(
+            {
+              type: NotificationTypes.Message,
+              createdAt: new Date(),
+              senderUserName: 'mahfujurrahm535',
+              avatar: ADMINLOGO,
+              message:
+                `Admin: ${user?.fullName} send to ${userData.userName} -> ` +
+                messageText,
+              admindId: user_id,
+            },
+            'ADMINS',
+          );
         }
       }
 
@@ -231,7 +244,7 @@ const updateMessage = catchAsync(async (req: Request, res: Response) => {
   const updateMessage = await prisma.message.updateMany({
     where: { uniqueId: uniqueId },
     data: {
-      ...body
+      ...body,
     },
   });
 
@@ -245,8 +258,7 @@ const updateMessage = catchAsync(async (req: Request, res: Response) => {
     data: null,
     message: 'Message updated successfully',
   });
-
-})
+});
 
 // Reply to a message
 const replyToMessage = async (req: Request, res: Response) => {
@@ -478,7 +490,6 @@ const getMessages = async (req: Request, res: Response) => {
 const deleteMessage = async (req: Request, res: Response) => {
   const { commonkey } = req.params;
   const { user_id, role } = req.user as TokenCredential;
-
 
   try {
     // Fetch the message from the database

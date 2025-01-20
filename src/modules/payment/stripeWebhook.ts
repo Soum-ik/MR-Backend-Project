@@ -256,6 +256,19 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               },
               'USER',
             );
+            const emailData = {
+              clientName: userData.userName,
+              projectNumber: orderData.projectNumber,
+              totalPrice: orderData.totalPrice,
+              from: orderData?.from || '',
+              items: orderData.items as [],
+            };
+
+            await sendMail({
+              to: 'sar4shakil@gmail.com',
+              subject: `You've received a project from ${emailData.clientName}`,
+              html: directProjectPlace(emailData),
+            });
           } else if (
             session?.metadata?.paymentType === PaymentType.EXTEND_DELIVERY
           ) {

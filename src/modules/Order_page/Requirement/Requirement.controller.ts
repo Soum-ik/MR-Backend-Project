@@ -84,7 +84,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         projectNumber: updateRequirements.projectNumber,
       };
       const payload1 = {
-        avatar: userData?.image,
+        avatar: ADMINLOGO,
         userId: userData?.id,
         thumbnailUrl: order?.projectImage,
         type: NotificationTypes.OrderStart,

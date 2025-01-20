@@ -35,8 +35,6 @@ schedule.scheduleJob('* * * * * *', async () => {
       },
     });
 
- 
-
     if (orderList.length > 0) {
       await Promise.all(
         orderList.map(async (message) => {
@@ -50,6 +48,8 @@ schedule.scheduleJob('* * * * * *', async () => {
             const payload = {
               thumbnailUrl: message?.projectImage,
               type: NotificationTypes.Reminder,
+              avatar: user?.image,
+              senderUserName: user?.userName,
               projectNumber: message.projectNumber,
               projectName: message.projectName,
               createdAt: new Date(),
@@ -79,6 +79,8 @@ schedule.scheduleJob('* * * * * *', async () => {
             PublicMessageHandler(
               {
                 msg: ``,
+                avatar: user?.image,
+                senderUserName: user?.userName,
                 deliveryDate: deliveryDate,
                 projectName: projectName,
                 projectNumber: projectNumber,
@@ -94,7 +96,7 @@ schedule.scheduleJob('* * * * * *', async () => {
             };
 
             await sendMail({
-              to: 'sarkarsoumik215@gmail.com',
+              to: 'sar4shakil@gmail.com',
               subject: `Your delivery deadline is coming up`,
               html: twelveHoursDelivery(emailData),
             });
