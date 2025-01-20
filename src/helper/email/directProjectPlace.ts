@@ -1,11 +1,70 @@
+interface Category {
+  categoryName?: string;
+}
+
+interface SubCategory {
+  subTitle?: string;
+}
+
+interface FreeSubDesign {
+  subDesignName: string;
+  isSelected: boolean;
+}
+
+interface FreeDesign {
+  designName: string;
+  freeSubDesign: FreeSubDesign;
+}
+
+interface DesignSubObject {
+  subCategoryLabel: string;
+}
+
+interface DesignObject {
+  categoryLabel: string;
+  subCategory: DesignSubObject;
+}
+
+interface ItemObject {
+  category?: Category;
+  categoryName?: string;
+  image?: object;
+  bulletPoint?: [];
+  subCategory?: string | SubCategory;
+  selectedQuantity?: number;
+  quantity?: number;
+  title?: string;
+  deliveryDuration: number;
+  isFastDelivery: boolean;
+  fastDeliveryAmount: number | string;
+  fastDeliveryDuration: number | string;
+  subTotal?: number;
+  totalAmount?: number;
+  projectType?: string;
+  projectImage?: string;
+  from?: string;
+  designTitle?: string;
+  designId?: string;
+  regularDeliveryDays: string;
+  fastDeliveryDays: string;
+  fastDeliveryPrice: string;
+  desc?: string;
+  deliveryWay?: string;
+  durationHours: number;
+  freeDesign?: FreeDesign;
+  designs?: DesignObject[];
+}
+
 interface data {
   projectNumber: string;
   clientName: string;
-  items?: [];
+  items?: ItemObject[];
+  totalPrice: string;
+  from?: string;
 }
 
 export const directProjectPlace = (data: data) => {
-  const { projectNumber, clientName, items } = data;
+  const { projectNumber, clientName, items, totalPrice, from } = data;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -132,7 +191,9 @@ export const directProjectPlace = (data: data) => {
       <h2 class="title">You've received a project from ${clientName}</h2>
       <span class="divider"></span>
       <p class="messageText">Project #${projectNumber}</p>
-      <table
+      ${
+        from === 'offerProject'
+          ? `<table
         border="1"
         style="width: 100%; border-color: rgba(128, 128, 128, 0.3)"
         cellspacing="0"
@@ -157,7 +218,19 @@ export const directProjectPlace = (data: data) => {
           </tr>
         </thead>
         <tbody>
-          <tr style="vertical-align: top">
+        ${items
+          ?.map(
+            ({
+              isFastDelivery,
+              fastDeliveryDuration,
+              fastDeliveryAmount,
+              bulletPoint,
+              designs,
+              freeDesign,
+            }: ItemObject) => `
+        ${
+          freeDesign && freeDesign?.designName
+            ? `<tr style="vertical-align: top">
             <td
               style="
                 width: 49%;
@@ -165,10 +238,21 @@ export const directProjectPlace = (data: data) => {
                 border-top: 1px solid rgba(128, 128, 128, 0.3);
               "
             >
-              <h1 style="font-size: 16px; font-weight: 600">
-                Door Hanger Design
-              </h1>
-              <p style="color: rgba(0, 0, 0, 0.8)">Double sided design</p>
+            ${
+              freeDesign && freeDesign?.designName
+                ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0; color: #1b8cdc!important;">
+                Free Design
+              </h1>`
+                : ``
+            }
+              ${
+                freeDesign && freeDesign?.designName
+                  ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0;">
+                ${freeDesign?.designName}
+              </h1>`
+                  : ``
+              }
+              ${freeDesign && freeDesign?.freeSubDesign?.subDesignName ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${freeDesign?.freeSubDesign?.subDesignName}</p>` : ``}
             </td>
             <td
               style="
@@ -189,7 +273,7 @@ export const directProjectPlace = (data: data) => {
                 font-weight: 500;
               "
             >
-              2 days
+              -
             </td>
             <td
               style="
@@ -200,10 +284,75 @@ export const directProjectPlace = (data: data) => {
                 font-weight: 500;
               "
             >
-              $40
+              -
             </td>
-          </tr>
-          <tr>
+          </tr>`
+            : ``
+        }
+        ${
+          designs && designs?.length > 0
+            ? `${designs
+                ?.map(
+                  ({
+                    categoryLabel,
+                    subCategory,
+                  }: DesignObject) => `<tr style="vertical-align: top">
+            <td
+              style="
+                width: 49%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              ${
+                categoryLabel
+                  ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0;">
+                ${categoryLabel}
+              </h1>`
+                  : ``
+              }
+              ${subCategory?.subCategoryLabel ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${subCategory?.subCategoryLabel}</p>` : ``}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                border-right: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              1
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              -
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              -
+            </td>
+          </tr>`,
+                )
+                .join('')}`
+            : ``
+        }
+          ${
+            bulletPoint && bulletPoint?.length > 0
+              ? `<tr>
             <td
               colspan="4"
               style="
@@ -212,65 +361,24 @@ export const directProjectPlace = (data: data) => {
                 border-top: 1px solid rgba(128, 128, 128, 0.3);
               "
             >
-              <ul style="list-style: none; padding-left: 0">
-                <li>
-                  <span
-                    style="
-                      display: inline-block;
-                      height: 16px;
-                      width: 16px;
-                      line-height: 16px;
-                      font-size: 10px;
-                      text-align: center;
-                      border-radius: 50%;
-                      background-color: #1b8cdc;
-                      color: #fff;
-                      margin-right: 5px;
-                    "
-                    >&#x2714;</span
-                  >
-                  Unlimited Revisions
-                </li>
-                <li>
-                  <span
-                    style="
-                      display: inline-block;
-                      height: 16px;
-                      width: 16px;
-                      line-height: 16px;
-                      font-size: 10px;
-                      text-align: center;
-                      border-radius: 50%;
-                      background-color: #1b8cdc;
-                      color: #fff;
-                      margin-right: 5px;
-                    "
-                    >&#x2714;</span
-                  >
-                  PSD Source File
-                </li>
-                <li>
-                  <span
-                    style="
-                      display: inline-block;
-                      height: 16px;
-                      width: 16px;
-                      line-height: 16px;
-                      font-size: 10px;
-                      text-align: center;
-                      border-radius: 50%;
-                      background-color: #1b8cdc;
-                      color: #fff;
-                      margin-right: 5px;
-                    "
-                    >&#x2714;</span
-                  >
-                  Print Ready PDF or JPEG File
-                </li>
+              <ul style="list-style: none; padding-left: 0; margin: 0;">
+                ${bulletPoint
+                  ?.map(
+                    (bullet) => `<li style="margin: 0;">
+                  <img src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/5610944.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
+                  ${bullet}
+                </li>`,
+                  )
+                  .join('')}
               </ul>
             </td>
-          </tr>
-          <tr>
+          </tr>`
+              : ``
+          }
+          
+          ${
+            isFastDelivery
+              ? `<tr>
             <td
               colspan="3"
               style="
@@ -279,7 +387,12 @@ export const directProjectPlace = (data: data) => {
                 border-top: 1px solid rgba(128, 128, 128, 0.3);
               "
             >
-              Extra-fast 1-day delivery
+              Extra-fast ${fastDeliveryDuration}-${
+                typeof fastDeliveryDuration === 'string' &&
+                parseInt(fastDeliveryDuration) > 1
+                  ? `days`
+                  : `day`
+              } delivery
             </td>
             <td
               style="
@@ -290,9 +403,14 @@ export const directProjectPlace = (data: data) => {
                 font-weight: 500;
               "
             >
-              $10
+              $${fastDeliveryAmount}
             </td>
-          </tr>
+          </tr>`
+              : ``
+          }
+        `,
+          )
+          .join('')}
         </tbody>
         <tfoot>
           <tr>
@@ -316,11 +434,202 @@ export const directProjectPlace = (data: data) => {
                 font-weight: 500;
               "
             >
-              $50
+              $${items && items[0]?.totalAmount}
             </td>
           </tr>
         </tfoot>
-      </table>
+      </table>`
+          : `<table
+        border="1"
+        style="width: 100%; border-color: rgba(128, 128, 128, 0.3)"
+        cellspacing="0"
+        cellpadding="10"
+      >
+        <thead>
+          <tr>
+            <th style="width: 49%; border: none; text-align: left">Item</th>
+            <th
+              style="
+                width: 17%;
+                border: none;
+                border-left: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              Qty
+            </th>
+            <th style="width: 17%; border-top: none; border-bottom: none">
+              Dur
+            </th>
+            <th style="width: 17%; border: none">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+        ${items
+          ?.map(
+            ({
+              isFastDelivery,
+              fastDeliveryDuration,
+              fastDeliveryAmount,
+              bulletPoint,
+              subTotal,
+              deliveryDuration,
+              selectedQuantity,
+              subCategory,
+              categoryName,
+              designId,
+              designTitle,
+              category,
+              quantity,
+              fastDeliveryPrice,
+              fastDeliveryDays,
+              regularDeliveryDays,
+              title,
+              desc,
+              durationHours,
+              deliveryWay,
+            }: ItemObject) => `
+        <tr style="vertical-align: top">
+            <td
+              style="
+                width: 49%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              ${
+                designTitle && designId
+                  ? `<a href="https://mahfujurrahm535.com/design/${designId}" style="font-size: 16px; font-weight: 500; color: #1b8cdc!important; margin: 0;">
+                ${designTitle}
+              </a>`
+                  : ``
+              }
+              ${
+                categoryName || category?.categoryName || title
+                  ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0;">
+                ${categoryName || category?.categoryName || title}
+              </h1>`
+                  : ``
+              }
+              ${subCategory && typeof subCategory === 'string' ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${subCategory}</p>` : typeof subCategory === 'object' && subCategory.subTitle ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${subCategory.subTitle}</p>` : desc ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${desc}</p>` : ``}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                border-right: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              ${selectedQuantity || quantity}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              ${isFastDelivery ? fastDeliveryDuration || fastDeliveryDays : deliveryDuration || regularDeliveryDays || durationHours} ${isFastDelivery && ((typeof fastDeliveryDuration === 'number' && fastDeliveryDuration > 1) || parseInt(fastDeliveryDays) > 1) ? `days` : !isFastDelivery && (deliveryDuration > 1 || parseInt(regularDeliveryDays) > 1) ? `days` : deliveryWay === 'hours' && durationHours > 1 ? `hours` : deliveryWay === 'hours' && durationHours === 1 ? `hour` : `day`}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $${subTotal}
+            </td>
+          </tr>
+          ${
+            bulletPoint && bulletPoint?.length > 0
+              ? `<tr>
+            <td
+              colspan="4"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              <ul style="list-style: none; padding-left: 0; margin: 0;">
+                ${bulletPoint
+                  ?.map(
+                    (bullet) => `<li style="margin: 0;">
+                  <img src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/5610944.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
+                  ${bullet}
+                </li>`,
+                  )
+                  .join('')}
+              </ul>
+            </td>
+          </tr>`
+              : ``
+          }
+          
+          ${
+            isFastDelivery
+              ? `<tr>
+            <td
+              colspan="3"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              Extra-fast ${fastDeliveryDuration || fastDeliveryDays}-${(typeof fastDeliveryDuration === 'number' && fastDeliveryDuration > 1) || parseInt(fastDeliveryDays) > 1 ? `days` : `day`} delivery
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $${fastDeliveryAmount || fastDeliveryPrice}
+            </td>
+          </tr>`
+              : ``
+          }
+        `,
+          )
+          .join('')}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td
+              colspan="3"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                font-weight: 500;
+              "
+            >
+              Total
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $${totalPrice || 0}
+            </td>
+          </tr>
+        </tfoot>
+      </table>`
+      }
 
       <div style="text-align: center; margin-top: 20px">
         <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button" style="color: #ffffff!important;">Take a look</a>

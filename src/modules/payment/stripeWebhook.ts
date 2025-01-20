@@ -676,10 +676,13 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               const emailData = {
                 clientName: userData.userName,
                 projectNumber: order.projectNumber,
+                totalPrice: order.totalPrice,
+                from: order?.from || '',
+                items: order.items as [],
               };
 
               await sendMail({
-                to: 'sarkarsoumik215@gmail.com',
+                to: 'sar4shakil@gmail.com',
                 subject: `You've received a project from ${emailData.clientName}`,
                 html: directProjectPlace(emailData),
               });

@@ -1,14 +1,86 @@
+interface ReqObject {
+  question?: string;
+  answer?: string;
+  attachments: [];
+}
+
+interface Category {
+  categoryName?: string;
+}
+
+interface SubCategory {
+  subTitle?: string;
+}
+
+interface FreeSubDesign {
+  subDesignName: string;
+  isSelected: boolean;
+}
+
+interface FreeDesign {
+  designName: string;
+  freeSubDesign: FreeSubDesign;
+}
+
+interface DesignSubObject {
+  subCategoryLabel: string;
+}
+
+interface DesignObject {
+  categoryLabel: string;
+  subCategory: DesignSubObject;
+}
+
+interface ItemObject {
+  category?: Category;
+  categoryName?: string;
+  image?: object;
+  bulletPoint?: [];
+  subCategory?: string | SubCategory;
+  selectedQuantity?: number;
+  quantity?: number;
+  title?: string;
+  deliveryDuration: number;
+  isFastDelivery: boolean;
+  fastDeliveryAmount: number | string;
+  fastDeliveryDuration: number | string;
+  subTotal?: number;
+  totalAmount?: number;
+  projectType?: string;
+  projectImage?: string;
+  from?: string;
+  designTitle?: string;
+  designId?: string;
+  regularDeliveryDays: string;
+  fastDeliveryDays: string;
+  fastDeliveryPrice: string;
+  desc?: string;
+  deliveryWay?: string;
+  durationHours: number;
+  freeDesign?: FreeDesign;
+  designs?: DesignObject[];
+}
+
 interface data {
   projectNumber: string;
   clientName: string;
-  items?: [];
-  requirements?: [];
+  items?: ItemObject[];
+  requirements?: ReqObject[];
   orderCreateDate: Date;
+  totalPrice: string;
+  from?: string;
 }
 
 export const directProjectRequirements = (data: data) => {
-  const { projectNumber, clientName, items, requirements, orderCreateDate } =
-    data;
+  const {
+    projectNumber,
+    clientName,
+    items,
+    requirements,
+    orderCreateDate,
+    totalPrice,
+    from,
+  } = data;
 
   function dateTimeFormatter(timestamp: Date): string {
     const options: Intl.DateTimeFormatOptions = {
@@ -125,6 +197,10 @@ export const directProjectRequirements = (data: data) => {
         list-style: none;
         padding-left: 0;
       }
+      .requirements-block *{
+        margin: 0;
+        padding: 0;
+      }
       .requirement {
         margin-top: 20px;
       }
@@ -170,7 +246,9 @@ export const directProjectRequirements = (data: data) => {
       <p class="messageText">
         <span style="font-weight: 500">Project #${projectNumber}</span> is due ${dateTimeFormatter(orderCreateDate)}.
       </p>
-      <table
+      ${
+        from === 'offerProject'
+          ? `<table
         border="1"
         style="width: 100%; border-color: rgba(128, 128, 128, 0.3)"
         cellspacing="0"
@@ -195,7 +273,19 @@ export const directProjectRequirements = (data: data) => {
           </tr>
         </thead>
         <tbody>
-          <tr style="vertical-align: top">
+        ${items
+          ?.map(
+            ({
+              isFastDelivery,
+              fastDeliveryDuration,
+              fastDeliveryAmount,
+              bulletPoint,
+              designs,
+              freeDesign,
+            }: ItemObject) => `
+        ${
+          freeDesign && freeDesign?.designName
+            ? `<tr style="vertical-align: top">
             <td
               style="
                 width: 49%;
@@ -203,10 +293,21 @@ export const directProjectRequirements = (data: data) => {
                 border-top: 1px solid rgba(128, 128, 128, 0.3);
               "
             >
-              <h1 style="font-size: 16px; font-weight: 600">
-                Door Hanger Design
-              </h1>
-              <p style="color: rgba(0, 0, 0, 0.8)">Double sided design</p>
+            ${
+              freeDesign && freeDesign?.designName
+                ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0; color: #1b8cdc!important;">
+                Free Design
+              </h1>`
+                : ``
+            }
+              ${
+                freeDesign && freeDesign?.designName
+                  ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0;">
+                ${freeDesign?.designName}
+              </h1>`
+                  : ``
+              }
+              ${freeDesign && freeDesign?.freeSubDesign?.subDesignName ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${freeDesign?.freeSubDesign?.subDesignName}</p>` : ``}
             </td>
             <td
               style="
@@ -227,7 +328,7 @@ export const directProjectRequirements = (data: data) => {
                 font-weight: 500;
               "
             >
-              2 days
+              -
             </td>
             <td
               style="
@@ -238,10 +339,75 @@ export const directProjectRequirements = (data: data) => {
                 font-weight: 500;
               "
             >
-              $40
+              -
             </td>
-          </tr>
-          <tr>
+          </tr>`
+            : ``
+        }
+        ${
+          designs && designs?.length > 0
+            ? `${designs
+                ?.map(
+                  ({
+                    categoryLabel,
+                    subCategory,
+                  }: DesignObject) => `<tr style="vertical-align: top">
+            <td
+              style="
+                width: 49%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              ${
+                categoryLabel
+                  ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0;">
+                ${categoryLabel}
+              </h1>`
+                  : ``
+              }
+              ${subCategory?.subCategoryLabel ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${subCategory?.subCategoryLabel}</p>` : ``}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                border-right: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              1
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              -
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              -
+            </td>
+          </tr>`,
+                )
+                .join('')}`
+            : ``
+        }
+          ${
+            bulletPoint && bulletPoint?.length > 0
+              ? `<tr>
             <td
               colspan="4"
               style="
@@ -250,65 +416,24 @@ export const directProjectRequirements = (data: data) => {
                 border-top: 1px solid rgba(128, 128, 128, 0.3);
               "
             >
-              <ul style="list-style: none; padding-left: 0">
-                <li>
-                  <span
-                    style="
-                      display: inline-block;
-                      height: 16px;
-                      width: 16px;
-                      line-height: 16px;
-                      font-size: 10px;
-                      text-align: center;
-                      border-radius: 50%;
-                      background-color: #1b8cdc;
-                      color: #fff;
-                      margin-right: 5px;
-                    "
-                    >&#x2714;</span
-                  >
-                  Unlimited Revisions
-                </li>
-                <li>
-                  <span
-                    style="
-                      display: inline-block;
-                      height: 16px;
-                      width: 16px;
-                      line-height: 16px;
-                      font-size: 10px;
-                      text-align: center;
-                      border-radius: 50%;
-                      background-color: #1b8cdc;
-                      color: #fff;
-                      margin-right: 5px;
-                    "
-                    >&#x2714;</span
-                  >
-                  PSD Source File
-                </li>
-                <li>
-                  <span
-                    style="
-                      display: inline-block;
-                      height: 16px;
-                      width: 16px;
-                      line-height: 16px;
-                      font-size: 10px;
-                      text-align: center;
-                      border-radius: 50%;
-                      background-color: #1b8cdc;
-                      color: #fff;
-                      margin-right: 5px;
-                    "
-                    >&#x2714;</span
-                  >
-                  Print Ready PDF or JPEG File
-                </li>
+              <ul style="list-style: none; padding-left: 0; margin: 0;">
+                ${bulletPoint
+                  ?.map(
+                    (bullet) => `<li style="margin: 0;">
+                  <img src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/5610944.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
+                  ${bullet}
+                </li>`,
+                  )
+                  .join('')}
               </ul>
             </td>
-          </tr>
-          <tr>
+          </tr>`
+              : ``
+          }
+          
+          ${
+            isFastDelivery
+              ? `<tr>
             <td
               colspan="3"
               style="
@@ -317,7 +442,12 @@ export const directProjectRequirements = (data: data) => {
                 border-top: 1px solid rgba(128, 128, 128, 0.3);
               "
             >
-              Extra-fast 1-day delivery
+              Extra-fast ${fastDeliveryDuration}-${
+                typeof fastDeliveryDuration === 'string' &&
+                parseInt(fastDeliveryDuration) > 1
+                  ? `days`
+                  : `day`
+              } delivery
             </td>
             <td
               style="
@@ -328,9 +458,14 @@ export const directProjectRequirements = (data: data) => {
                 font-weight: 500;
               "
             >
-              $10
+              $${fastDeliveryAmount}
             </td>
-          </tr>
+          </tr>`
+              : ``
+          }
+        `,
+          )
+          .join('')}
         </tbody>
         <tfoot>
           <tr>
@@ -354,80 +489,228 @@ export const directProjectRequirements = (data: data) => {
                 font-weight: 500;
               "
             >
-              $50
+              $${items && items[0]?.totalAmount}
             </td>
           </tr>
         </tfoot>
-      </table>
+      </table>`
+          : `<table
+        border="1"
+        style="width: 100%; border-color: rgba(128, 128, 128, 0.3)"
+        cellspacing="0"
+        cellpadding="10"
+      >
+        <thead>
+          <tr>
+            <th style="width: 49%; border: none; text-align: left">Item</th>
+            <th
+              style="
+                width: 17%;
+                border: none;
+                border-left: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              Qty
+            </th>
+            <th style="width: 17%; border-top: none; border-bottom: none">
+              Dur
+            </th>
+            <th style="width: 17%; border: none">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+        ${items
+          ?.map(
+            ({
+              isFastDelivery,
+              fastDeliveryDuration,
+              fastDeliveryAmount,
+              bulletPoint,
+              subTotal,
+              deliveryDuration,
+              selectedQuantity,
+              subCategory,
+              categoryName,
+              designId,
+              designTitle,
+              category,
+              quantity,
+              fastDeliveryPrice,
+              fastDeliveryDays,
+              regularDeliveryDays,
+              title,
+              desc,
+              durationHours,
+              deliveryWay,
+            }: ItemObject) => `
+        <tr style="vertical-align: top">
+            <td
+              style="
+                width: 49%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              ${
+                designTitle && designId
+                  ? `<a href="https://mahfujurrahm535.com/design/${designId}" style="font-size: 16px; font-weight: 500; color: #1b8cdc!important; margin: 0;">
+                ${designTitle}
+              </a>`
+                  : ``
+              }
+              ${
+                categoryName || category?.categoryName || title
+                  ? `<h1 style="font-size: 16px; font-weight: 600; margin: 0;">
+                ${categoryName || category?.categoryName || title}
+              </h1>`
+                  : ``
+              }
+              ${subCategory && typeof subCategory === 'string' ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${subCategory}</p>` : typeof subCategory === 'object' && subCategory.subTitle ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${subCategory.subTitle}</p>` : desc ? `<p style="color: rgba(0, 0, 0, 0.8); margin: 0;">${desc}</p>` : ``}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                border-right: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              ${selectedQuantity || quantity}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border-bottom: none;
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              ${isFastDelivery ? fastDeliveryDuration || fastDeliveryDays : deliveryDuration || regularDeliveryDays || durationHours} ${isFastDelivery && ((typeof fastDeliveryDuration === 'number' && fastDeliveryDuration > 1) || parseInt(fastDeliveryDays) > 1) ? `days` : !isFastDelivery && (deliveryDuration > 1 || parseInt(regularDeliveryDays) > 1) ? `days` : deliveryWay === 'hours' && durationHours > 1 ? `hours` : deliveryWay === 'hours' && durationHours === 1 ? `hour` : `day`}
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $${subTotal}
+            </td>
+          </tr>
+          ${
+            bulletPoint && bulletPoint?.length > 0
+              ? `<tr>
+            <td
+              colspan="4"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              <ul style="list-style: none; padding-left: 0; margin: 0;">
+                ${bulletPoint
+                  ?.map(
+                    (bullet) => `<li style="margin: 0;">
+                  <img src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/5610944.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
+                  ${bullet}
+                </li>`,
+                  )
+                  .join('')}
+              </ul>
+            </td>
+          </tr>`
+              : ``
+          }
+          
+          ${
+            isFastDelivery
+              ? `<tr>
+            <td
+              colspan="3"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+              "
+            >
+              Extra-fast ${fastDeliveryDuration || fastDeliveryDays}-${(typeof fastDeliveryDuration === 'number' && fastDeliveryDuration > 1) || parseInt(fastDeliveryDays) > 1 ? `days` : `day`} delivery
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $${fastDeliveryAmount || fastDeliveryPrice}
+            </td>
+          </tr>`
+              : ``
+          }
+        `,
+          )
+          .join('')}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td
+              colspan="3"
+              style="
+                width: 83%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                font-weight: 500;
+              "
+            >
+              Total
+            </td>
+            <td
+              style="
+                width: 17%;
+                border: none;
+                border-top: 1px solid rgba(128, 128, 128, 0.3);
+                text-align: center;
+                font-weight: 500;
+              "
+            >
+              $${totalPrice || 0}
+            </td>
+          </tr>
+        </tfoot>
+      </table>`
+      }
 
       <div style="margin-top: 20px">
         The buyer has provided the following project requirements:
       </div>
 
       <ul class="requirements-block">
+        ${requirements
+          ?.map(
+            ({ question, answer, attachments }: ReqObject, i: number) => `
         <li class="requirement">
-          <span>1.</span>
+          <span>${i + 1}.</span>
           <div>
-            <p style="margin-bottom: 5px">Which industry do you work in?</p>
-            <p>Pest control and bed maintenance</p>
+            <p style="margin-bottom: 5px">${question}</p>
+            <p>${answer}</p>
+            ${
+              attachments.length > 0
+                ? `<span style="display: block; margin-top: 5px"
+              >[${attachments.length} ${attachments.length > 1 ? `files` : `file`} attached]</span
+            >`
+                : `<span style="display: none;"></span>`
+            }
           </div>
         </li>
-        <li class="requirement">
-          <span>2.</span>
-          <div>
-            <p style="margin-bottom: 5px">Do you have your own/company logo?</p>
-            <p>use one of these or a combination for the aeration image.</p>
-            <span style="display: block; margin-top: 5px"
-              >[2 files attached]</span
-            >
-          </div>
-        </li>
-        <li class="requirement">
-          <span>3.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              Do you have your own/company website?
-            </p>
-            <p>www.website.com</p>
-          </div>
-        </li>
-        <li class="requirement">
-          <span>4.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              Do you have any imaginary or specific design ideas?
-            </p>
-            <p>please use this image for fertilizing add</p>
-            <span style="display: block; margin-top: 5px"
-              >[1 files attached]</span
-            >
-          </div>
-        </li>
-        <li class="requirement">
-          <span>5.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              Do you have your specific design size?
-            </p>
-            <p>4.5x11 inch</p>
-          </div>
-        </li>
-        <li class="requirement">
-          <span>6.</span>
-          <div>
-            <p style="margin-bottom: 5px">
-              You have to give clear information that you need in the design.
-              (For example, all texts, all photos, logo, contact info, etc.)
-            </p>
-            <p>
-              please use a combination of these for pest control and bed
-              maintenance ads
-            </p>
-            <span style="display: block; margin-top: 5px"
-              >[5 files attached]</span
-            >
-          </div>
-        </li>
+        `,
+          )
+          .join('')}
       </ul>
 
       <div style="text-align: center; margin-top: 30px">

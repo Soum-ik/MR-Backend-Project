@@ -172,14 +172,18 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         const emailData = {
           clientName: userData.userName,
           projectNumber: updateRequirements.projectNumber,
-          // items: [],
-          // requirements: [],
+          items: updateRequirements.items as [],
+          requirements: updateRequirements.requirements as [],
           orderCreateDate: new Date(),
+          totalPrice: updateRequirements.totalPrice,
+          from: updateRequirements?.from || '',
         };
 
+        console.log(emailData);
+
         await sendMail({
-          to: 'sarkarsoumik215@gmail.com',
-          subject: `You've received a project from ${emailData.clientName}`,
+          to: 'sar4shakil@gmail.com',
+          subject: `You've received a project from ${emailData.clientName} and requirements Added`,
           html: directProjectRequirements(emailData),
         });
       }
