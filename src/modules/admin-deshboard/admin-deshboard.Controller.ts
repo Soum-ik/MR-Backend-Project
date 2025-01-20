@@ -174,7 +174,7 @@ export const getOrderCount = catchAsync(
           },
         }),
         // Get canceled orders count
-        prisma.order.count({
+        prisma.order.findMany({
           where: {
             ...whereClause,
             projectStatus: ProjectStatus.CANCELED,
@@ -222,9 +222,14 @@ export const getOrderCount = catchAsync(
       ? totalEarnings / payments.length
       : 0;
 
+    const cancelOrders = {
+      length: canceledOrders.length,
+      price: canceledOrders.reduce((acc, payment) => acc + parseFloat(payment.totalPrice), 0),
+    }
+
     const totalOrder = {
       completedOrders,
-      canceledOrders,
+      canceledOrders: cancelOrders,
       totalEarnings,
       averageOrderValue,
       totalCancelledAmount,
