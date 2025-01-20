@@ -8,7 +8,9 @@ import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
 import catchAsync from '../../../libs/utlitys/catchSynch';
-import PublicMessageHandler from '../../../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, {
+  ADMINLOGO,
+} from '../../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../../utils/userFinder';
 import { OrderStatus, ProjectStatus } from '../Order_page.constant';
 
@@ -192,7 +194,8 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
       thumbnailUrl: order?.projectImage,
       type: NotificationTypes.CompleteOrderUser,
       projectNumber: order.projectNumber,
-      senderUserName: 'You',
+      senderUserName: userData.userName,
+      avatar: userData?.image,
       createdAt: new Date(),
     };
 
@@ -224,7 +227,8 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         projectNumber: projectNumber,
         type: NotificationTypes.CompleteOrderUser,
         createdAt: new Date(),
-        senderUserName: 'You',
+        senderUserName: userData.userName,
+        avatar: userData?.image,
       },
       'ADMIN',
     );
@@ -381,6 +385,7 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
     projectNumber: order.projectNumber,
     projectName: order.projectName,
     senderUserName: 'mahfujurrahm535',
+    avatar: ADMINLOGO,
     createdAt: new Date(),
   };
 
@@ -414,6 +419,7 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
       deliveryDate: order.deliveryDate,
       projectName: order.projectName,
       projectNumber: projectNumber,
+      avatar: ADMINLOGO,
       senderUserName: 'mahfujurrahm535',
       type: NotificationTypes.FileDelivered,
       thumbnailUrl: order?.projectImage,

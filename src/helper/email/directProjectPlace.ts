@@ -229,7 +229,7 @@ export const directProjectPlace = (data: data) => {
               freeDesign,
             }: ItemObject) => `
         ${
-          freeDesign && freeDesign?.designName
+          freeDesign && freeDesign?.freeSubDesign?.isSelected
             ? `<tr style="vertical-align: top">
             <td
               style="
