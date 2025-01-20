@@ -229,10 +229,10 @@ export const getOrderCount = catchAsync(
 
     const totalOrder = {
       completedOrders,
-      canceledOrders: cancelOrders,
+      canceledOrders: cancelOrders.length,
+      totalCancelledAmount: cancelOrders.price,
       totalEarnings,
       averageOrderValue,
-      totalCancelledAmount,
     };
 
     // Add date range information to response for clarity
