@@ -35,7 +35,7 @@ schedule.scheduleJob('* * * * * *', async () => {
       },
     });
 
-    console.log(orderList, 'orderList');
+ 
 
     if (orderList.length > 0) {
       await Promise.all(

@@ -560,6 +560,14 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         subject: `mahfujurrahm535 has sent a cancellation request`,
         html: cancelTemplate(emailData),
       });
+      await prisma.order.update({
+        where: {
+          projectNumber: projectNumber,
+        },
+        data: {
+          projectStatus: 'Dispute'
+        }
+      })
     } else if (
       message.extendDeliveryTime &&
       !offer.isAccepted &&
