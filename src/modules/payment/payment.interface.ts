@@ -29,6 +29,16 @@ interface extendDeliveryTimeT {
   amount?: number;
 }
 
+interface cancelProjectT {
+  explainWhyCancel: string,
+  isAccepted: boolean,
+  isRejected: boolean,
+  isWithdrawn: boolean,
+  extendType: string
+}
+
+
+
 interface deliverProjectT {
   isRevision: boolean;
   isAccepted: boolean;
@@ -41,4 +51,5 @@ export type {
   customOfferT,
   deliverProjectT,
   extendDeliveryTimeT,
+  cancelProjectT
 };

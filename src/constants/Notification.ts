@@ -27,6 +27,7 @@ export const NotificationTypes = {
   CompleteOrder: 'CompleteOrder',
   CompleteOrderUser: 'CompleteOrderUser',
   AutoCompleteOrder: 'AutoCompleteOrder',
+  AutoCancelOrder: 'AutoCancelOrder',
   AutoCompleteOrderUser: 'AutoCompleteOrder',
   Tips: 'Tips',
   AffiliateWidthrawRequsted: 'AffiliateWidthrawRequsted',
@@ -36,6 +37,7 @@ export const NotificationTypes = {
   CancelOfferReject: 'CancelOfferReject',
   CancelOfferWithdraw: 'CancelOfferWithdraw',
   OrderAttchFile: 'OrderAttchFile',
+  
 };
 
 export type NotificationType =
