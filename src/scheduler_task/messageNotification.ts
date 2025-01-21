@@ -69,6 +69,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
             attachment,
             contactForm,
             customOffer,
+            recipient: { email }
           } = message;
 
           const userData = (await userFinder(SenderId)) as User;
@@ -82,11 +83,14 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
             customOffer: customOffer as object,
           };
 
+          console.log(userData.email, 'user dataa');
+
+
           await sendMail({
             to:
               userData?.role === 'USER'
                 ? 'sarkarsoumik215@gmail.com' :
-                userData.email,
+                email,
             subject: `You've recieved messages from ${emailData.clientName}`,
             html: messagesTemplate(emailData),
           });
