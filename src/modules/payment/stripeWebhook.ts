@@ -363,12 +363,11 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               });
 
               const messageData = findMessage[0];
-              const { isPending, isAccepted, ...rest } =
+              const { isPending, ...rest } =
                 messageData?.extendDeliveryTime as unknown as extendDeliveryTimeT;
 
               const updateMessage = {
                 isPending: false,
-                isAccepted: true,
                 ...rest,
               };
 
@@ -426,23 +425,24 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   isClientSeen: false,
                 },
               });
+              if (data?.requestedByClient === 'false') {
+                const emailData = {
+                  clientName: userData.userName,
+                  projectNumber: orderData?.projectNumber,
+                  item: {
+                    text: updateMessage?.explainWhyExtend,
+                    duration: parseInt(updateMessage?.days),
+                    price: updateMessage?.amount,
+                    isExtend: true,
+                  },
+                };
 
-              const emailData = {
-                clientName: userData.userName,
-                projectNumber: orderData?.projectNumber,
-                item: {
-                  text: updateMessage?.explainWhyExtend,
-                  duration: parseInt(updateMessage?.days),
-                  price: updateMessage?.amount,
-                  isExtend: true,
-                },
-              };
-
-              await sendMail({
-                to: 'sar4shakil@gmail.com',
-                subject: `Good news: Your extend request has been accepted`,
-                html: emailTemplate(emailData),
-              });
+                await sendMail({
+                  to: 'sar4shakil@gmail.com',
+                  subject: `Good news: Your extend request has been accepted`,
+                  html: emailTemplate(emailData),
+                });
+              }
             } catch (error) {
               // console.log('Error in extend delivery', error);
             }
