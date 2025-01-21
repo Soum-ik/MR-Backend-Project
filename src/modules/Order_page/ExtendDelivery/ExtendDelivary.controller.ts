@@ -3,6 +3,8 @@ import { type Request, type Response } from 'express';
 import httpStatus from 'http-status';
 import { NotificationTypes } from '../../../constants/Notification';
 import AppError from '../../../errors/AppError';
+import { emailTemplate } from '../../../helper/email/additionalOfferandExtendDate';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
@@ -194,6 +196,21 @@ const approveExtensionRequest = catchAsync(
           },
           'USER',
         );
+        const emailData = {
+          clientName: userData.userName,
+          projectNumber: orderData?.projectNumber,
+          item: {
+            text: updateMessage?.explainWhyExtend,
+            duration: parseInt(updateMessage?.days),
+            price: updateMessage?.amount,
+          },
+        };
+
+        await sendMail({
+          to: userData?.email.trim(),
+          subject: `Good news: Your extend request has been accepted`,
+          html: emailTemplate(emailData),
+        });
       } else {
         throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
       }
@@ -332,6 +349,21 @@ const ExtendDeliveryMessageOption = catchAsync(
           ).toString(),
         },
       });
+      const emailData = {
+        clientName: userData.userName,
+        projectNumber: orderData?.projectNumber,
+        item: {
+          text: updateMessage?.explainWhyExtend,
+          duration: parseInt(updateMessage?.days),
+          isExtend: true,
+        },
+      };
+
+      await sendMail({
+        to: 'sar4shakil@gmail.com',
+        subject: `Good news: Your extend request has been accepted`,
+        html: emailTemplate(emailData),
+      });
     });
 
     return sendResponse(res, {
@@ -343,4 +375,4 @@ const ExtendDeliveryMessageOption = catchAsync(
   },
 );
 
-export { approveExtensionRequest, ExtendDeliveryMessageOption };
+export { ExtendDeliveryMessageOption, approveExtensionRequest };

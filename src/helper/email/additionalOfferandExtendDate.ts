@@ -1,11 +1,18 @@
+interface ItemObject {
+  text: string;
+  duration: number;
+  price?: number;
+  isExtend?: boolean;
+}
+
 interface data {
-  projectNumber: string;
+  projectNumber?: string;
   clientName: string;
-  items?: [];
+  item?: ItemObject;
 }
 
 export const emailTemplate = (data: data) => {
-  const { projectNumber, clientName, items } = data;
+  const { projectNumber, clientName, item } = data;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -14,10 +21,6 @@ export const emailTemplate = (data: data) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email Sign-Up Confirmation</title>
     <style>
-      * {
-        margin: 0;
-        box-sizing: border-box;
-      }
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
@@ -133,10 +136,10 @@ export const emailTemplate = (data: data) => {
           alt="MR Logo"
         />
       </div>
-      <h2 class="title">Your offer has been accepted</h2>
+      <h2 class="title">Your ${item?.isExtend ? `extend request` : `offer`} has been accepted</h2>
       <span class="divider"></span>
       <p class="messageText">
-        ${clientName} has accepted your offer on project #${projectNumber}
+        ${clientName} has accepted your ${item?.isExtend ? `extend request` : `offer`} on project #${projectNumber}
       </p>
 
       <table
@@ -147,26 +150,25 @@ export const emailTemplate = (data: data) => {
       >
         <thead>
           <tr>
-            <th style="width: 66%; border: none; text-align: left">Item</th>
+            <th style="width: ${item?.price ? 66 : 83}%; border: none; text-align: left">Item</th>
             <th style="width: 17%; border-top: none; border-bottom: none">
               Dur
             </th>
-            <th style="width: 17%; border: none">Price</th>
+            ${item?.price ? `<th style="width: 17%; border: none">Price</th>` : ``}
           </tr>
         </thead>
         <tbody>
           <tr style="vertical-align: top">
             <td
               style="
-                width: 66%;
+                width: ${item?.price ? 66 : 83}%;
                 border: none;
                 border-top: 1px solid rgba(128, 128, 128, 0.3);
               "
             >
-              <h1 style="font-size: 16px; font-weight: 400">
-                Door Hanger Design Double sided design
+              <h1 style="font-size: 16px; font-weight: 400; margin: 0;">
+                ${item?.text}
               </h1>
-              <p style="color: rgba(0, 0, 0, 0.8)">Unlimited revision</p>
             </td>
             <td
               style="
@@ -176,9 +178,11 @@ export const emailTemplate = (data: data) => {
                 font-weight: 500;
               "
             >
-              2 days
+              ${item?.duration} ${item?.duration && item?.duration > 1 ? 'days' : 'day'}
             </td>
-            <td
+            ${
+              item?.price
+                ? `<td
               style="
                 width: 17%;
                 border: none;
@@ -187,11 +191,15 @@ export const emailTemplate = (data: data) => {
                 font-weight: 500;
               "
             >
-              $30
-            </td>
+              $${item?.price}
+            </td>`
+                : ``
+            }
           </tr>
         </tbody>
-        <tfoot>
+        ${
+          item?.price
+            ? `<tfoot>
           <tr>
             <td
               colspan="2"
@@ -213,10 +221,12 @@ export const emailTemplate = (data: data) => {
                 font-weight: 500;
               "
             >
-              $50
+              $${item?.price}
             </td>
           </tr>
-        </tfoot>
+        </tfoot>`
+            : ``
+        }
       </table>
 
       <div style="text-align: center; margin-top: 20px">

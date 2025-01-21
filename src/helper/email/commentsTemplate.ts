@@ -132,11 +132,11 @@ export const commentsTemplate = (data: data) => {
       <h2 class="title">${clientName} left you new comments</h2>
       <span class="divider"></span>
       <p class="messageText">
-        ${clientName} left you ${commentLength} new comments in your project files. View the
+        ${clientName} left you ${commentLength} new ${commentLength > 1 ? `comments` : `comment`} in your project files. View the
         conversation to reply.
       </p>
       <div style="text-align: center">
-        <a href="https://mahfujurrahm535.com/inbox" class="button" style="color: #ffffff!important;">View Conversation</a>
+        <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button" style="color: #ffffff!important;">View Conversation</a>
       </div>
       <ul class="social">
         <li>

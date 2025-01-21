@@ -230,8 +230,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
 
       await sendMail({
-        to: 'sarkarsoumik215@gmail.com',
-        subject: `${emailData.clientName} left you new comments`,
+        to: 'sar4shakil@gmail.com',
+        subject: `You Have New Comments In your project files`,
         html: commentsTemplate(emailData),
       });
     } else if (
@@ -552,12 +552,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 
       const emailData = {
         projectNumber: projectNumber,
-        clientName: 'mahfujurrahm535',
+        clientName: 'Mahfujurrahm535',
       };
       await sendMail({
         // from: 'ratulsarkar216@gmail.com',
         to: userData.email,
-        subject: `mahfujurrahm535 has sent a cancellation request`,
+        subject: `Mahfujurrahm535 has sent a cancellation request`,
         html: cancelTemplate(emailData),
       });
       await prisma.order.update({
@@ -565,9 +565,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           projectNumber: projectNumber,
         },
         data: {
-          projectStatus: 'Dispute'
-        }
-      })
+          projectStatus: 'Dispute',
+        },
+      });
     } else if (
       message.extendDeliveryTime &&
       !offer.isAccepted &&
@@ -674,6 +674,18 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           isAdminSeen: [],
           isClientSeen: false,
         },
+      });
+
+      const emailData = {
+        clientName: 'Mahfujurrahm535',
+        projectNumber: message?.projectNumber,
+        commentLength: total,
+      };
+
+      await sendMail({
+        to: userData?.email,
+        subject: `You Have New Comments In your project files`,
+        html: commentsTemplate(emailData),
       });
 
       // commentsTemplate

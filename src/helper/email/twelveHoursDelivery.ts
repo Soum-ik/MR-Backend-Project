@@ -141,7 +141,7 @@ export const twelveHoursDelivery = (data: data) => {
       <span class="divider"></span>
    
       <p class="messageText">
-        We wanted to remind you that your delivery deadline for project ${projectNumber}
+        We wanted to remind you that your delivery deadline for project #${projectNumber}
         with ${clientName} is in less than 12 hours.
       </p>
       

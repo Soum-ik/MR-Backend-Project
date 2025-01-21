@@ -348,7 +348,7 @@ const handleDeliveryResponse = catchAsync(
       };
 
       await sendMail({
-        to: 'sarkarsoumik215@gmail.com',
+        to: 'sar4shakil@gmail.com',
         subject: `${emailData.clientName} has requested a revision`,
         html: revisionTemplate(emailData),
       });

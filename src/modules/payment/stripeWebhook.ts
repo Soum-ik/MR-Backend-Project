@@ -160,11 +160,16 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             const emailData = {
               clientName: userData.userName,
               projectNumber: orderData?.projectNumber,
+              item: {
+                text: updateMessage?.text,
+                duration: parseInt(updateMessage?.duration),
+                price: parseInt(updateMessage?.price),
+              },
             };
 
             await sendMail({
-              to: 'sarkarsoumik215@gmail.com',
-              subject: `Your offer has been accepted`,
+              to: 'sar4shakil@gmail.com',
+              subject: `Good news: Your offer has been accepted`,
               html: emailTemplate(emailData),
             });
           } else if (
@@ -266,7 +271,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
             await sendMail({
               to: 'sar4shakil@gmail.com',
-              subject: `You've received a project from ${emailData.clientName}`,
+              subject: `Great news: You've received a project from ${emailData.clientName}`,
               html: directProjectPlace(emailData),
             });
           } else if (
@@ -358,11 +363,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               });
 
               const messageData = findMessage[0];
-              const { isPending, ...rest } =
+              const { isPending, isAccepted, ...rest } =
                 messageData?.extendDeliveryTime as unknown as extendDeliveryTimeT;
 
               const updateMessage = {
                 isPending: false,
+                isAccepted: true,
                 ...rest,
               };
 
@@ -419,6 +425,23 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   isAdminSeen: [],
                   isClientSeen: false,
                 },
+              });
+
+              const emailData = {
+                clientName: userData.userName,
+                projectNumber: orderData?.projectNumber,
+                item: {
+                  text: updateMessage?.explainWhyExtend,
+                  duration: parseInt(updateMessage?.days),
+                  price: updateMessage?.amount,
+                  isExtend: true,
+                },
+              };
+
+              await sendMail({
+                to: 'sar4shakil@gmail.com',
+                subject: `Good news: Your extend request has been accepted`,
+                html: emailTemplate(emailData),
               });
             } catch (error) {
               // console.log('Error in extend delivery', error);
@@ -601,7 +624,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             };
 
             const email = await sendMail({
-              to: 'sarkarsoumik215@gmail.com',
+              to: 'sar4shakil@gmail.com',
               subject: `You've just been tipped!`,
               html: tipsTemplate(emailData),
             });
@@ -696,7 +719,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
               await sendMail({
                 to: 'sar4shakil@gmail.com',
-                subject: `You've received a project from ${emailData.clientName}`,
+                subject: `Great news: You've received a project from ${emailData.clientName}`,
                 html: directProjectPlace(emailData),
               });
             }

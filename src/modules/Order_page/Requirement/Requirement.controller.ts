@@ -183,7 +183,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
 
         await sendMail({
           to: 'sar4shakil@gmail.com',
-          subject: `You've received a project from ${emailData.clientName} and requirements Added`,
+          subject: `${emailData.clientName} added project requirements`,
           html: directProjectRequirements(emailData),
         });
       }
