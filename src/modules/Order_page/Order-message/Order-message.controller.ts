@@ -502,6 +502,14 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     ) {
       console.log('direct cancel');
     } else if (message.cancelProject && !message.isCancelled) {
+      const order = await prisma.order.findUnique({
+        where: {
+          projectNumber: projectNumber,
+        },
+      });
+
+      const getUserData = (await userFinder(order?.userId as string)) as User;
+
       PublicMessageHandler(
         {
           type: NotificationTypes.CancelOffer,
@@ -556,7 +564,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
       await sendMail({
         // from: 'ratulsarkar216@gmail.com',
-        to: userData.email,
+        to: getUserData.email,
         subject: `Mahfujurrahm535 has sent a cancellation request`,
         html: cancelTemplate(emailData),
       });
@@ -626,6 +634,16 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     } else if (message?.revisionProject) {
       console.log('Revision project from user request');
     } else if (message.imageComments && total) {
+      const order = await prisma.order.findUnique({
+        where: {
+          projectNumber: projectNumber,
+        },
+      });
+
+      const getOrderUserData = (await userFinder(
+        order?.userId as string,
+      )) as User;
+
       PublicMessageHandler(
         {
           type: NotificationTypes.Comment,
@@ -683,7 +701,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
 
       await sendMail({
-        to: userData?.email,
+        to: getOrderUserData?.email,
         subject: `You Have New Comments In your project files`,
         html: commentsTemplate(emailData),
       });
