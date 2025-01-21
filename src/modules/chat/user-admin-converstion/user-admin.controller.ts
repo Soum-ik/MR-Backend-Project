@@ -116,17 +116,34 @@ const sendMessage = async (req: Request, res: Response) => {
         //   },
         // });
 
-        PublicMessageHandler(
-          {
-            type: NotificationTypes.Message,
-            createdAt: new Date(),
-            senderUserName: userData.userName,
-            avatar: userData.image,
-            senderId: user_id,
-            message: messageText,
-          },
-          'USER',
-        );
+        if (message?.attachment?.length > 0) {
+          PublicMessageHandler(
+            {
+              type: NotificationTypes.AttchFile,
+              createdAt: new Date(),
+              senderUserName: userData.userName,
+              avatar: userData.image,
+              senderId: user_id,
+              message:
+                message?.attachment?.length > 0
+                  ? ` sent you some attachments.`
+                  : messageText,
+            },
+            'USER',
+          );
+        } else {
+          PublicMessageHandler(
+            {
+              type: NotificationTypes.Message,
+              createdAt: new Date(),
+              senderUserName: userData.userName,
+              avatar: userData.image,
+              senderId: user_id,
+              message: messageText,
+            },
+            'USER',
+          );
+        }
       }
 
       return sendResponse(res, {
@@ -156,17 +173,33 @@ const sendMessage = async (req: Request, res: Response) => {
         },
       });
 
-      PublicMessageHandler(
-        {
-          type: NotificationTypes.Message,
-          createdAt: new Date(),
-          senderUserName: 'mahfujurrahm535',
-          avatar: ADMINLOGO,
-          message: customOffer ? ' sent you a custom offer' : messageText,
-          userId: recipientId,
-        },
-        'ADMIN',
-      );
+      if (message?.attachment?.length > 0) {
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.AttchFile,
+            createdAt: new Date(),
+            senderUserName: 'mahfujurrahm535',
+            avatar: ADMINLOGO,
+            message: message?.attachment?.length
+              ? ' sent you some attachments.'
+              : messageText,
+            userId: recipientId,
+          },
+          'ADMIN',
+        );
+      } else {
+        PublicMessageHandler(
+          {
+            type: NotificationTypes.Message,
+            createdAt: new Date(),
+            senderUserName: 'mahfujurrahm535',
+            avatar: ADMINLOGO,
+            message: customOffer ? ' sent you a custom offer' : messageText,
+            userId: recipientId,
+          },
+          'ADMIN',
+        );
+      }
 
       // Send message to all admins
       for (const admin of admins) {

@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { NotificationTypes } from '../../../constants/Notification';
 import { directProjectRequirements } from '../../../helper/email/directProjectRequirements';
+import { messagesTemplate } from '../../../helper/email/messagesTemplate';
 import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
@@ -179,12 +180,24 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
           from: updateRequirements?.from || '',
         };
 
+        const emailData2 = {
+          clientName: 'Mahfujurrahm535',
+          projectNumber: updateRequirements.projectNumber,
+          messageText: `Your project has started! The designer is now working on your project.`,
+        };
+
         console.log(emailData);
 
         await sendMail({
           to: 'sar4shakil@gmail.com',
           subject: `${emailData.clientName} added project requirements`,
           html: directProjectRequirements(emailData),
+        });
+
+        await sendMail({
+          to: userData.email,
+          subject: `Your Project Has been started.`,
+          html: messagesTemplate(emailData2),
         });
       }
     }

@@ -1,11 +1,25 @@
 interface data {
   messageText?: string | null;
+  projectNumber?: string | null;
   clientName: string;
   attachments?: [];
+  contactForm?: object;
+  customOffer?: object;
+  additionalOffer?: object;
+  deliverProject?: object;
 }
 
 export const messagesTemplate = (data: data) => {
-  const { messageText, clientName, attachments } = data;
+  const {
+    messageText,
+    clientName,
+    attachments,
+    contactForm,
+    customOffer,
+    projectNumber,
+    additionalOffer,
+    deliverProject,
+  } = data;
 
   return `<!doctype html>
 <html lang="en">
@@ -141,11 +155,11 @@ export const messagesTemplate = (data: data) => {
       <h2 class="title">You've recieved messages from ${clientName}</h2>
       <span class="divider"></span>
       <p class="messageText">
-        ${messageText}
+        ${deliverProject ? `Your project has been delivered Please take a look.` : additionalOffer ? `Mahfujurrahm535 sent you an additional offer.` : contactForm ? `${clientName} submitted a contact form.` : customOffer ? `Mahfujurrahm535 sent you a custom offer.` : messageText}
       </p>
-      ${attachments && `<p class="messageText" style="margin-bottom: 40px">[${attachments?.length} file attached]</p>`}
+      ${attachments && attachments?.length > 0 ? `<p class="messageText" style="margin-bottom: 40px">[${attachments?.length} ${attachments?.length > 1 ? `files` : `file`} attached]</p>` : ``}
       <div style="text-align: center">
-        <a href="https://mahfujurrahm535.com/inbox" class="button" style="color: #ffffff!important;">View and Reply</a>
+        <a href="https://mahfujurrahm535.com/${projectNumber ? `order/${projectNumber}` : `inbox`}" class="button" style="color: #ffffff!important;">View and Reply</a>
       </div>
       <ul class="social">
         <li>
