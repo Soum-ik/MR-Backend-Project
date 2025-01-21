@@ -617,24 +617,24 @@ const profile = catchAsync(async (req: Request, res: Response) => {
       },
     }),
 
-    prisma.review.aggregate({
+    prisma.review.findMany({
       where: {
         order: {
           userId: user_id, // Assuming the userId is part of the Order model and links to the order
         },
       },
-      _avg: {
-        rating: true, // Calculate the average of ratings received
-      },
+      // _avg: {
+      //   rating: true, // Calculate the average of ratings received
+      // },
     }),
 
-    prisma.review.aggregate({
+    prisma.review.findMany({
       where: {
         senderId: user_id, // Filter reviews where the user is the sender
       },
-      _avg: {
-        rating: true, // Calculate the average of ratings given
-      },
+      // _avg: {
+      //   rating: true, // Calculate the average of ratings given
+      // },
     }),
 
     prisma.order.findMany({
@@ -665,8 +665,8 @@ const profile = catchAsync(async (req: Request, res: Response) => {
   const result = {
     CompletedProjects: CP.length,
     ProjectCompletedRate: ProjectCompletedRate,
-    AvgRatingTaken: ART._avg.rating || 0,
-    AvgRatingGiven: ARV._avg.rating || 0,
+    AvgRatingTaken: ART.length,
+    AvgRatingGiven: ARV.length,
     LastProjectOn: LP[0]?.createdAt,
   };
 
