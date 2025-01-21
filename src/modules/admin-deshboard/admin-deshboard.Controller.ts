@@ -218,9 +218,7 @@ export const getOrderCount = catchAsync(
       (acc, payment) => acc + parseFloat(payment.amount),
       0,
     );
-    const averageOrderValue = payments.length
-      ? totalEarnings / payments.length
-      : 0;
+    const averageOrderValue = (totalEarnings / completedOrders) || 0; 
 
     const cancelOrders = {
       length: canceledOrders.length,
