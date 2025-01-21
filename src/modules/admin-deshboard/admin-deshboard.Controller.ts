@@ -358,6 +358,14 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
       },
     }
     : {};
+  const whereClauseAffi: Prisma.AffiliateWhereInput = startDate
+    ? {
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    }
+    : {};
   const [returning, newUser, affiliate] = await Promise.all([
     prisma.user.findMany({
       where: {
@@ -410,6 +418,7 @@ const UsersStatus = catchAsync(async (req: Request, res: Response) => {
     }),
     prisma.affiliate.findMany({
       where: {
+        ...whereClauseAffi,
         user: {
           role: {
             notIn: [Role.ADMIN, Role.SUB_ADMIN, Role.SUPER_ADMIN],
