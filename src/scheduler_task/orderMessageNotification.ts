@@ -6,7 +6,7 @@ import { sendMail } from '../helper/smtp/AWS_SES';
 import { prisma } from '../libs/prismaHelper';
 import { userFinder } from '../utils/userFinder';
 
-schedule.scheduleJob('*/10 * * * * *', async () => {
+schedule.scheduleJob('*/1 * * * * *', async () => {
   print.blue('Scheduler running to sending order message notification...');
 
   try {
@@ -17,7 +17,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
       where: {
         sendNotification: false,
         createdAt: {
-          gte: fiveSecondsAgo,
+          lte: fiveSecondsAgo,
         },
         NOT: {
           AND: [{ isAdminSeen: true }, { isClientSeen: true }],
@@ -70,7 +70,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
           const {
             uniqueId,
             messageText,
-            sender: { id: SenderId, userName },
+            sender: { id: SenderId, userName, email },
             attachment,
             additionalOffer,
             deliverProject,
@@ -78,7 +78,23 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
           } = message;
 
           const userData = (await userFinder(SenderId)) as User;
+          await prisma.orderMessage.updateMany({
+            where: {
+              uniqueId: uniqueId,
+            },
+            data: {
+              sendNotification: true,
+            },
+          });
 
+
+          const order = await prisma.order.findUnique({
+            where: {
+              projectNumber
+            }
+          })
+
+          const userEmail = (await userFinder(order?.userId as string)) as User;
           const emailData = {
             clientName:
               userData?.role === 'USER' ? userData.userName : 'Mahfujurrahm535',
@@ -89,23 +105,20 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
             projectNumber: projectNumber,
           };
 
+          console.log(userData.email, 'checking email');
+
+
+
           await sendMail({
             to:
               userData?.role === 'USER'
-                ? userData.email
-                : 'sar4shakil@gmail.com',
+                ? 'sarkarsoumik215@gmail.com'
+                : userEmail.email,
             subject: `You've recieved messages from ${emailData.clientName}`,
             html: messagesTemplate(emailData),
           });
 
-          await prisma.message.updateMany({
-            where: {
-              uniqueId: uniqueId,
-            },
-            data: {
-              sendNotification: true,
-            },
-          });
+
         }),
       );
     }
