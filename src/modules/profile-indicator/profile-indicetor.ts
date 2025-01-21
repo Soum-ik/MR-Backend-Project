@@ -41,9 +41,8 @@ const IndicatorController = catchAsync(async (req: Request, res: Response) => {
     const [Active_Projects, LastProjectCompleted, Avg_Rating, OnTimeDelivery] = await Promise.all([
         await prisma.order.findMany({
             where: {
-                projectStatus: {
-                    notIn: [ProjectStatus.Completed, ProjectStatus.Canceled]
-                }
+                projectStatus: 'Ongoing',
+                paymentStatus : "PAID"
             }
         }),
         await prisma.order.findFirst({
