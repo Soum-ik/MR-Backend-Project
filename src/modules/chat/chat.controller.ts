@@ -44,6 +44,7 @@ const AvaiableForChat = catchAsync(async (req: Request, res: Response) => {
               },
             },
           ],
+          AND: [{ hiddenFromAdmin: false }],
         },
         orderBy: {
           createdAt: 'desc', // Fetch the most recent message

@@ -38,24 +38,38 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
             }
         },
         select: {
+            Order: {
+                where: {
+                    projectStatus: 'Completed'
+                }
+            },
             userName: true,
             totalOrder: true,
-            id: true
+            id: true,
         }
     });
 
+    console.log(users, 'total order completed from the user');
+
+
     const payments = await prisma.payment.findMany({
         where: {
-            userId: {
-                in: users.map(user => user.id) // Use id instead of userName
+            Order: {
+                userId: {
+                    in: users.map(user => user.id)
+                },
+                projectStatus : 'Completed'
             },
-            status: PaymentStatus.PAID
+            status: PaymentStatus.PAID,
+
         },
         select: {
             userId: true,
             amount: true
         }
     });
+
+
 
     // Group and sum payments by userId
     const paymentsByUser = payments.reduce((acc, payment) => {
@@ -66,12 +80,12 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
         return acc;
     }, {} as Record<string, number>);
 
- 
+
 
     const usersWithPayments = users.map(user => {
         return {
             userName: user.userName,
-            totalOrders: user.totalOrder,
+            totalOrders: user.Order.length,
             totalPayments: paymentsByUser[user.id] || 0
         };
     });
