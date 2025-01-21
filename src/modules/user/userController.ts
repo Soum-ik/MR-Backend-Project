@@ -8,7 +8,7 @@ import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 
 import bcrypt from 'bcrypt';
-import catchAsync from '../../libs/utlitys/catchSynch'; 
+import catchAsync from '../../libs/utlitys/catchSynch';
 import { emailVerficationTemplate } from '../../helper/email/EmailVerificationTemplate';
 import { sendMail } from '../../helper/smtp/AWS_SES';
 import { SignupRequestBody } from './user.interface';
@@ -254,7 +254,7 @@ const forgotPass = async (req: Request, res: Response) => {
       data: { otp: verfiyCode }, // Update the OTP field
     });
 
-    
+
     await sendMail({
       to: email,
       subject: 'Verification Code',
@@ -617,24 +617,24 @@ const profile = catchAsync(async (req: Request, res: Response) => {
       },
     }),
 
-    prisma.review.findMany({
+    prisma.review.aggregate({
       where: {
         order: {
           userId: user_id, // Assuming the userId is part of the Order model and links to the order
         },
       },
-      // _avg: {
-      //   rating: true, // Calculate the average of ratings received
-      // },
+      _avg: {
+        rating: true, // Calculate the average of ratings received
+      },
     }),
 
-    prisma.review.findMany({
+    prisma.review.aggregate({
       where: {
         senderId: user_id, // Filter reviews where the user is the sender
       },
-      // _avg: {
-      //   rating: true, // Calculate the average of ratings given
-      // },
+      _avg: {
+        rating: true, // Calculate the average of ratings given
+      },
     }),
 
     prisma.order.findMany({
@@ -665,8 +665,8 @@ const profile = catchAsync(async (req: Request, res: Response) => {
   const result = {
     CompletedProjects: CP.length,
     ProjectCompletedRate: ProjectCompletedRate,
-    AvgRatingTaken: ART.length,
-    AvgRatingGiven: ARV.length,
+    AvgRatingTaken: ART._avg.rating,
+    AvgRatingGiven: ARV._avg.rating,
     LastProjectOn: LP[0]?.createdAt,
   };
 
