@@ -148,7 +148,7 @@ async function getOrderDataByPeriod(
                             gte: period.start,
                             lt: period.end,
                         },
-                        projectStatus: 'Ongoing', // Assuming "new" status for new orders
+                        // projectStatus: 'Ongoing', // Assuming "new" status for new orders
                     },
                 }),
                 prisma.order.count({
@@ -180,7 +180,7 @@ async function getOrderDataByPeriod(
                         gte: period.start,
                         lt: period.end,
                     },
-                    projectStatus: "Ongoing"
+                    // projectStatus: "Ongoing"
                 },
             });
 
@@ -273,7 +273,7 @@ async function getOrdersForPeriod(
                     gte: monthStart,
                     lt: monthEnd,
                 },
-                projectStatus: "Ongoing"
+                // projectStatus: "Ongoing"
             },
         }),
         prisma.order.count({
@@ -302,7 +302,7 @@ async function getOrdersForPeriod(
                 gte: monthStart,
                 lt: monthEnd,
             },
-            projectStatus: "Ongoing",
+            // projectStatus: "Ongoing",
         },
         select: {
             totalPrice: true
@@ -365,7 +365,7 @@ async function getAllTimeOrderDataGroupedByYear(startDate: Date, endDate: Date) 
           prisma.order.count({
             where: {
               createdAt: { gte: yearStart, lt: yearEnd },
-              projectStatus: "Ongoing",
+            //   projectStatus: "Ongoing",
             },
           }),
           prisma.order.count({
@@ -391,7 +391,7 @@ async function getAllTimeOrderDataGroupedByYear(startDate: Date, endDate: Date) 
           prisma.order.findMany({
             where: {
               createdAt: { gte: yearStart, lt: yearEnd },
-              projectStatus: "Ongoing",
+            //   projectStatus: "Ongoing",
             },
             select: { totalPrice: true },
           }),

@@ -168,7 +168,6 @@ model OrderMessage {
   isClientSeen          Boolean                 @default(false)
   isAdminSeen           Boolean                 @default(false)
   isFromClient          Boolean                 @default(false)
-  
 
   @@map("OrderMessages")
 }
@@ -534,7 +533,7 @@ model Order {
   deliveryAttempt          Int?                    @default(0)
   tags                     tags[]
   completedProjectName     String?
-  isReminderDone        Boolean                 @default(false)
+  isReminderDone           Boolean                 @default(false)
 }
 
 model tags {
