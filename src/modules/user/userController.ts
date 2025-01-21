@@ -619,6 +619,7 @@ const profile = catchAsync(async (req: Request, res: Response) => {
 
     prisma.review.aggregate({
       where: {
+        senderType : "OWNER",
         order: {
           userId: user_id, // Assuming the userId is part of the Order model and links to the order
         },
@@ -630,6 +631,7 @@ const profile = catchAsync(async (req: Request, res: Response) => {
 
     prisma.review.aggregate({
       where: {
+        senderType : "CLIENT",
         senderId: user_id, // Filter reviews where the user is the sender
       },
       _avg: {

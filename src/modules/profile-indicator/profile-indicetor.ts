@@ -42,7 +42,7 @@ const IndicatorController = catchAsync(async (req: Request, res: Response) => {
         await prisma.order.findMany({
             where: {
                 projectStatus: 'Ongoing',
-                paymentStatus : "PAID"
+                paymentStatus: "PAID"
             }
         }),
         await prisma.order.findFirst({
@@ -58,6 +58,9 @@ const IndicatorController = catchAsync(async (req: Request, res: Response) => {
         }),
 
         await prisma.review.aggregate({
+            where: {
+                senderType: 'CLIENT'
+            },
             _avg: {
                 rating: true
             }
