@@ -13,15 +13,15 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
     print.blue('Scheduler running to sending notification...');
 
     try {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        // const fiveSecondsAgo = new Date(Date.now() - 10 * 1000);
+        // const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const fiveSecondsAgo = new Date(Date.now() - 20 * 1000);
 
 
         const messageList = await prisma.message.findMany({
             where: {
                 sendNotification: false,
                 createdAt: {
-                    lte: fiveMinutesAgo
+                    lte: fiveSecondsAgo
                 },
                 NOT: {
                     AND: [
@@ -79,7 +79,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
                 }
 
                 await sendMail({
-                    to: 'sarkarsoumik215@gmail.com',
+                    to: 'sar4shakil@gmail.com',
                     subject: `You've recieved messages from ${emailData.clientName}`,
                     html: messagesTemplate(
                         emailData
