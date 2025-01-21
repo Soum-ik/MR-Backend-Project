@@ -96,7 +96,7 @@ schedule.scheduleJob('* * * * * *', async () => {
             };
 
             await sendMail({
-              to: 'sar4shakil@gmail.com',
+              to: 'mahfujurr321@gmail.com',
               subject: `Your delivery deadline is coming up`,
               html: twelveHoursDelivery(emailData),
             });

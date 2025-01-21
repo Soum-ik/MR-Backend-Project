@@ -230,7 +230,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
 
       await sendMail({
-        to: 'sar4shakil@gmail.com',
+        to: 'mahfujurr321@gmail.com',
         subject: `You Have New Comments In your project files`,
         html: commentsTemplate(emailData),
       });

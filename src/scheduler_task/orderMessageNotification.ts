@@ -10,14 +10,14 @@ schedule.scheduleJob('*/1 * * * * *', async () => {
   print.blue('Scheduler running to sending order message notification...');
 
   try {
-    // const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const fiveSecondsAgo = new Date(Date.now() - 2 * 1000);
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    // const fiveSecondsAgo = new Date(Date.now() - 2 * 1000);
 
     const messageList = await prisma.orderMessage.findMany({
       where: {
         sendNotification: false,
         createdAt: {
-          lte: fiveSecondsAgo,
+          lte: fiveMinutesAgo,
         },
         NOT: {
           AND: [{ isAdminSeen: true }, { isClientSeen: true }],
@@ -87,12 +87,11 @@ schedule.scheduleJob('*/1 * * * * *', async () => {
             },
           });
 
-
           const order = await prisma.order.findUnique({
             where: {
-              projectNumber
-            }
-          })
+              projectNumber,
+            },
+          });
 
           const userEmail = (await userFinder(order?.userId as string)) as User;
           const emailData = {
@@ -107,18 +106,14 @@ schedule.scheduleJob('*/1 * * * * *', async () => {
 
           console.log(userData.email, 'checking email');
 
-
-
           await sendMail({
             to:
               userData?.role === 'USER'
-                ? 'sarkarsoumik215@gmail.com'
+                ? 'mahfujurr321@gmail.com'
                 : userEmail.email,
             subject: `You've recieved messages from ${emailData.clientName}`,
             html: messagesTemplate(emailData),
           });
-
-
         }),
       );
     }
