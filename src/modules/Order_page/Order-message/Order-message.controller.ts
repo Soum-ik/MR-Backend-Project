@@ -1,4 +1,4 @@
-import { Role, User } from '@prisma/client';
+import { ProjectStatus, Role, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
@@ -1140,6 +1140,16 @@ export const updateProjectMessage = catchAsync(
 
     if (role === 'USER') {
       if (findOrder[0].cancelProject) {
+
+        await prisma.order.update({
+          where: {
+            projectNumber: projectNumber,
+          },
+          data: {
+            projectStatus: updateBody?.cancelProject?.disputedFrom as ProjectStatus
+          }
+        })
+
         PublicMessageHandler(
           {
             type: NotificationTypes.CancelOfferReject,
@@ -1291,6 +1301,16 @@ export const updateProjectMessage = catchAsync(
         },
       });
       if (findOrderMessage[0].cancelProject) {
+
+        await prisma.order.update({
+          where: {
+            projectNumber: projectNumber,
+          },
+          data: {
+            projectStatus: updateBody?.cancelProject?.disputedFrom as ProjectStatus
+          }
+        })
+        
         PublicMessageHandler(
           {
             type: NotificationTypes.CancelOfferWithdraw,
