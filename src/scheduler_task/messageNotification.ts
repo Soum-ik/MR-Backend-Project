@@ -86,7 +86,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
           console.log(userData.email, 'user dataa');
 
           await sendMail({
-            to: userData?.role === 'USER' ? 'mahfujurr321@gmail.com' : email,
+            to: userData?.role === 'USER' ? 'mahfujurrahm535@gmail.com' : email,
             subject: `You've recieved messages from ${emailData.clientName}`,
             html: messagesTemplate(emailData),
           });

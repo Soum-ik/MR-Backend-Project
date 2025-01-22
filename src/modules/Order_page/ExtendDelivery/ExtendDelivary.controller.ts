@@ -360,7 +360,7 @@ const ExtendDeliveryMessageOption = catchAsync(
       };
 
       await sendMail({
-        to: 'mahfujurr321@gmail.com',
+        to: 'mahfujurrahm535@gmail.com',
         subject: `Good news: Your extend request has been accepted`,
         html: emailTemplate(emailData),
       });

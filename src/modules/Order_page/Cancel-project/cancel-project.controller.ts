@@ -177,7 +177,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
   };
 
   await sendMail({
-    to: 'mahfujurr321@gmail.com',
+    to: 'mahfujurrahm535@gmail.com',
     subject: `${emailData.clientName} has sent a cancellation request`,
     html: cancelTemplate(emailData),
   });

@@ -168,7 +168,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             };
 
             await sendMail({
-              to: 'mahfujurr321@gmail.com',
+              to: 'mahfujurrahm535@gmail.com',
               subject: `Good news: Your offer has been accepted`,
               html: emailTemplate(emailData),
             });
@@ -270,7 +270,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             };
 
             await sendMail({
-              to: 'mahfujurr321@gmail.com',
+              to: 'mahfujurrahm535@gmail.com',
               subject: `Great news: You've received a project from ${emailData.clientName}`,
               html: directProjectPlace(emailData),
             });
@@ -438,7 +438,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 };
 
                 await sendMail({
-                  to: 'mahfujurr321@gmail.com',
+                  to: 'mahfujurrahm535@gmail.com',
                   subject: `Good news: Your extend request has been accepted`,
                   html: emailTemplate(emailData),
                 });
@@ -624,7 +624,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             };
 
             const email = await sendMail({
-              to: 'mahfujurr321@gmail.com',
+              to: 'mahfujurrahm535@gmail.com',
               subject: `You've just been tipped!`,
               html: tipsTemplate(emailData),
             });
@@ -718,7 +718,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               };
 
               await sendMail({
-                to: 'mahfujurr321@gmail.com',
+                to: 'mahfujurrahm535@gmail.com',
                 subject: `Great news: You've received a project from ${emailData.clientName}`,
                 html: directProjectPlace(emailData),
               });
