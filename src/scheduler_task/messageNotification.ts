@@ -6,11 +6,11 @@ import { sendMail } from '../helper/smtp/AWS_SES';
 import { prisma } from '../libs/prismaHelper';
 import { userFinder } from '../utils/userFinder';
 
-schedule.scheduleJob('*/10 * * * * *', async () => {
+schedule.scheduleJob('*/1 * * * * *', async () => {
   print.blue('Scheduler running to sending notification...');
 
   try {
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const fiveMinutesAgo = new Date(Date.now() - 2 * 1000);
     // const fiveSecondsAgo = new Date(Date.now() - 2 * 1000);
 
     const messageList = await prisma.message.findMany({
@@ -51,6 +51,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
         customOffer: true,
       },
     });
+console.log(messageList, 'messageList');
 
     if (messageList.length > 0) {
       const uniqueMessages = Array.from(
