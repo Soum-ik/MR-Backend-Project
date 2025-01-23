@@ -12,7 +12,9 @@ import { tipsTemplate } from '../../helper/email/tipsTemplate';
 import { sendMail } from '../../helper/smtp/AWS_SES';
 import { prisma } from '../../libs/prismaHelper';
 import catchAsync from '../../libs/utlitys/catchSynch';
-import PublicMessageHandler, { ADMINLOGO } from '../../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, {
+  ADMINLOGO,
+} from '../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../utils/userFinder';
 import { updateDeliveryDate } from '../Order_page/ExtendDelivery/ExtendDelivary.utils';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
@@ -304,6 +306,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                     senderUserName: userData.userName,
                     avatar: userData.image,
                     message: '',
+                    thumbnailUrl: orderData?.projectImage,
                   },
                   'USER',
                 );
@@ -315,6 +318,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   message: '',
                   projectNumber: orderData.projectNumber,
                   createdAt: new Date(),
+                  thumbnailUrl: orderData?.projectImage,
                 };
                 await prisma.notification.upsert({
                   where: {
@@ -390,6 +394,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   senderUserName: userData.userName,
                   avatar: userData.image,
                   message: '',
+                  thumbnailUrl: orderData?.projectImage,
                 },
                 'USER',
               );
@@ -401,6 +406,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 message: '',
                 projectNumber: orderData?.projectNumber,
                 createdAt: new Date(),
+                thumbnailUrl: orderData?.projectImage,
               };
               await prisma.notification.upsert({
                 where: {
@@ -729,9 +735,9 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               PublicMessageHandler(
                 {
                   msg: ``,
-                  avatar: userData.image,
+                  avatar: ADMINLOGO,
                   userId: userData.id,
-                  senderUserName: userData.userName,
+                  senderUserName: 'mahfujurrahm535',
                   thumbnailUrl: order.projectImage,
                   projectNumber: order.projectNumber,
                   type: NotificationTypes.paymentConfirmation,

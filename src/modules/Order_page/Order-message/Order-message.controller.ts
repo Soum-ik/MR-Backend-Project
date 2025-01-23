@@ -174,6 +174,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
     const offer = message?.extendDeliveryTime as unknown as ExtendDelivery;
 
+    const order = await prisma.order.findUnique({
+      where: {
+        projectNumber: projectNumber,
+      },
+    });
+
     if (message?.imageComments && total > 0) {
       PublicMessageHandler(
         {
@@ -184,6 +190,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText,
           userId: user_id,
           projectNumber: projectNumber,
+          thumbnailUrl: order?.projectImage,
           commentQuantity: total,
         },
         'USER',
@@ -197,6 +204,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         message: 'Image Comments',
         userId: user_id,
         projectNumber: projectNumber,
+        thumbnailUrl: order?.projectImage,
         commentQuantity: total,
       };
 
@@ -254,6 +262,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         message: 'Image Comments',
         userId: user_id,
         projectNumber: projectNumber,
+        thumbnailUrl: order?.projectImage,
       };
 
       PublicMessageHandler(
@@ -265,7 +274,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           senderId: user_id,
           message: messageText,
           projectNumber: projectNumber,
-          projectImage: 'testing images',
+          thumbnailUrl: order?.projectImage,
         },
         'USER',
       );
@@ -302,7 +311,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           senderId: user_id,
           message: messageText,
           projectNumber: projectNumber,
-          projectImage: 'testing images',
+          thumbnailUrl: order?.projectImage,
         },
         'USER',
       );
@@ -315,6 +324,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         message: messageText,
         senderId: user_id,
         projectNumber: projectNumber,
+        thumbnailUrl: order?.projectImage,
       };
 
       // Check if a notification already exists for the sender and recipient
@@ -449,6 +459,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     };
     const total = calculateNewCommentsAndReplies(message as unknown as Message);
 
+    const order = await prisma.order.findUnique({
+      where: {
+        projectNumber: projectNumber,
+      },
+    });
+
     if (message.additionalOffer) {
       PublicMessageHandler(
         {
@@ -459,6 +475,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText,
           userId: recipientId,
           projectNumber: projectNumber,
+          thumbnailUrl: order?.projectImage,
         },
         'ADMIN',
       );
@@ -471,6 +488,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
+        thumbnailUrl: order?.projectImage,
       };
       await prisma.notification.upsert({
         where: {
@@ -519,6 +537,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText,
           userId: recipientId,
           projectNumber,
+          thumbnailUrl: order?.projectImage,
         },
         'ADMIN',
       );
@@ -531,6 +550,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
+        thumbnailUrl: order?.projectImage,
       };
       await prisma.notification.upsert({
         where: {
@@ -591,6 +611,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText,
           userId: recipientId,
           projectNumber,
+          thumbnailUrl: order?.projectImage,
         },
         'ADMIN',
       );
@@ -603,6 +624,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
+        thumbnailUrl: order?.projectImage,
       };
       await prisma.notification.upsert({
         where: {
@@ -654,6 +676,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           userId: recipientId,
           projectNumber,
           commentQuantity: total,
+          thumbnailUrl: order?.projectImage,
         },
         'ADMIN',
       );
@@ -667,6 +690,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         projectNumber: projectNumber,
         createdAt: new Date(),
         commentQuantity: total,
+        thumbnailUrl: order?.projectImage,
       };
       await prisma.notification.upsert({
         where: {
@@ -720,6 +744,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         message: 'Image Comments',
         userId: orderInfo?.userId,
         projectNumber: projectNumber,
+        thumbnailUrl: order?.projectImage,
       };
 
       PublicMessageHandler(
@@ -731,7 +756,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           senderId: user_id,
           message: messageText,
           projectNumber: projectNumber,
-          projectImage: 'testing images',
+          thumbnailUrl: order?.projectImage,
           userId: orderInfo?.userId,
         },
         'ADMIN',
@@ -771,6 +796,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
           message: messageText,
           userId: recipientId,
           projectNumber,
+          thumbnailUrl: order?.projectImage,
         },
         'ADMIN',
       );
@@ -783,6 +809,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         recipientId: recipientId,
         projectNumber: projectNumber,
         createdAt: new Date(),
+        thumbnailUrl: order?.projectImage,
       };
 
       // Check if a notification already exists for the sender and recipient
@@ -884,6 +911,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
               avatar: ADMINLOGO,
               message: messageText,
               userId: recipientId,
+              thumbnailUrl: order?.projectImage,
+              projectNumber,
             },
             'ADMINS',
           );
@@ -1138,17 +1167,21 @@ export const updateProjectMessage = catchAsync(
     });
     const offer = findOrder[0].extendDeliveryTime as unknown as ExtendDelivery;
 
+    const order = await prisma.order.findUnique({
+      where: { projectNumber: projectNumber },
+    });
+
     if (role === 'USER') {
       if (findOrder[0].cancelProject) {
-
         await prisma.order.update({
           where: {
             projectNumber: projectNumber,
           },
           data: {
-            projectStatus: updateBody?.cancelProject?.disputedFrom as ProjectStatus
-          }
-        })
+            projectStatus: updateBody?.cancelProject
+              ?.disputedFrom as ProjectStatus,
+          },
+        });
 
         PublicMessageHandler(
           {
@@ -1158,6 +1191,7 @@ export const updateProjectMessage = catchAsync(
             avatar: userData.image,
             projectNumber: projectNumber,
             userId: user_id,
+            thumbnailUrl: order?.projectImage,
           },
           'USER',
         );
@@ -1169,6 +1203,7 @@ export const updateProjectMessage = catchAsync(
           message: `${userData.userName} Cancel Offer Reject`,
           projectNumber: projectNumber,
           createdAt: new Date(),
+          thumbnailUrl: order?.projectImage,
         };
 
         await prisma.notification.upsert({
@@ -1207,6 +1242,7 @@ export const updateProjectMessage = catchAsync(
             avatar: userData.image,
             projectNumber: projectNumber,
             userId: user_id,
+            thumbnailUrl: order?.projectImage,
           },
           'USER',
         );
@@ -1218,6 +1254,7 @@ export const updateProjectMessage = catchAsync(
           message: `${userData.userName} withdraw the extension request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
+          thumbnailUrl: order?.projectImage,
         };
 
         await prisma.notification.upsert({
@@ -1252,6 +1289,7 @@ export const updateProjectMessage = catchAsync(
             projectNumber: projectNumber,
             // message: messageText,
             userId: user_id,
+            thumbnailUrl: order?.projectImage,
           },
           'USER',
         );
@@ -1263,6 +1301,7 @@ export const updateProjectMessage = catchAsync(
           message: `${userData.userName} reject the addition offer request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
+          thumbnailUrl: order?.projectImage,
         };
 
         await prisma.notification.upsert({
@@ -1301,15 +1340,15 @@ export const updateProjectMessage = catchAsync(
         },
       });
       if (findOrderMessage[0].cancelProject) {
-
         await prisma.order.update({
           where: {
             projectNumber: projectNumber,
           },
           data: {
-            projectStatus: updateBody?.cancelProject?.disputedFrom as ProjectStatus
-          }
-        })
+            projectStatus: updateBody?.cancelProject
+              ?.disputedFrom as ProjectStatus,
+          },
+        });
 
         PublicMessageHandler(
           {
@@ -1319,6 +1358,7 @@ export const updateProjectMessage = catchAsync(
             avatar: ADMINLOGO,
             projectNumber: projectNumber,
             userId: findOrder?.userId,
+            thumbnailUrl: order?.projectImage,
           },
           'ADMIN',
         );
@@ -1330,6 +1370,7 @@ export const updateProjectMessage = catchAsync(
           message: `mahfujurrahm535 withdrawn the offer`,
           projectNumber: projectNumber,
           createdAt: new Date(),
+          thumbnailUrl: order?.projectImage,
         };
 
         await prisma.notification.upsert({
@@ -1370,6 +1411,7 @@ export const updateProjectMessage = catchAsync(
             avatar: ADMINLOGO,
             projectNumber: projectNumber,
             userId: findOrder?.userId,
+            thumbnailUrl: order?.projectImage,
           },
           'ADMIN',
         );
@@ -1381,6 +1423,7 @@ export const updateProjectMessage = catchAsync(
           message: `mahfujurrahm535 rejected the extension request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
+          thumbnailUrl: order?.projectImage,
         };
 
         await prisma.notification.upsert({
@@ -1423,6 +1466,7 @@ export const updateProjectMessage = catchAsync(
             avatar: ADMINLOGO,
             projectNumber: projectNumber,
             userId: findOrder?.userId,
+            thumbnailUrl: order?.projectImage,
           },
           'ADMIN',
         );
@@ -1434,6 +1478,7 @@ export const updateProjectMessage = catchAsync(
           message: `mahfujurrahm535 withdrawn the extension request`,
           projectNumber: projectNumber,
           createdAt: new Date(),
+          thumbnailUrl: order?.projectImage,
         };
 
         await prisma.notification.upsert({
@@ -1478,6 +1523,7 @@ export const updateProjectMessage = catchAsync(
             avatar: ADMINLOGO,
             projectNumber: projectNumber,
             userId: findOrder?.userId,
+            thumbnailUrl: order?.projectImage,
           },
           'ADMIN',
         );
@@ -1489,6 +1535,7 @@ export const updateProjectMessage = catchAsync(
           message: `mahfujurrahm535 withdrawn the offer`,
           projectNumber: projectNumber,
           createdAt: new Date(),
+          thumbnailUrl: order?.projectImage,
         };
 
         await prisma.notification.upsert({

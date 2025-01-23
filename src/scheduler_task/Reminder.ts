@@ -86,6 +86,7 @@ schedule.scheduleJob('* * * * * *', async () => {
                 projectNumber: projectNumber,
                 type: NotificationTypes.Reminder,
                 createdAt: new Date(),
+                thumbnailUrl: message?.projectImage,
               },
               'USER',
             );

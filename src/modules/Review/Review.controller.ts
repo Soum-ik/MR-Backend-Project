@@ -87,6 +87,7 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
       type: NotificationTypes.Review,
       createdAt: new Date(),
       rating: rating,
+      thumbnailUrl: orderData?.projectImage,
     },
     admins ? 'ADMIN' : 'USER',
   );
