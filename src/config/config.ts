@@ -7,8 +7,13 @@ export const JWT_SECRET = '5EC7CEFA1BE7C9354A639369A2AA8';
 export const JWT_EXPIRATION_TIME = 30 * 24 * 60 * 60; // 30 Days
 
 // export const EMAIL_HOST = "sarkarsoumik215@gmail.com";
-export const EMAIL_USER = 'bsns.mr.site@gmail.com';
-export const EMAIL_PASSWORD = 'etix eqzv zbpy jvqn';
+// export const EMAIL_USER = 'bsns.mr.site@gmail.com';
+// export const EMAIL_PASSWORD = 'etix eqzv zbpy jvqn';
+
+// SMTP_MAIL="mahfujurrahm535@gmail.com"
+// SMTP_USER="mrko sntp iceq qgah"
+export const EMAIL_USER = "mahfujurrahm535@gmail.com";
+export const EMAIL_PASSWORD = "mrko sntp iceq qgah";
 
 export const MAX_JSON_SIZE = '50mb';
 export const URL_ENCODED = true;

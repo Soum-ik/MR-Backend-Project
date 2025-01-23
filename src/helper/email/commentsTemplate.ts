@@ -125,7 +125,7 @@ export const commentsTemplate = (data: data) => {
       <div class="logo-box">
         <img
           class="logo"
-          src="https://mr-backend.s3.amazonaws.com/MR+Logo+Black.png"
+          src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737643401890-503933697.jpg"
           alt="MR Logo"
         />
       </div>

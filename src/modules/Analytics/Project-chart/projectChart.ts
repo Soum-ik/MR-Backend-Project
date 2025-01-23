@@ -147,7 +147,7 @@ async function getOrderDataByPeriod(
                         createdAt: {
                             gte: period.start,
                             lt: period.end,
-                        },
+                        }, paymentStatus: 'PAID',
                         // projectStatus: 'Ongoing', // Assuming "new" status for new orders
                     },
                 }),
@@ -156,7 +156,7 @@ async function getOrderDataByPeriod(
                         createdAt: {
                             gte: period.start,
                             lt: period.end,
-                        },
+                        }, paymentStatus: 'PAID',
                         projectStatus: "Completed"
                     },
                 }),
@@ -165,7 +165,7 @@ async function getOrderDataByPeriod(
                         createdAt: {
                             gte: period.start,
                             lt: period.end,
-                        },
+                        }, paymentStatus: 'PAID',
                         projectStatus: "Canceled"
                     },
                 }),
@@ -180,6 +180,7 @@ async function getOrderDataByPeriod(
                         gte: period.start,
                         lt: period.end,
                     },
+                    paymentStatus: 'PAID'
                     // projectStatus: "Ongoing"
                 },
             });
@@ -193,7 +194,8 @@ async function getOrderDataByPeriod(
                         gte: period.start,
                         lt: period.end,
                     },
-                    projectStatus: "Completed"
+                    projectStatus: "Completed",
+                    paymentStatus: 'PAID',
                 },
 
             });
@@ -207,7 +209,7 @@ async function getOrderDataByPeriod(
                         gte: period.start,
                         lt: period.end,
                     },
-
+                    paymentStatus: 'PAID',
 
 
                     projectStatus: "Canceled"
@@ -272,7 +274,7 @@ async function getOrdersForPeriod(
                 createdAt: {
                     gte: monthStart,
                     lt: monthEnd,
-                },
+                }, paymentStatus: 'PAID',
                 // projectStatus: "Ongoing"
             },
         }),
@@ -281,7 +283,7 @@ async function getOrdersForPeriod(
                 createdAt: {
                     gte: monthStart,
                     lt: monthEnd,
-                },
+                }, paymentStatus: 'PAID',
                 projectStatus: "Completed"
             },
         }),
@@ -290,7 +292,7 @@ async function getOrdersForPeriod(
                 createdAt: {
                     gte: monthStart,
                     lt: monthEnd,
-                },
+                }, paymentStatus: 'PAID',
                 projectStatus: "Canceled"
             },
         }),
@@ -301,7 +303,7 @@ async function getOrdersForPeriod(
             createdAt: {
                 gte: monthStart,
                 lt: monthEnd,
-            },
+            }, paymentStatus: 'PAID',
             // projectStatus: "Ongoing",
         },
         select: {
@@ -327,7 +329,7 @@ async function getOrdersForPeriod(
             createdAt: {
                 gte: monthStart,
                 lt: monthEnd,
-            },
+            }, paymentStatus: 'PAID',
             projectStatus: "Canceled"
         },
         select: {
@@ -351,86 +353,86 @@ async function getOrdersForPeriod(
 async function getAllTimeOrderDataGroupedByYear(startDate: Date, endDate: Date) {
     try {
 
-      // Get the list of years in the range
-      const startYear = startDate.getFullYear();
-      const endYear = endDate.getFullYear();
-  
-      const results = [];
-      for (let year = startYear; year <= endYear; year++) {
-        const yearStart = new Date(`${year}-01-01`);
-        const yearEnd = new Date(`${year + 1}-01-01`);
-  
-        // Fetch orders counts for each project status
-        const [newOrders, completedOrders, canceledOrders] = await Promise.all([
-          prisma.order.count({
-            where: {
-              createdAt: { gte: yearStart, lt: yearEnd },
-            //   projectStatus: "Ongoing",
-            },
-          }),
-          prisma.order.count({
-            where: {
-              createdAt: { gte: yearStart, lt: yearEnd },
-              projectStatus: "Completed",
-            },
-          }),
-          prisma.order.count({
-            where: {
-              createdAt: { gte: yearStart, lt: yearEnd },
-              projectStatus: "Canceled",
-            },
-          }),
-        ]);
-  
-        // Fetch earnings for each project status
-        const [
-          newOrdersEarnings,
-          completedOrdersEarnings,
-          canceledOrdersEarnings,
-        ] = await Promise.all([
-          prisma.order.findMany({
-            where: {
-              createdAt: { gte: yearStart, lt: yearEnd },
-            //   projectStatus: "Ongoing",
-            },
-            select: { totalPrice: true },
-          }),
-          prisma.order.findMany({
-            where: {
-              createdAt: { gte: yearStart, lt: yearEnd },
-              projectStatus: "Completed",
-            },
-            select: { totalPrice: true },
-          }),
-          prisma.order.findMany({
-            where: {
-              createdAt: { gte: yearStart, lt: yearEnd },
-              projectStatus: "Canceled",
-            },
-            select: { totalPrice: true },
-          }),
-        ]);
-  
-        // Push the results for the year
-        results.push({
-          date: year.toString(),
-          newOrders,
-          newOrdersEarnings: calculateTotalPrice(newOrdersEarnings) || 0,
-          completedOrders,
-          completedOrdersEarnings: calculateTotalPrice(completedOrdersEarnings) || 0,
-          canceledOrders,
-          canceledOrdersEarnings: calculateTotalPrice(canceledOrdersEarnings) || 0,
-        });
-      }
-  
-      return results;
+        // Get the list of years in the range
+        const startYear = startDate.getFullYear();
+        const endYear = endDate.getFullYear();
+
+        const results = [];
+        for (let year = startYear; year <= endYear; year++) {
+            const yearStart = new Date(`${year}-01-01`);
+            const yearEnd = new Date(`${year + 1}-01-01`);
+
+            // Fetch orders counts for each project status
+            const [newOrders, completedOrders, canceledOrders] = await Promise.all([
+                prisma.order.count({
+                    where: {
+                        createdAt: { gte: yearStart, lt: yearEnd }, paymentStatus: 'PAID',
+                        //   projectStatus: "Ongoing",
+                    },
+                }),
+                prisma.order.count({
+                    where: {
+                        createdAt: { gte: yearStart, lt: yearEnd },
+                        projectStatus: "Completed", paymentStatus: 'PAID',
+                    },
+                }),
+                prisma.order.count({
+                    where: {
+                        createdAt: { gte: yearStart, lt: yearEnd },
+                        projectStatus: "Canceled", paymentStatus: 'PAID',
+                    },
+                }),
+            ]);
+
+            // Fetch earnings for each project status
+            const [
+                newOrdersEarnings,
+                completedOrdersEarnings,
+                canceledOrdersEarnings,
+            ] = await Promise.all([
+                prisma.order.findMany({
+                    where: {
+                        createdAt: { gte: yearStart, lt: yearEnd }, paymentStatus: 'PAID',
+                        //   projectStatus: "Ongoing",
+                    },
+                    select: { totalPrice: true },
+                }),
+                prisma.order.findMany({
+                    where: {
+                        createdAt: { gte: yearStart, lt: yearEnd }, paymentStatus: 'PAID',
+                        projectStatus: "Completed",
+                    },
+                    select: { totalPrice: true },
+                }),
+                prisma.order.findMany({
+                    where: {
+                        createdAt: { gte: yearStart, lt: yearEnd }, paymentStatus: 'PAID',
+                        projectStatus: "Canceled",
+                    },
+                    select: { totalPrice: true },
+                }),
+            ]);
+
+            // Push the results for the year
+            results.push({
+                date: year.toString(),
+                newOrders,
+                newOrdersEarnings: calculateTotalPrice(newOrdersEarnings) || 0,
+                completedOrders,
+                completedOrdersEarnings: calculateTotalPrice(completedOrdersEarnings) || 0,
+                canceledOrders,
+                canceledOrdersEarnings: calculateTotalPrice(canceledOrdersEarnings) || 0,
+            });
+        }
+
+        return results;
     } catch (error) {
-      throw new AppError(
-        httpStatus.INTERNAL_SERVER_ERROR,
-        "Error fetching all-time order data grouped by year"
-      );
+        throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Error fetching all-time order data grouped by year"
+        );
     }
-  }
+}
 
 function calculatePeriods(
     startDate: Date,

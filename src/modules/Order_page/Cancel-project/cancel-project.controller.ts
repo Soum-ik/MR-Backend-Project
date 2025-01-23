@@ -135,6 +135,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
     projectNumber: orderData?.projectNumber,
     senderUserName: 'mahfujurrahm535',
     createdAt: new Date(),
+    avatar: ADMINLOGO,
   };
 
   await prisma.notification.upsert({
@@ -162,6 +163,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
   });
   PublicMessageHandler(
     {
+      avatar: ADMINLOGO,
       thumbnailUrl: orderData?.projectImage,
       type: NotificationTypes.CancelAcceptUser,
       projectNumber: orderData?.projectNumber,
@@ -177,7 +179,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
   };
 
   await sendMail({
-    to: 'mahfujurrahm535@gmail.com',
+    to: userData.email,
     subject: `${emailData.clientName} has sent a cancellation request`,
     html: cancelTemplate(emailData),
   });

@@ -12,7 +12,7 @@ import { tipsTemplate } from '../../helper/email/tipsTemplate';
 import { sendMail } from '../../helper/smtp/AWS_SES';
 import { prisma } from '../../libs/prismaHelper';
 import catchAsync from '../../libs/utlitys/catchSynch';
-import PublicMessageHandler from '../../socket/handlers/PublicMessageHandler';
+import PublicMessageHandler, { ADMINLOGO } from '../../socket/handlers/PublicMessageHandler';
 import { userFinder } from '../../utils/userFinder';
 import { updateDeliveryDate } from '../Order_page/ExtendDelivery/ExtendDelivary.utils';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
@@ -168,7 +168,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             };
 
             await sendMail({
-              to: 'mahfujurrahm535@gmail.com',
+              to: 'bsns.mr.site@gmail.com',
               subject: `Good news: Your offer has been accepted`,
               html: emailTemplate(emailData),
             });
@@ -270,7 +270,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             };
 
             await sendMail({
-              to: 'mahfujurrahm535@gmail.com',
+              to: 'bsns.mr.site@gmail.com',
               subject: `Great news: You've received a project from ${emailData.clientName}`,
               html: directProjectPlace(emailData),
             });
@@ -438,7 +438,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 };
 
                 await sendMail({
-                  to: 'mahfujurrahm535@gmail.com',
+                  to: 'bsns.mr.site@gmail.com',
                   subject: `Good news: Your extend request has been accepted`,
                   html: emailTemplate(emailData),
                 });
@@ -624,7 +624,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
             };
 
             const email = await sendMail({
-              to: 'mahfujurrahm535@gmail.com',
+              to: 'bsns.mr.site@gmail.com',
               subject: `You've just been tipped!`,
               html: tipsTemplate(emailData),
             });
@@ -695,6 +695,51 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 },
               });
 
+              const payload2 = {
+                thumbnailUrl: order?.projectImage,
+                type: NotificationTypes.paymentConfirmation,
+                projectNumber: order.projectNumber,
+                senderUserName: 'mahfujurrahm535',
+                createdAt: new Date(),
+                avatar: ADMINLOGO,
+              };
+
+              await prisma.notification.upsert({
+                where: {
+                  projectNumber: order.projectNumber,
+                  recipient: 'USER',
+                },
+                create: {
+                  projectNumber: order.projectNumber,
+                  recipient: 'USER',
+                  message: ``,
+                  senderId: userData?.id as string,
+                  payload: payload2,
+                },
+                update: {
+                  recipient: 'USER',
+                  message: ``,
+                  senderId: userData?.id as string,
+                  payload: payload2,
+                  createdAt: new Date(),
+                  isAdminSeen: [],
+                  isClientSeen: false,
+                },
+              });
+              PublicMessageHandler(
+                {
+                  msg: ``,
+                  avatar: userData.image,
+                  userId: userData.id,
+                  senderUserName: userData.userName,
+                  thumbnailUrl: order.projectImage,
+                  projectNumber: order.projectNumber,
+                  type: NotificationTypes.paymentConfirmation,
+                  createdAt: new Date(),
+                },
+                'ADMIN',
+              );
+
               PublicMessageHandler(
                 {
                   msg: ``,
@@ -718,7 +763,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               };
 
               await sendMail({
-                to: 'mahfujurrahm535@gmail.com',
+                to: 'bsns.mr.site@gmail.com',
                 subject: `Great news: You've received a project from ${emailData.clientName}`,
                 html: directProjectPlace(emailData),
               });

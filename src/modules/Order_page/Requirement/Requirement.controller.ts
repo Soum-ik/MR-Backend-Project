@@ -189,7 +189,7 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
         console.log(emailData);
 
         await sendMail({
-          to: 'mahfujurrahm535@gmail.com',
+          to: 'bsns.mr.site@gmail.com',
           subject: `${emailData.clientName} added project requirements`,
           html: directProjectRequirements(emailData),
         });

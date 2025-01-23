@@ -230,7 +230,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
 
       await sendMail({
-        to: 'mahfujurrahm535@gmail.com',
+        to: 'bsns.mr.site@gmail.com',
         subject: `You Have New Comments In your project files`,
         html: commentsTemplate(emailData),
       });
@@ -558,6 +558,14 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
 
+      await prisma.order.update({
+        where: {
+          projectNumber: projectNumber,
+        },
+        data: {
+          projectStatus: 'Dispute',
+        },
+      });
       const emailData = {
         projectNumber: projectNumber,
         clientName: 'Mahfujurrahm535',
@@ -567,14 +575,6 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         to: getUserData.email,
         subject: `Mahfujurrahm535 has sent a cancellation request`,
         html: cancelTemplate(emailData),
-      });
-      await prisma.order.update({
-        where: {
-          projectNumber: projectNumber,
-        },
-        data: {
-          projectStatus: 'Dispute',
-        },
       });
     } else if (
       message.extendDeliveryTime &&
@@ -1310,7 +1310,7 @@ export const updateProjectMessage = catchAsync(
             projectStatus: updateBody?.cancelProject?.disputedFrom as ProjectStatus
           }
         })
-        
+
         PublicMessageHandler(
           {
             type: NotificationTypes.CancelOfferWithdraw,

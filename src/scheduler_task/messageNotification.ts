@@ -87,7 +87,7 @@ console.log(messageList, 'messageList');
           console.log(userData.email, 'user dataa');
 
           await sendMail({
-            to: userData?.role === 'USER' ? 'mahfujurrahm535@gmail.com' : email,
+            to: userData?.role === 'USER' ? 'bsns.mr.site@gmail.com' : email,
             subject: `You've recieved messages from ${emailData.clientName}`,
             html: messagesTemplate(emailData),
           });

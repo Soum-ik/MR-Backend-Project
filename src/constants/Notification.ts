@@ -1,5 +1,6 @@
 export const NotificationTypes = {
   Review: 'Review',
+  paymentConfirmation: 'paymentConfirmation',
   Order: 'Order',
   OrderStart: 'OrderStart',
   Instructions: 'Instructions',
