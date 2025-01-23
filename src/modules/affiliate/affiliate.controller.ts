@@ -476,8 +476,12 @@ const withDrawRequest = catchAsync(async (req: Request, res: Response) => {
 
   await prisma.notification.upsert({
     where: {
-      projectNumber: '2',
-      recipient: 'ADMIN',
+      // projectNumber: '2',
+      // recipient: 'ADMIN',
+      projectNumber_recipient: {
+        projectNumber: '2',
+        recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+      },
     },
     create: {
       recipient: 'ADMIN',

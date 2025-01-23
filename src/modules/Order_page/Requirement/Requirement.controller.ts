@@ -96,8 +96,12 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
 
       await prisma.notification.upsert({
         where: {
-          projectNumber: updateRequirements.projectNumber,
-          recipient: 'ADMIN',
+          // projectNumber: updateRequirements.projectNumber,
+          // recipient: 'ADMIN',
+          projectNumber_recipient: {
+            projectNumber: updateRequirements.projectNumber,
+            recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           projectNumber: updateRequirements.projectNumber,
@@ -133,8 +137,12 @@ const answerRequirements = catchAsync(async (req: Request, res: Response) => {
 
       await prisma.notification.upsert({
         where: {
-          recipient: 'USER',
-          projectNumber: updateRequirements.projectNumber,
+          // recipient: 'USER',
+          // projectNumber: updateRequirements.projectNumber,
+          projectNumber_recipient: {
+            projectNumber: updateRequirements.projectNumber,
+            recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           recipient: 'USER',

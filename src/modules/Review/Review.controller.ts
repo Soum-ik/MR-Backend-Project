@@ -54,8 +54,12 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
 
   await prisma.notification.upsert({
     where: {
-      recipient: admins ? 'USER' : 'ADMIN',
-      projectNumber: orderData?.projectNumber,
+      // recipient: admins ? 'USER' : 'ADMIN',
+      // projectNumber: orderData?.projectNumber,
+      projectNumber_recipient: {
+        projectNumber: orderData?.projectNumber as string,
+        recipient: admins ? 'USER' : 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+      },
     },
     update: {
       recipient: admins ? 'USER' : 'ADMIN',

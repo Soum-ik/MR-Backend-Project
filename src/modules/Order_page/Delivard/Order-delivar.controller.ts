@@ -158,8 +158,12 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
 
     await prisma.notification.upsert({
       where: {
-        projectNumber: order.projectNumber,
-        recipient: 'ADMIN',
+        // projectNumber: order.projectNumber,
+        // recipient: 'ADMIN',
+        projectNumber_recipient: {
+          projectNumber: order.projectNumber,
+          recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+        },
       },
       create: {
         recipient: 'ADMIN',
@@ -201,8 +205,12 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
 
     await prisma.notification.upsert({
       where: {
-        projectNumber: order.projectNumber,
-        recipient: 'USER',
+        // projectNumber: order.projectNumber,
+        // recipient: 'USER',
+        projectNumber_recipient: {
+          projectNumber: order.projectNumber,
+          recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+        },
       },
       create: {
         recipient: 'USER',
@@ -210,6 +218,7 @@ const DeliveredOrders = catchAsync(async (req: Request, res: Response) => {
         senderId: userData?.id as string,
         payload: payload2,
         projectNumber: order.projectNumber,
+        recipientId: order.userId,
       },
       update: {
         recipient: 'USER',
@@ -296,8 +305,12 @@ const handleDeliveryResponse = catchAsync(
 
       await prisma.notification.upsert({
         where: {
-          projectNumber: order.projectNumber,
-          recipient: 'ADMIN',
+          // projectNumber: order.projectNumber,
+          // recipient: 'ADMIN',
+          projectNumber_recipient: {
+            projectNumber: order.projectNumber,
+            recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         update: {
           recipient: 'ADMIN',
@@ -391,8 +404,12 @@ const OrderDelivardStatus = catchAsync(async (req: Request, res: Response) => {
 
   await prisma.notification.upsert({
     where: {
-      projectNumber: order.projectNumber,
-      recipient: 'USER',
+      // projectNumber: order.projectNumber,
+      // recipient: 'USER',
+      projectNumber_recipient: {
+        projectNumber: order.projectNumber,
+        recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+      },
     },
     create: {
       recipient: 'USER',

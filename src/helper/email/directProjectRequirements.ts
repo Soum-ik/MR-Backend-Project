@@ -220,6 +220,9 @@ export const directProjectRequirements = (data: data) => {
         .container {
           padding: 10px;
         }
+        .social a{
+          padding-bottom: 3px;
+        }
       }
     </style>
   </head>
@@ -237,7 +240,7 @@ export const directProjectRequirements = (data: data) => {
       <div class="logo-box">
         <img
           class="logo"
-          src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737643401890-503933697.jpg"
+          src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737653981685-394446378.png"
           alt="MR Logo"
         />
       </div>
@@ -419,8 +422,10 @@ export const directProjectRequirements = (data: data) => {
               <ul style="list-style: none; padding-left: 0; margin: 0;">
                 ${bulletPoint
                   ?.map(
-                    (bullet) => `<li style="margin: 0;">
-                  <img src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/5610944.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
+                    (
+                      bullet,
+                    ) => `<li style="margin: 0; margin-top: 3px; margin-bottom: 3px;">
+                  <img src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737654200988-435843765.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
                   ${bullet}
                 </li>`,
                   )
@@ -614,8 +619,10 @@ export const directProjectRequirements = (data: data) => {
               <ul style="list-style: none; padding-left: 0; margin: 0;">
                 ${bulletPoint
                   ?.map(
-                    (bullet) => `<li style="margin: 0;">
-                  <img src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/5610944.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
+                    (
+                      bullet,
+                    ) => `<li style="margin: 0; margin-top: 3px; margin-bottom: 3px;">
+                  <img src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737654200988-435843765.png" alt="check icon" style="height: 16px; display: inline-block; border-radius: 50%; vertical-align: middle;" />
                   ${bullet}
                 </li>`,
                   )

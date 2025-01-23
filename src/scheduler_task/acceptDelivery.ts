@@ -113,8 +113,12 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
 
                 await prisma.notification.upsert({
                   where: {
-                    projectNumber: order.projectNumber,
-                    recipient: 'ADMIN',
+                    // projectNumber: order.projectNumber,
+                    // recipient: 'ADMIN',
+                    projectNumber_recipient: {
+                      projectNumber: order.projectNumber,
+                      recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                    },
                   },
                   create: {
                     recipient: 'ADMIN',
@@ -156,8 +160,12 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
 
                 await prisma.notification.upsert({
                   where: {
-                    projectNumber: order.projectNumber,
-                    recipient: 'USER',
+                    // projectNumber: order.projectNumber,
+                    // recipient: 'USER',
+                    projectNumber_recipient: {
+                      projectNumber: order.projectNumber,
+                      recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+                    },
                   },
                   create: {
                     projectNumber: order.projectNumber,
@@ -165,6 +173,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     message: ``,
                     senderId: userData?.id as string,
                     payload: payload2,
+                    recipientId: order.userId,
                   },
                   update: {
                     recipient: 'USER',

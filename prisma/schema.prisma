@@ -186,7 +186,7 @@ model Notification {
   isAdminSeen  String[] @default([])
   isClientSeen Boolean  @default(false)
 
-  projectNumber String @unique
+  projectNumber String
 
   recipient   NotifyRole
   isAdminSent Boolean?
@@ -197,6 +197,7 @@ model Notification {
   updateAt  DateTime @updatedAt
 
   @@map("Notifications")
+  @@unique([projectNumber, recipient]) 
 }
 
 model Message {

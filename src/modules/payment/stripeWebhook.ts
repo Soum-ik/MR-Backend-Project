@@ -123,8 +123,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
             await prisma.notification.upsert({
               where: {
-                projectNumber: orderData?.projectNumber,
-                recipient: 'ADMIN',
+                // projectNumber: orderData?.projectNumber,
+                // recipient: 'ADMIN',
+                projectNumber_recipient: {
+                  projectNumber: orderData.projectNumber,
+                  recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                },
               },
               create: {
                 projectNumber: orderData?.projectNumber,
@@ -132,6 +136,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 message: ``,
                 senderId: userData.id as string,
                 payload: payload,
+                recipientId: orderData?.userId,
               },
               update: {
                 recipient: 'ADMIN',
@@ -230,8 +235,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
             await prisma.notification.upsert({
               where: {
-                projectNumber: orderData.projectNumber,
-                recipient: 'ADMIN',
+                // projectNumber: orderData.projectNumber,
+                // recipient: 'ADMIN',
+                projectNumber_recipient: {
+                  projectNumber: orderData.projectNumber,
+                  recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                },
               },
               create: {
                 projectNumber: orderData.projectNumber,
@@ -322,8 +331,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                 };
                 await prisma.notification.upsert({
                   where: {
-                    projectNumber: orderData.projectNumber,
-                    recipient: 'ADMIN',
+                    // projectNumber: orderData.projectNumber,
+                    // recipient: 'ADMIN',
+                    projectNumber_recipient: {
+                      projectNumber: orderData.projectNumber,
+                      recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                    },
                   },
                   create: {
                     projectNumber: orderData.projectNumber,
@@ -410,8 +423,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               };
               await prisma.notification.upsert({
                 where: {
-                  projectNumber: orderData?.projectNumber,
-                  recipient: 'ADMIN',
+                  // projectNumber: orderData?.projectNumber,
+                  // recipient: 'ADMIN',
+                  projectNumber_recipient: {
+                    projectNumber: orderData?.projectNumber as string,
+                    recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                  },
                 },
                 create: {
                   senderId: userData.id as string,
@@ -503,8 +520,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
                 const res = await prisma.notification.upsert({
                   where: {
-                    projectNumber: orderData.projectNumber,
-                    recipient: 'ADMIN',
+                    // projectNumber: orderData.projectNumber,
+                    // recipient: 'ADMIN',
+                    projectNumber_recipient: {
+                      projectNumber: orderData.projectNumber,
+                      recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                    },
                   },
                   create: {
                     recipient: 'ADMIN',
@@ -590,8 +611,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
             await prisma.notification.upsert({
               where: {
-                projectNumber: orderData.projectNumber,
-                recipient: 'ADMIN',
+                // projectNumber: orderData.projectNumber,
+                // recipient: 'ADMIN',
+                projectNumber_recipient: {
+                  projectNumber: orderData.projectNumber,
+                  recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                },
               },
               create: {
                 projectNumber: orderData.projectNumber,
@@ -680,8 +705,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
               const notification = await prisma.notification.upsert({
                 where: {
-                  projectNumber: order.projectNumber, // Ensure this field is unique in your schema
-                  recipient: 'ADMIN',
+                  // projectNumber: order.projectNumber, // Ensure this field is unique in your schema
+                  // recipient: 'ADMIN',
+                  projectNumber_recipient: {
+                    projectNumber: order.projectNumber,
+                    recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                  },
                 },
                 create: {
                   projectNumber: order.projectNumber, // Ensure this field is unique in your schema
@@ -712,8 +741,12 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
               await prisma.notification.upsert({
                 where: {
-                  projectNumber: order.projectNumber,
-                  recipient: 'USER',
+                  // projectNumber: order.projectNumber,
+                  // recipient: 'USER',
+                  projectNumber_recipient: {
+                    projectNumber: order.projectNumber,
+                    recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+                  },
                 },
                 create: {
                   projectNumber: order.projectNumber,
@@ -721,6 +754,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   message: ``,
                   senderId: userData?.id as string,
                   payload: payload2,
+                  recipientId: order.userId,
                 },
                 update: {
                   recipient: 'USER',

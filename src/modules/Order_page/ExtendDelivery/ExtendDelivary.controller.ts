@@ -113,8 +113,12 @@ const approveExtensionRequest = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: orderData.projectNumber,
-            recipient: 'USER',
+            // projectNumber: orderData.projectNumber,
+            // recipient: 'USER',
+            projectNumber_recipient: {
+              projectNumber: orderData.projectNumber,
+              recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             recipient: 'USER',
@@ -162,8 +166,12 @@ const approveExtensionRequest = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: orderData.projectNumber,
-            recipient: 'ADMIN',
+            // projectNumber: orderData.projectNumber,
+            // recipient: 'ADMIN',
+            projectNumber_recipient: {
+              projectNumber: orderData.projectNumber,
+              recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             recipient: 'ADMIN',
@@ -297,8 +305,12 @@ const ExtendDeliveryMessageOption = catchAsync(
 
       await prisma.notification.upsert({
         where: {
-          projectNumber: orderData?.projectNumber,
-          recipient: 'ADMIN',
+          // projectNumber: orderData?.projectNumber,
+          // recipient: 'ADMIN',
+          projectNumber_recipient: {
+            projectNumber: orderData?.projectNumber as string,
+            recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           recipient: 'ADMIN',

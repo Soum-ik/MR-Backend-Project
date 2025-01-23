@@ -91,8 +91,12 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
 
   await prisma.notification.upsert({
     where: {
-      projectNumber: orderData?.projectNumber,
-      recipient: isAdminType ? 'USER' : 'ADMIN',
+      // projectNumber: orderData?.projectNumber,
+      // recipient: isAdminType ? 'USER' : 'ADMIN',
+      projectNumber_recipient: {
+        projectNumber: orderData.projectNumber,
+        recipient: isAdminType ? 'USER' : 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+      },
     },
     update: {
       recipient: isAdminType ? 'USER' : 'ADMIN',
@@ -140,8 +144,12 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
 
   await prisma.notification.upsert({
     where: {
-      projectNumber: orderData?.projectNumber,
-      recipient: 'USER',
+      // projectNumber: orderData?.projectNumber,
+      // recipient: 'USER',
+      projectNumber_recipient: {
+        projectNumber: orderData.projectNumber,
+        recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+      },
     },
     update: {
       recipient: 'USER',
@@ -159,6 +167,7 @@ export const CancelProject = catchAsync(async (req: Request, res: Response) => {
       isAdminSent: true,
       payload: payload2,
       projectNumber: orderData?.projectNumber,
+      recipientId: orderData.userId,
     },
   });
   PublicMessageHandler(

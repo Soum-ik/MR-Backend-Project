@@ -1,7 +1,5 @@
- 
-
 export const emailVerficationTemplate = (code: number) => {
-    return `
+  return `
     <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -74,7 +72,7 @@ export const emailVerficationTemplate = (code: number) => {
     <body>
         <div class="container">
             <div class="logo-box">
-                <img class="logo" src=${`https://mr-backend.s3.amazonaws.com/mr-backend-files-1737643401890-503933697.jpg`} alt="MR Logo" />
+                <img class="logo" src=${`https://mr-backend.s3.amazonaws.com/mr-backend-files-1737653981685-394446378.png`} alt="MR Logo" />
             </div>
             <h2 class="title">Verification Code</h2>
             <p>Please use the following One Time Password (OTP)</p>

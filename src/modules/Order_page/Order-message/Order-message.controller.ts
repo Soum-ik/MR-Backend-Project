@@ -210,8 +210,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 
       await prisma.notification.upsert({
         where: {
-          projectNumber: projectNumber, // Ensure this field is unique in your schema
-          recipient: 'ADMIN',
+          // projectNumber: projectNumber, // Ensure this field is unique in your schema
+          // recipient: 'ADMIN',
+          projectNumber_recipient: {
+            projectNumber: projectNumber,
+            recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         update: {
           senderId: user_id as string,
@@ -280,8 +284,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       );
       await prisma.notification.upsert({
         where: {
-          projectNumber: projectNumber, // Ensure this field is unique in your schema
-          recipient: 'ADMIN',
+          // projectNumber: projectNumber, // Ensure this field is unique in your schema
+          // recipient: 'ADMIN',
+          projectNumber_recipient: {
+            projectNumber: projectNumber,
+            recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           projectNumber: projectNumber,
@@ -366,8 +374,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         // Create a new notification if it doesn't exist
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber, // Ensure this field is unique in your schema
-            recipient: 'ADMIN',
+            // projectNumber: projectNumber, // Ensure this field is unique in your schema
+            // recipient: 'ADMIN',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           update: {
             senderId: user_id as string,
@@ -492,8 +504,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
       await prisma.notification.upsert({
         where: {
-          projectNumber: projectNumber,
-          recipient: 'USER',
+          // projectNumber: projectNumber,
+          // recipient: 'USER',
+          projectNumber_recipient: {
+            projectNumber: projectNumber,
+            recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           projectNumber: projectNumber,
@@ -554,8 +570,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
       await prisma.notification.upsert({
         where: {
-          projectNumber: projectNumber,
-          recipient: 'USER',
+          // projectNumber: projectNumber,
+          // recipient: 'USER',
+          projectNumber_recipient: {
+            projectNumber: projectNumber,
+            recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           senderId: user_id as string,
@@ -628,8 +648,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
       await prisma.notification.upsert({
         where: {
-          projectNumber: projectNumber,
-          recipient: 'USER',
+          // projectNumber: projectNumber,
+          // recipient: 'USER',
+          projectNumber_recipient: {
+            projectNumber: projectNumber,
+            recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         update: {
           senderId: user_id as string,
@@ -694,8 +718,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       };
       await prisma.notification.upsert({
         where: {
-          projectNumber: projectNumber,
-          recipient: 'USER',
+          // projectNumber: projectNumber,
+          // recipient: 'USER',
+          projectNumber_recipient: {
+            projectNumber: projectNumber,
+            recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           senderId: user_id as string,
@@ -763,8 +791,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       );
       await prisma.notification.upsert({
         where: {
-          projectNumber: projectNumber,
-          recipient: 'USER',
+          // projectNumber: projectNumber,
+          // recipient: 'USER',
+          projectNumber_recipient: {
+            projectNumber: projectNumber,
+            recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+          },
         },
         create: {
           projectNumber: projectNumber,
@@ -845,8 +877,12 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         // Create a new notification if it doesn't exist
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'USER',
+            // projectNumber: projectNumber,
+            // recipient: 'USER',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             senderId: user_id as string,
@@ -1208,8 +1244,12 @@ export const updateProjectMessage = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'ADMIN',
+            // projectNumber: projectNumber,
+            // recipient: 'ADMIN',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             senderId: user_id as string,
@@ -1259,8 +1299,12 @@ export const updateProjectMessage = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'ADMIN',
+            // projectNumber: projectNumber,
+            // recipient: 'ADMIN',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             senderId: user_id as string,
@@ -1306,8 +1350,12 @@ export const updateProjectMessage = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'ADMIN',
+            // projectNumber: projectNumber,
+            // recipient: 'ADMIN',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             senderId: user_id as string,
@@ -1375,8 +1423,12 @@ export const updateProjectMessage = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'USER',
+            // projectNumber: projectNumber,
+            // recipient: 'USER',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             senderId: user_id as string,
@@ -1428,8 +1480,12 @@ export const updateProjectMessage = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'USER',
+            // projectNumber: projectNumber,
+            // recipient: 'USER',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             senderId: user_id as string,
@@ -1483,8 +1539,12 @@ export const updateProjectMessage = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'USER',
+            // projectNumber: projectNumber,
+            // recipient: 'USER',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             projectNumber: projectNumber,
@@ -1540,8 +1600,12 @@ export const updateProjectMessage = catchAsync(
 
         await prisma.notification.upsert({
           where: {
-            projectNumber: projectNumber,
-            recipient: 'USER',
+            // projectNumber: projectNumber,
+            // recipient: 'USER',
+            projectNumber_recipient: {
+              projectNumber: projectNumber,
+              recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+            },
           },
           create: {
             senderId: user_id as string,

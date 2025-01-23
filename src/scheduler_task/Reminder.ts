@@ -56,8 +56,12 @@ schedule.scheduleJob('* * * * * *', async () => {
             };
             await prisma.notification.upsert({
               where: {
-                projectNumber: message.projectNumber,
-                recipient: 'ADMIN',
+                // projectNumber: message.projectNumber,
+                // recipient: 'ADMIN',
+                projectNumber_recipient: {
+                  projectNumber: message.projectNumber,
+                  recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                },
               },
               update: {
                 recipient: 'ADMIN',

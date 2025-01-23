@@ -1,9 +1,8 @@
-import { ProjectStatus, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import schedule from 'node-schedule';
 import { NotificationTypes } from '../constants/Notification';
 import { print } from '../helper/colorConsolePrint.ts/colorizedConsole';
 import { prisma } from '../libs/prismaHelper';
-import { OrderStatus } from '../modules/Order_page/Order_page.constant';
 import { cancelProjectT } from '../modules/payment/payment.interface';
 import PublicMessageHandler, {
   ADMINLOGO,
@@ -18,11 +17,9 @@ function iscancelProjectT(offer: unknown): offer is cancelProjectT {
   return (
     maybeOffer.isAccepted === false &&
     maybeOffer.isRejected === false &&
-    maybeOffer.isWithdrawn === false  
+    maybeOffer.isWithdrawn === false
   );
 }
-
-
 
 schedule.scheduleJob('*/10  * * * * *', async () => {
   print.blue('Scheduler running to withdraw the cancel request');
@@ -40,7 +37,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
         createdAt: {
           lt: new Date(now.getTime() - 48 * 60 * 60 * 1000), // Subtract 48 hours in milliseconds
         },
-        isCancelled: false
+        isCancelled: false,
       },
       select: {
         projectNumber: true,
@@ -73,7 +70,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                 },
                 data: {
                   cancelProject: updateOffer,
-                  isCancelled : true
+                  isCancelled: true,
                 },
               });
 
@@ -82,7 +79,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                   projectNumber,
                 },
                 data: {
-                  projectStatus : 'Canceled'
+                  projectStatus: 'Canceled',
                 },
               });
 
@@ -100,8 +97,12 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
 
                 await prisma.notification.upsert({
                   where: {
-                    projectNumber: order.projectNumber,
-                    recipient: 'ADMIN',
+                    // projectNumber: order.projectNumber,
+                    // recipient: 'ADMIN',
+                    projectNumber_recipient: {
+                      projectNumber: order.projectNumber,
+                      recipient: 'ADMIN', // Or NotifyRole.USER depending on how you're passing it
+                    },
                   },
                   create: {
                     recipient: 'ADMIN',
@@ -143,8 +144,12 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
 
                 await prisma.notification.upsert({
                   where: {
-                    projectNumber: order.projectNumber,
-                    recipient: 'USER',
+                    // projectNumber: order.projectNumber,
+                    // recipient: 'USER',
+                    projectNumber_recipient: {
+                      projectNumber: order.projectNumber,
+                      recipient: 'USER', // Or NotifyRole.USER depending on how you're passing it
+                    },
                   },
                   create: {
                     projectNumber: order.projectNumber,
@@ -152,6 +157,7 @@ schedule.scheduleJob('*/10  * * * * *', async () => {
                     message: ``,
                     senderId: userData?.id as string,
                     payload: payload2,
+                    recipientId: order.userId,
                   },
                   update: {
                     recipient: 'USER',

@@ -116,6 +116,9 @@ export const twelveHoursDelivery = (data: data) => {
         .container {
           padding: 10px;
         }
+        .social a{
+          padding-bottom: 3px;
+        }
       }
     </style>
   </head>
@@ -133,7 +136,7 @@ export const twelveHoursDelivery = (data: data) => {
       <div class="logo-box">
         <img
           class="logo"
-          src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737643401890-503933697.jpg"
+          src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737653981685-394446378.png"
           alt="MR Logo"
         />
       </div>
