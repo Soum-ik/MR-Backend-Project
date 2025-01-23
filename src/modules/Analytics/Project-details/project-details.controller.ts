@@ -15,21 +15,25 @@ const ActiveProject = catchAsync(async (req: Request, res: Response) => {
   const [Revision, Ongoing, Waiting, Delivered] = await Promise.all([
     prisma.order.count({
       where: {
+        paymentStatus: 'PAID',
         projectStatus: ProjectStatus.REVISION,
       },
     }),
     prisma.order.count({
       where: {
+        paymentStatus: 'PAID',
         projectStatus: ProjectStatus.ONGOING,
       },
     }),
     prisma.order.count({
       where: {
+        paymentStatus: 'PAID',
         projectStatus: ProjectStatus.WAITING,
       },
     }),
     prisma.order.count({
       where: {
+        paymentStatus: 'PAID',
         projectStatus: ProjectStatus.DELIVERED,
       },
     }),
@@ -65,11 +69,11 @@ const FinishedProjects = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause = startDate
     ? {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    }
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      }
     : {};
 
   const [Completed, Cancelled] = await Promise.all([
@@ -115,11 +119,11 @@ const ProjectBuyers = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause = startDate
     ? {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    }
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      }
     : {};
 
   const buyers = await prisma.user.findMany({
@@ -171,11 +175,11 @@ const ProjectDetails = catchAsync(async (req: Request, res: Response) => {
 
   const whereClause: Prisma.OrderWhereInput = startDate
     ? {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    }
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      }
     : {};
   const [Completed, Cancelled, NewProjects] = await Promise.all([
     prisma.order.findMany({
