@@ -4,6 +4,8 @@ import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
 import { NotificationTypes } from '../../../constants/Notification';
 import AppError from '../../../errors/AppError';
+import { messagesTemplate } from '../../../helper/email/messagesTemplate';
+import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
@@ -201,6 +203,20 @@ const sendMessage = async (req: Request, res: Response) => {
         );
       }
 
+      const recipientUser = (await userFinder(recipientId as string)) as User;
+
+      if (customOffer) {
+        const emailData = {
+          clientName: 'Mahfujurrahm535',
+          customOffer: customOffer as object,
+        };
+        await sendMail({
+          to: recipientUser?.email,
+          subject: `You've recieved messages from Mahfujurrahm535`,
+          html: messagesTemplate(emailData),
+        });
+      }
+
       // Send message to all admins
       for (const admin of admins) {
         if (admin.id !== user_id) {
@@ -285,6 +301,34 @@ const updateMessage = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Message not found');
   }
 
+  const customoffer = body?.customOffer;
+
+  const userData = (await userFinder(body?.senderId as string)) as User;
+  const recipientUser = (await userFinder(body?.recipientId as string)) as User;
+
+  if (customoffer) {
+    const emailData = {
+      clientName:
+        userData?.role === 'USER' ? userData.userName : 'Mahfujurrahm535',
+      isWithdrawn: customoffer?.isWithdrawn,
+      isRejected: customoffer?.isRejected,
+    };
+
+    if (customoffer?.isRejected) {
+      await sendMail({
+        to: 'bsns.mr.site@gmail.com',
+        subject: `You've recieved messages from ${emailData.clientName}`,
+        html: messagesTemplate(emailData),
+      });
+    }
+    if (customoffer?.isWithdrawn) {
+      await sendMail({
+        to: recipientUser?.email,
+        subject: `You've recieved messages from Mahfujurrahm535`,
+        html: messagesTemplate(emailData),
+      });
+    }
+  }
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -595,10 +639,7 @@ const deleteConversation = async (req: Request, res: Response) => {
     // Update the messages between the user and the recipient (admin or user)
     const result = await prisma.message.updateMany({
       where: {
-        OR: [
-          { senderId: user_id as string, recipientId: userId },
-          { senderId: userId, recipientId: user_id as string },
-        ],
+        OR: [{ recipientId: userId }, { senderId: userId }],
       },
       data: {
         hiddenFromAdmin: true,

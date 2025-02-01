@@ -1,30 +1,4 @@
-interface data {
-  messageText?: string | null;
-  projectNumber?: string | null;
-  clientName: string;
-  attachments?: [];
-  contactForm?: object;
-  customOffer?: object;
-  additionalOffer?: object;
-  deliverProject?: object;
-  isWithdrawn?: boolean;
-  isRejected?: boolean;
-}
-
-export const messagesTemplate = (data: data) => {
-  const {
-    messageText,
-    clientName,
-    attachments,
-    contactForm,
-    customOffer,
-    projectNumber,
-    additionalOffer,
-    deliverProject,
-    isWithdrawn,
-    isRejected,
-  } = data;
-
+export const signupTemplate = (clientName: string) => {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -149,14 +123,12 @@ export const messagesTemplate = (data: data) => {
           alt="MR Logo"
         />
       </div>
-      <h2 class="title">You've recieved messages from ${clientName}</h2>
+      <h2 class="title">Welcome!</h2>
       <span class="divider"></span>
-      <p class="messageText">
-        ${deliverProject ? `Your project has been delivered Please take a look.` : additionalOffer ? `Mahfujurrahm535 sent you an additional offer.` : contactForm ? `${clientName} submitted a contact form.` : customOffer ? `Mahfujurrahm535 sent you a custom offer.` : isWithdrawn ? `Mahfujurrahm535 withdrawn custom offer.` : isRejected ? `${clientName} rejected your custom offer.` : messageText}
+      <p class="messageText">Thank you for sign up with <b>Mahfujurrahm535</b>. We hope you enjoy your time with us. Check your account and update your profile.
       </p>
-      ${attachments && attachments?.length > 0 ? `<p class="messageText" style="margin-bottom: 40px">[${attachments?.length} ${attachments?.length > 1 ? `files` : `file`} attached]</p>` : ``}
       <div style="text-align: center">
-        <a href="https://mahfujurrahm535.com/${projectNumber ? `order/${projectNumber}` : `inbox`}" class="button" style="color: #ffffff!important;">View and Reply</a>
+        <a href="https://mahfujurrahm535.com/${clientName}" class="button" style="color: #ffffff!important;">My Account</a>
       </div>
       <div class="social">
               <a href="https://facebook.com/mahfuj535">

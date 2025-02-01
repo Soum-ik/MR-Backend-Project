@@ -1,49 +1,14 @@
-interface data {
-  messageText?: string | null;
-  projectNumber?: string | null;
-  clientName: string;
-  attachments?: [];
-  contactForm?: object;
-  customOffer?: object;
-  additionalOffer?: object;
-  deliverProject?: object;
-  isWithdrawn?: boolean;
-  isRejected?: boolean;
-}
-
-export const messagesTemplate = (data: data) => {
-  const {
-    messageText,
-    clientName,
-    attachments,
-    contactForm,
-    customOffer,
-    projectNumber,
-    additionalOffer,
-    deliverProject,
-    isWithdrawn,
-    isRejected,
-  } = data;
-
-  return `<!doctype html>
+export const signinTemplate = (clientName: string) => {
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Email Sign-Up Confirmation</title>
+    <title>Email Sign-In Confirmation</title>
     <style>
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          'Segoe UI',
-          Roboto,
-          Oxygen,
-          Ubuntu,
-          Cantarell,
-          'Open Sans',
-          'Helvetica Neue',
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
           sans-serif;
         background-color: #f4f4f4;
         margin: 0;
@@ -132,7 +97,7 @@ export const messagesTemplate = (data: data) => {
     </style>
   </head>
   <body>
-  <table
+    <table
       border="0"
       align="center"
       width="600"
@@ -141,24 +106,32 @@ export const messagesTemplate = (data: data) => {
     >
       <tr>
         <td>
-    <div class="container">
-      <div class="logo-box">
-        <img
-          class="logo"
-          src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737653981685-394446378.png"
-          alt="MR Logo"
-        />
-      </div>
-      <h2 class="title">You've recieved messages from ${clientName}</h2>
-      <span class="divider"></span>
-      <p class="messageText">
-        ${deliverProject ? `Your project has been delivered Please take a look.` : additionalOffer ? `Mahfujurrahm535 sent you an additional offer.` : contactForm ? `${clientName} submitted a contact form.` : customOffer ? `Mahfujurrahm535 sent you a custom offer.` : isWithdrawn ? `Mahfujurrahm535 withdrawn custom offer.` : isRejected ? `${clientName} rejected your custom offer.` : messageText}
-      </p>
-      ${attachments && attachments?.length > 0 ? `<p class="messageText" style="margin-bottom: 40px">[${attachments?.length} ${attachments?.length > 1 ? `files` : `file`} attached]</p>` : ``}
-      <div style="text-align: center">
-        <a href="https://mahfujurrahm535.com/${projectNumber ? `order/${projectNumber}` : `inbox`}" class="button" style="color: #ffffff!important;">View and Reply</a>
-      </div>
-      <div class="social">
+          <div class="container">
+            <div class="logo-box">
+              <img
+                class="logo"
+                src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1737653981685-394446378.png"
+                alt="MR Logo"
+              />
+            </div>
+            <h2 class="title">New sign in to your account!</h2>
+            <span class="divider"></span>
+            <h1 style="font-size: 16px">Hello ${clientName}</h1>
+            <p class="messageText">
+              Congratulations! You have successfully signed in to your account.
+            </p>
+            <p class="messageText">
+              If it wasn't you? then please take some action!
+            </p>
+            <div style="text-align: center">
+              <a
+                href="https://mahfujurrahm535.com/${clientName}"
+                class="button"
+                style="color: #ffffff !important"
+                >Take Action</a
+              >
+            </div>
+            <div class="social">
               <a href="https://facebook.com/mahfuj535">
                 <img
                   src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1738250979804-274966243.png"
@@ -190,11 +163,10 @@ export const messagesTemplate = (data: data) => {
                 />
               </a>
             </div>
-    </div>
-    </td>
+          </div>
+        </td>
       </tr>
     </table>
   </body>
-</html>
-`;
+</html>`;
 };

@@ -173,24 +173,17 @@ export const directProjectRequirements = (data: data) => {
         line-height: 1;
       }
       .social {
-        list-style: none;
         margin: 40px 0 0;
         padding: 0;
         text-align: center;
       }
-      .social li {
+      .social a {
         display: inline-block;
         margin-left: 3px;
         margin-right: 3px;
       }
-      .social a {
+      .social a img {
         width: 30px;
-        height: 30px;
-        line-height: 30px;
-        border-radius: 50%;
-        border: 1px solid #ccc;
-        display: inline-block;
-        vertical-align: middle;
       }
 
       .requirements-block {
@@ -219,9 +212,6 @@ export const directProjectRequirements = (data: data) => {
       @media only screen and (max-width: 600px) {
         .container {
           padding: 10px;
-        }
-        .social a{
-          padding-bottom: 3px;
         }
       }
     </style>
@@ -732,53 +722,38 @@ export const directProjectRequirements = (data: data) => {
         <p style="margin-block: 15px">Got everything you need?</p>
         <a href="https://mahfujurrahm535.com/order/${projectNumber}" class="button" style="color: #ffffff!important;">Review Requirements</a>
       </div>
-      <ul class="social">
-        <li>
-          <a href="https://facebook.com/mahfuj535">
-            <img
-              src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/81341.png"
-              alt=""
-              style="height: 16px; vertical-align: middle"
-            />
-          </a>
-        </li>
-        <li>
-          <a href="https://www.instagram.com/mahfujurrahm535">
-            <img
-              src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/instagram-53.png"
-              alt=""
-              style="height: 16px; vertical-align: middle"
-            />
-          </a>
-        </li>
-        <li>
-          <a href="https://x.com/mahfujurrahm535">
-            <img
-              src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/x-social-media-black-icon.png"
-              alt=""
-              style="height: 14px; vertical-align: middle"
-            />
-          </a>
-        </li>
-        <li>
-          <a href="https://www.pinterest.com/mahfujurrahm535">
-            <img
-              src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/black-pinterest-icon.png"
-              alt=""
-              style="height: 20px; vertical-align: middle"
-            />
-          </a>
-        </li>
-        <li>
-          <a href="https://www.linkedin.com/in/mahfujurrahm535">
-            <img
-              src="https://mr-backend.s3.ap-south-1.amazonaws.com/icons/free-linkedin-icon-130-thumb.png"
-              alt=""
-              style="height: 16px; vertical-align: middle"
-            />
-          </a>
-        </li>
-      </ul>
+      <div class="social">
+              <a href="https://facebook.com/mahfuj535">
+                <img
+                  src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1738250979804-274966243.png"
+                  alt=""
+                />
+              </a>
+              <a href="https://www.instagram.com/mahfujurrahm535">
+                <img
+                  src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1738251041263-299717143.png"
+                  alt=""
+                />
+              </a>
+              <a href="https://x.com/mahfujurrahm535">
+                <img
+                  src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1738251171481-608690311.png"
+                  alt=""
+                />
+              </a>
+              <a href="https://www.pinterest.com/mahfujurrahm535">
+                <img
+                  src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1738251135480-267640083.png"
+                  alt=""
+                />
+              </a>
+              <a href="https://www.linkedin.com/in/mahfujurrahm535">
+                <img
+                  src="https://mr-backend.s3.amazonaws.com/mr-backend-files-1738251090221-711258380.png"
+                  alt=""
+                />
+              </a>
+            </div>
     </div>
     </td>
       </tr>

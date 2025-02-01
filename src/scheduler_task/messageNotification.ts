@@ -51,7 +51,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
         customOffer: true,
       },
     });
-console.log(messageList, 'messageList');
+    console.log(messageList, 'messageList');
 
     if (messageList.length > 0) {
       const uniqueMessages = Array.from(
@@ -84,13 +84,13 @@ console.log(messageList, 'messageList');
             customOffer: customOffer as object,
           };
 
-          console.log(userData.email, 'user dataa');
-
-          await sendMail({
-            to: userData?.role === 'USER' ? 'bsns.mr.site@gmail.com' : email,
-            subject: `You've recieved messages from ${emailData.clientName}`,
-            html: messagesTemplate(emailData),
-          });
+          if (!customOffer) {
+            await sendMail({
+              to: userData?.role === 'USER' ? 'bsns.mr.site@gmail.com' : email,
+              subject: `You've recieved messages from ${emailData.clientName}`,
+              html: messagesTemplate(emailData),
+            });
+          }
 
           await prisma.message.updateMany({
             where: {

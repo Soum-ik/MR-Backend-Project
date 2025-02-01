@@ -8,9 +8,11 @@ import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 
 import bcrypt from 'bcrypt';
-import catchAsync from '../../libs/utlitys/catchSynch';
 import { emailVerficationTemplate } from '../../helper/email/EmailVerificationTemplate';
+import { signinTemplate } from '../../helper/email/signinTemplate';
+import { signupTemplate } from '../../helper/email/signupTemplate';
 import { sendMail } from '../../helper/smtp/AWS_SES';
+import catchAsync from '../../libs/utlitys/catchSynch';
 import { SignupRequestBody } from './user.interface';
 export interface User {
   user_id?: string;
@@ -97,6 +99,12 @@ const SignUp = async (
     // Create the token
     const token = createToken({ role, user_id: id, email: Useremail });
 
+    await sendMail({
+      to: email,
+      subject: 'Sign up successful!',
+      html: signupTemplate(userName),
+    });
+
     return sendResponse<any>(res, {
       statusCode: httpStatus.CREATED,
       success: true,
@@ -161,6 +169,12 @@ const SignIn = async (
       httpOnly: true,
       maxAge: 3600000, // 1 hour
       sameSite: 'strict', // CSRF protection
+    });
+
+    await sendMail({
+      to: email,
+      subject: 'New sign in to your account!',
+      html: signinTemplate(rest?.userName),
     });
 
     // Return a successful response with token and user data
@@ -253,7 +267,6 @@ const forgotPass = async (req: Request, res: Response) => {
       where: { email }, // Specify the user to update
       data: { otp: verfiyCode }, // Update the OTP field
     });
-
 
     await sendMail({
       to: email,
@@ -619,7 +632,7 @@ const profile = catchAsync(async (req: Request, res: Response) => {
 
     prisma.review.aggregate({
       where: {
-        senderType : "OWNER",
+        senderType: 'OWNER',
         order: {
           userId: user_id, // Assuming the userId is part of the Order model and links to the order
         },
@@ -631,7 +644,7 @@ const profile = catchAsync(async (req: Request, res: Response) => {
 
     prisma.review.aggregate({
       where: {
-        senderType : "CLIENT",
+        senderType: 'CLIENT',
         senderId: user_id, // Filter reviews where the user is the sender
       },
       _avg: {
