@@ -303,13 +303,14 @@ const updateMessage = catchAsync(async (req: Request, res: Response) => {
 
   const customoffer = body?.customOffer;
 
-  const userData = (await userFinder(body?.senderId as string)) as User;
   const recipientUser = (await userFinder(body?.recipientId as string)) as User;
 
   if (customoffer) {
     const emailData = {
       clientName:
-        userData?.role === 'USER' ? userData.userName : 'Mahfujurrahm535',
+        recipientUser?.role === 'USER'
+          ? recipientUser.userName
+          : 'Mahfujurrahm535',
       isWithdrawn: customoffer?.isWithdrawn,
       isRejected: customoffer?.isRejected,
     };
