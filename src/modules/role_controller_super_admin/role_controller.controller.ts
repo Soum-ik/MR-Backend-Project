@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status";
+import { print } from "../../helper/colorConsolePrint.ts/colorizedConsole";
 import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
 import { createToken } from "../../libs/authHelper";
@@ -7,7 +8,7 @@ import { createToken } from "../../libs/authHelper";
 const manage_role = async (req: Request, res: Response) => {
   try {
     const { user_id, role, users } = req.body;
-    console.log(req.body, 'role chageing');
+    print.blue(req.body, 'role changing');
 
     // If users array is provided, handle multiple role updates
     if (users && Array.isArray(users) && users.length > 0) {
@@ -28,7 +29,7 @@ const manage_role = async (req: Request, res: Response) => {
               ]
             }
           })
-          console.log('delet message ', deleteMessages);
+          print.green('delete message ', deleteMessages);
         }
 
 
@@ -105,7 +106,7 @@ const manage_role = async (req: Request, res: Response) => {
             ]
           }
         })
-        console.log('delet message ', deleteMessages);
+        print.green('delete message ', deleteMessages);
       }
 
       return sendResponse(res, {

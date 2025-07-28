@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 import { z } from "zod";
+import { print } from "../../helper/colorConsolePrint.ts/colorizedConsole";
 import { prisma } from "../../libs/prismaHelper";
 import sendResponse from "../../libs/sendResponse";
 import { getPaginationOptions } from "../../paginations/paginations";
@@ -16,7 +17,7 @@ const createCategoryWithSubCategory = async (req: Request, res: Response) => {
   try {
     // Validate request body against the combined schema
     const validatedData = categoryWithSubCategorySchema.parse(req.body);
-    console.log(validatedData, "validation data");
+    print.blue(validatedData, "validation data");
 
     // Fetch the maximum order value from the database
     const maxOrderResult = await prisma.category.aggregate({
@@ -51,7 +52,7 @@ const createCategoryWithSubCategory = async (req: Request, res: Response) => {
       data: newCategory,
     });
   } catch (error) {
-    console.log(error);
+    print.red('Error creating category:', error);
 
     if (error instanceof z.ZodError) {
       return sendResponse<any>(res, {
@@ -326,7 +327,7 @@ const updateCategoryWithSubCategory = async (req: Request, res: Response) => {
       data: updatedCategory,
     });
   } catch (error) {
-    console.log(error);
+    print.red('Error updating category:', error);
 
     if (error instanceof z.ZodError) {
       return sendResponse<any>(res, {

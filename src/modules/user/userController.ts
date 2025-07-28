@@ -4,6 +4,7 @@ import httpStatus from 'http-status';
 // import sendVeficationEmail from '../../helper/email/emailSend';
 import { createToken, TokenCredential } from '../../libs/authHelper';
 
+import { print } from '../../helper/colorConsolePrint.ts/colorizedConsole';
 import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 
@@ -185,7 +186,7 @@ const SignIn = async (
       message: 'User authenticated successfully',
     });
   } catch (error) {
-    console.log('SignIn Error:', error);
+    print.red('SignIn Error:', error);
 
     // Return a generic error response
     return sendResponse(res, {
@@ -199,7 +200,7 @@ const SignIn = async (
 
 const getUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log(id);
+  print.blue(id);
 
   try {
     const user = await prisma.user.findUnique({
@@ -261,7 +262,12 @@ const forgotPass = async (req: Request, res: Response) => {
     const { fullName } = findByEmail;
 
     if (!fullName) {
-      return console.log('full name need');
+      print.red('full name need');
+      return sendResponse<any>(res, {
+        statusCode: httpStatus.BAD_REQUEST,
+        success: false,
+        message: 'Full name is required',
+      });
     }
     const updateUserOtp = await prisma.user.update({
       where: { email }, // Specify the user to update
@@ -394,7 +400,7 @@ const setForgetNewPass = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    print.red('Error in forgot password operation:', error);
     return sendResponse<any>(res, {
       data: error,
       statusCode: httpStatus.OK,
@@ -440,7 +446,7 @@ const setNewPass = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    print.red('Error in set new password operation:', error);
     return sendResponse<any>(res, {
       data: error,
       statusCode: httpStatus.OK,
@@ -538,7 +544,7 @@ const updateUser = async (req: Request, res: Response) => {
       },
     });
 
-    console.log('User updated:', updatedUser);
+    print.green('User updated:', updatedUser);
 
     return sendResponse<any>(res, {
       statusCode: httpStatus.OK,
