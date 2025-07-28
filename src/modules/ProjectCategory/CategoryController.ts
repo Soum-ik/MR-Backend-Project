@@ -17,7 +17,7 @@ const createCategoryWithSubCategory = async (req: Request, res: Response) => {
   try {
     // Validate request body against the combined schema
     const validatedData = categoryWithSubCategorySchema.parse(req.body);
-    print.blue(validatedData, "validation data");
+    print.blue(`${validatedData} - validation data`);
 
     // Fetch the maximum order value from the database
     const maxOrderResult = await prisma.category.aggregate({

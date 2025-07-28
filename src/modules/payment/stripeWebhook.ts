@@ -661,7 +661,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               html: tipsTemplate(emailData),
             });
 
-            print.blue(email, ' email checking');
+            print.blue(`${email} - email checking`);
 
             await prisma.payment.update({
               where: { stripeId: session.id.split('_').join('') },

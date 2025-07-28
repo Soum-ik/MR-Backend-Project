@@ -544,7 +544,7 @@ const updateUser = async (req: Request, res: Response) => {
       },
     });
 
-    print.green('User updated:', updatedUser);
+    print.green(`User updated: ${updatedUser}`);
 
     return sendResponse<any>(res, {
       statusCode: httpStatus.OK,

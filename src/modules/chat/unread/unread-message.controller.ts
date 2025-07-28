@@ -101,7 +101,7 @@ const updateUnseenMessageController = catchAsync(
         },
       });
 
-      print.green('updated messages', updateMessage);
+      print.green(`updated messages: ${updateMessage}`);
 
       return sendResponse(res, {
         statusCode: httpStatus.OK,

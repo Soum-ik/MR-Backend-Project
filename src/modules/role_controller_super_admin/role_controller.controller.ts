@@ -8,7 +8,7 @@ import { createToken } from "../../libs/authHelper";
 const manage_role = async (req: Request, res: Response) => {
   try {
     const { user_id, role, users } = req.body;
-    print.blue(req.body, 'role changing');
+    print.blue(`${req.body} - role changing`);
 
     // If users array is provided, handle multiple role updates
     if (users && Array.isArray(users) && users.length > 0) {
@@ -29,7 +29,7 @@ const manage_role = async (req: Request, res: Response) => {
               ]
             }
           })
-          print.green('delete message ', deleteMessages);
+          print.green(`delete message: ${deleteMessages}`);
         }
 
 
@@ -106,7 +106,7 @@ const manage_role = async (req: Request, res: Response) => {
             ]
           }
         })
-        print.green('delete message ', deleteMessages);
+        print.green(`delete message: ${deleteMessages}`);
       }
 
       return sendResponse(res, {

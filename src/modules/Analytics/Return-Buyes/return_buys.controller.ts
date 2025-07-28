@@ -50,7 +50,7 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
         }
     });
 
-    print.blue(users, 'total order completed from the user');
+    print.blue(`${users} - total order completed from the user`);
 
 
     const payments = await prisma.payment.findMany({

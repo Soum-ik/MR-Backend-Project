@@ -56,7 +56,7 @@ schedule.scheduleJob('*/1 * * * * *', async () => {
       },
     });
 
-    print.blue(messageList, 'checking message list');
+    print.blue(`${messageList} - checking message list`);
 
     if (messageList.length > 0) {
       const uniqueMessages = Array.from(
@@ -104,7 +104,7 @@ schedule.scheduleJob('*/1 * * * * *', async () => {
             projectNumber: projectNumber,
           };
 
-          print.blue(userData.email, 'checking email');
+          print.blue(`${userData.email} - checking email`);
 
           await sendMail({
             to:
