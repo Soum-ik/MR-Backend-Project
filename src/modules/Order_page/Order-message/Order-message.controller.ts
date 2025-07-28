@@ -6,6 +6,7 @@ import { NotificationTypes } from '../../../constants/Notification';
 import AppError from '../../../errors/AppError';
 import { cancelTemplate } from '../../../helper/email/cancelTemplate';
 import { commentsTemplate } from '../../../helper/email/commentsTemplate';
+import { print } from '../../../helper/colorConsolePrint.ts/colorizedConsole';
 import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
@@ -103,7 +104,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
-  console.log(admins, 'checking admins');
+  print.blue(admins, 'checking admins');
 
   const commonkey = uuidv4();
 

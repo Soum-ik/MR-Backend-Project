@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { v4 as uuidv4 } from 'uuid';
 import { STRIPE_SECRET_KEY } from '../../config/config';
 import AppError from '../../errors/AppError';
+import { print } from '../../helper/colorConsolePrint.ts/colorizedConsole';
 import { prisma } from '../../libs/prismaHelper';
 import { OrderStatus, ProjectStatus } from '../Order_page/Order_page.constant';
 import projectNumberCreator from '../Order_page/projectNumberGenarator.ts/projectNumberCreator';
@@ -23,7 +24,7 @@ const stripePayment = catchAsync(async (req: Request, res: any) => {
 
   const { data, tags } = req.body;
 
-  console.log(data, 'checking data from custom offers before confirm');
+  print.blue(data, 'checking data from custom offers before confirm');
 
   const offer = data?.updatedMessage
   const paymentType = offer ? 'CustomOffer' : null;

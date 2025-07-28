@@ -7,6 +7,7 @@ import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from '../../config/config';
 import { NotificationTypes } from '../../constants/Notification';
 import AppError from '../../errors/AppError';
 import { emailTemplate } from '../../helper/email/additionalOfferandExtendDate';
+import { print } from '../../helper/colorConsolePrint.ts/colorizedConsole';
 import { directProjectPlace } from '../../helper/email/directProjectPlace';
 import { tipsTemplate } from '../../helper/email/tipsTemplate';
 import { sendMail } from '../../helper/smtp/AWS_SES';
@@ -357,7 +358,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
                   },
                 });
               }
-              return console.log('Request are already taken');
+              return print.yellow('Request are already taken');
             }
 
             try {
@@ -660,7 +661,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
               html: tipsTemplate(emailData),
             });
 
-            console.log(email, ' email checking');
+            print.blue(email, ' email checking');
 
             await prisma.payment.update({
               where: { stripeId: session.id.split('_').join('') },
