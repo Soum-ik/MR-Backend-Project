@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { print } from "../../helper/colorConsolePrint.ts/colorizedConsole";
 import socketStore from "../socket-store";
 
 const adminMessageHandler = (socket: Socket, io: any) => {
@@ -19,7 +20,7 @@ const adminMessageHandler = (socket: Socket, io: any) => {
                 ...message
             });
         } else {
-            console.log(`User ${message.userId} is not online.`);
+            print.yellow(`User ${message.userId} is not online.`);
         }
 
         // Notify other admins about the message sent

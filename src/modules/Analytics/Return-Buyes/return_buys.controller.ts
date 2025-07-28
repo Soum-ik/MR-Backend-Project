@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import sendResponse from "../../../libs/sendResponse";
 import httpStatus from "http-status";
+import { print } from "../../../helper/colorConsolePrint.ts/colorizedConsole";
 import { prisma } from "../../../libs/prismaHelper";
 import { USER_ROLE } from "../../user/user.constant";
 import { timeFilterSchema } from "../../../utils/calculateDateRange";
@@ -49,7 +50,7 @@ const ReturnBuyesController = async (req: Request, res: Response) => {
         }
     });
 
-    console.log(users, 'total order completed from the user');
+    print.blue(users, 'total order completed from the user');
 
 
     const payments = await prisma.payment.findMany({
