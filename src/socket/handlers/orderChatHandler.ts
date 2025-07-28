@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { print } from "../../helper/colorConsolePrint.ts/colorizedConsole";
 import socketStore from "../socket-store";
 
 const orderChatHandler = (socket: Socket, io: any) => {
@@ -18,7 +19,7 @@ const orderChatHandler = (socket: Socket, io: any) => {
                 });
             });
         } else {
-            console.log("No admin is online.");
+            print.yellow("No admin is online.");
         }
     });
 
@@ -37,7 +38,7 @@ const orderChatHandler = (socket: Socket, io: any) => {
                 ...message
             });
         } else {
-            console.log("Target user is not online.");
+            print.yellow("Target user is not online.");
         }
     });
 };

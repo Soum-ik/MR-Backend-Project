@@ -1,6 +1,7 @@
 import { Role } from '@prisma/client';
 import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import { print } from '../../../helper/colorConsolePrint.ts/colorizedConsole';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
 import sendResponse from '../../../libs/sendResponse';
@@ -100,7 +101,7 @@ const updateUnseenMessageController = catchAsync(
         },
       });
 
-      console.log('updated messages', updateMessage);
+      print.green(`updated messages: ${updateMessage}`);
 
       return sendResponse(res, {
         statusCode: httpStatus.OK,

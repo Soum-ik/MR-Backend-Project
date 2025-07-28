@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { z } from 'zod';
 import { designSerialGenerator } from '../../helper/SerialCodeGenerator/serialGenerator';
+import { print } from '../../helper/colorConsolePrint.ts/colorizedConsole';
 import { prisma } from '../../libs/prismaHelper';
 import sendResponse from '../../libs/sendResponse';
 import { getLastSerialNumber } from '../../libs/utlitys/desginNumber';
@@ -195,7 +196,7 @@ const deleteDesign = async (req: Request, res: Response) => {
       message: `Design deleted successfully.`,
     });
   } catch (error) {
-    console.log(error);
+    print.red('Error deleting design:', error);
 
     return sendResponse<any>(res, {
       statusCode: httpStatus.INTERNAL_SERVER_ERROR,

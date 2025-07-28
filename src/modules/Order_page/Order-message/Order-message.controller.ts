@@ -6,6 +6,7 @@ import { NotificationTypes } from '../../../constants/Notification';
 import AppError from '../../../errors/AppError';
 import { cancelTemplate } from '../../../helper/email/cancelTemplate';
 import { commentsTemplate } from '../../../helper/email/commentsTemplate';
+import { print } from '../../../helper/colorConsolePrint.ts/colorizedConsole';
 import { sendMail } from '../../../helper/smtp/AWS_SES';
 import { TokenCredential } from '../../../libs/authHelper';
 import { prisma } from '../../../libs/prismaHelper';
@@ -103,7 +104,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     },
   });
 
-  console.log(admins, 'checking admins');
+  print.blue(admins, 'checking admins');
 
   const commonkey = uuidv4();
 
@@ -252,11 +253,11 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       !offer.isRejected &&
       !offer.isWithdrawn
     ) {
-      console.log('Extend delivery from user request');
+      print.blue('Extend delivery from user request');
     } else if (message?.deliverProject) {
-      console.log('Delivery project from user request');
+      print.blue('Delivery project from user request');
     } else if (message?.revisionProject) {
-      console.log('Revision project from user request');
+      print.blue('Revision project from user request');
     } else if (message?.attachment && message?.attachment?.length > 0) {
       const payload = {
         type: NotificationTypes.OrderAttchFile,
@@ -369,7 +370,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
       } else if (
         (message?.cancelProject as CancelOffer)?.extendType === 'requestByMe'
       ) {
-        console.log('direct cancel');
+        print.yellow('direct cancel');
       } else {
         // Create a new notification if it doesn't exist
         await prisma.notification.upsert({
@@ -435,7 +436,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     });
     const userData = (await userFinder(user_id)) as User;
     const offer = message?.extendDeliveryTime as unknown as ExtendDelivery;
-    console.log(message, 'admin');
+    print.blue(message, 'admin');
 
     const calculateNewCommentsAndReplies = (message: Message) => {
       const filteredImages =
@@ -534,7 +535,7 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
     } else if (
       (message?.cancelProject as CancelOffer)?.extendType === 'requestByMe'
     ) {
-      console.log('direct cancel');
+      print.yellow('direct cancel');
     } else if (message.cancelProject && !message.isCancelled) {
       const order = await prisma.order.findUnique({
         where: {
@@ -676,9 +677,9 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
         },
       });
     } else if (message?.deliverProject) {
-      console.log('Delivery project from user request');
+      print.blue('Delivery project from user request');
     } else if (message?.revisionProject) {
-      console.log('Revision project from user request');
+      print.blue('Revision project from user request');
     } else if (message.imageComments && total) {
       const order = await prisma.order.findUnique({
         where: {

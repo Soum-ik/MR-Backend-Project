@@ -51,7 +51,7 @@ schedule.scheduleJob('*/10 * * * * *', async () => {
         customOffer: true,
       },
     });
-    console.log(messageList, 'messageList');
+    print.blue(`${messageList} - messageList`);
 
     if (messageList.length > 0) {
       const uniqueMessages = Array.from(

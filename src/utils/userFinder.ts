@@ -1,3 +1,4 @@
+import { print } from "../helper/colorConsolePrint.ts/colorizedConsole";
 import { prisma } from "../libs/prismaHelper";
 
 
@@ -11,7 +12,7 @@ export const userFinder = async (userId: string) => {
 
         return user;
     } catch (error) {
-        console.log(error);
+        print.red('Error finding user:', error);
         return error
     }
 }

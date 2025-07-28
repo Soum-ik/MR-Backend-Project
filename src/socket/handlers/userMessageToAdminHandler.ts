@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { print } from "../../helper/colorConsolePrint.ts/colorizedConsole";
 import socketStore from "../socket-store";
 
 const userMessageHandler = (socket: Socket, io: any) => {
@@ -19,7 +20,7 @@ const userMessageHandler = (socket: Socket, io: any) => {
                 });
             });
         } else {
-            console.log("No admin is online.");
+            print.yellow("No admin is online.");
         }
     });
 
